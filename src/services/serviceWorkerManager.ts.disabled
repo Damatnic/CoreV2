@@ -1,0 +1,675 @@
+/**
+ * Service Worker Registration and Management
+ * 
+ * Handles service worker registration, updates, offline detection,
+ * and communication between main thread and service worker.
+ */
+
+interface ServiceWorkerMessage {
+  type: string;
+  payload?: any;
+}
+
+interface CacheStatus {
+  isOnline: boolean;
+  swRegistered: boolean;
+  updateAvailable: boolean;
+  cacheVersion?: string;
+  offlineReady?: boolean;
+  criticalResourcesCached?: boolean;
+  lastUpdateCheck?: Date;
+  storageQuota?: {
+    used: number;
+    available: number;
+    percentage: number;
+  };
+}
+
+interface ServiceWorkerRegistrationOptions {
+  scope?: string;
+  updateViaCache?: 'imports' | 'all' | 'none';
+  fallbackUrls?: string[];
+  cacheWarmingEnabled?: boolean;
+  offlineNotificationsEnabled?: boolean;
+}
+
+class ServiceWorkerManager {
+  private registration: ServiceWorkerRegistration | null = null;
+  private updateAvailableCallbacks: (() => void)[] = [];
+  private offlineCallbacks: (() => void)[] = [];
+  private onlineCallbacks: (() => void)[] = [];
+  private offlineReadyCallbacks: (() => void)[] = [];
+  private isOnline = navigator.onLine;
+  private isInitialized = false;
+  private initPromise: Promise<void> | null = null;
+  private registrationOptions: ServiceWorkerRegistrationOptions = {
+    scope: '/',
+    updateViaCache: 'none',
+    fallbackUrls: ['/sw.js', '/sw-enhanced.js'],
+    cacheWarmingEnabled: true,
+    offlineNotificationsEnabled: true
+  };
+
+  constructor() {
+    this.init();
+  }
+
+  /**
+   * Initialize service worker and network listeners
+   */
+  private async init(): Promise<void> {
+    if (this.initPromise) return this.initPromise;
+    
+    this.initPromise = this._init();
+    return this.initPromise;
+  }
+
+  private async _init(): Promise<void> {
+    if (!this.isServiceWorkerSupported()) {
+      console.warn('[SW Manager] Service Worker not supported');
+      this.notifyGracefulDegradation();
+      return;
+    }
+
+    try {
+      // Register service worker with fallback options
+      await this.registerServiceWorker();
+
+      // Set up network event listeners
+      this.setupNetworkListeners();
+
+      // Set up service worker message listeners
+      this.setupMessageListeners();
+
+      // Check for updates periodically
+      this.startUpdateChecker();
+
+      // Warm critical caches if enabled
+      if (this.registrationOptions.cacheWarmingEnabled) {
+        await this.warmCriticalCaches();
+      }
+
+      // Check offline readiness
+      await this.checkOfflineReadiness();
+
+      this.isInitialized = true;
+      console.log('[SW Manager] Service worker manager initialized successfully');
+
+    } catch (error) {
+      console.error('[SW Manager] Initialization failed:', error);
+      this.notifyGracefulDegradation();
+    }
+  }
+
+  /**
+   * Enhanced service worker registration with fallback
+   */
+  private async registerServiceWorker(): Promise<void> {
+    const { fallbackUrls = ['/sw.js'], scope, updateViaCache } = this.registrationOptions;
+    
+    for (const swUrl of fallbackUrls) {
+      try {
+        console.log(`[SW Manager] Attempting to register service worker: ${swUrl}`);
+        
+        this.registration = await navigator.serviceWorker.register(swUrl, {
+          scope,
+          updateViaCache
+        });
+
+        console.log(`[SW Manager] Service worker registered successfully: ${swUrl}`);
+        
+        // Handle updates
+        this.registration.addEventListener('updatefound', () => {
+          this.handleServiceWorkerUpdate();
+        });
+
+        // If there's already a waiting service worker, show update prompt
+        if (this.registration.waiting) {
+          this.notifyUpdateAvailable();
+        }
+
+        // Check if service worker is controlling the page
+        if (!navigator.serviceWorker.controller) {
+          console.log('[SW Manager] Service worker registered but not controlling page yet');
+        }
+
+        return; // Success, exit loop
+
+      } catch (error) {
+        console.warn(`[SW Manager] Failed to register ${swUrl}:`, error);
+        
+        // If this is the last URL, throw the error
+        if (swUrl === fallbackUrls[fallbackUrls.length - 1]) {
+          throw new Error(`All service worker registration attempts failed. Last error: ${error.message}`);
+        }
+      }
+    }
+  }
+
+  /**
+   * Warm critical caches on initialization
+   */
+  private async warmCriticalCaches(): Promise<void> {
+    try {
+      console.log('[SW Manager] Warming critical caches...');
+      
+      await this.sendMessage({
+        type: 'WARM_CRITICAL_CACHES',
+        payload: {
+          resources: [
+            '/crisis-resources.json',
+            '/emergency-contacts.json',
+            '/offline-crisis.html',
+            '/offline.html',
+            '/',
+            '/crisis',
+            '/safety-plan',
+            '/emergency-contacts'
+          ]
+        }
+      });
+
+      console.log('[SW Manager] Critical caches warmed');
+    } catch (error) {
+      console.warn('[SW Manager] Cache warming failed:', error);
+    }
+  }
+
+  /**
+   * Check if app is ready for offline use
+   */
+  private async checkOfflineReadiness(): Promise<void> {
+    try {
+      const isReady = await this.isOfflineReady();
+      
+      if (isReady) {
+        console.log('[SW Manager] App is ready for offline use');
+        this.notifyOfflineReady();
+      } else {
+        console.log('[SW Manager] App is not yet ready for offline use');
+      }
+    } catch (error) {
+      console.warn('[SW Manager] Failed to check offline readiness:', error);
+    }
+  }
+
+  /**
+   * Notify callbacks that app is ready for offline use
+   */
+  private notifyOfflineReady(): void {
+    this.offlineReadyCallbacks.forEach(callback => {
+      try {
+        callback();
+      } catch (error) {
+        console.error('[SW Manager] Error in offline ready callback:', error);
+      }
+    });
+  }
+
+  /**
+   * Notify user about graceful degradation when SW is not available
+   */
+  private notifyGracefulDegradation(): void {
+    if (this.registrationOptions.offlineNotificationsEnabled) {
+      console.info('[SW Manager] Running in fallback mode - some offline features may be limited');
+      // You could show a user notification here if needed
+    }
+  }
+
+  /**
+   * Check if service worker is supported
+   */
+  private isServiceWorkerSupported(): boolean {
+    return 'serviceWorker' in navigator;
+  }
+
+  /**
+   * Handle service worker updates
+   */
+  private handleServiceWorkerUpdate(): void {
+    if (!this.registration) return;
+
+    const newWorker = this.registration.installing;
+    if (!newWorker) return;
+
+    console.log('[SW Manager] New service worker installing...');
+
+    newWorker.addEventListener('statechange', () => {
+      if (newWorker.state === 'installed') {
+        if (navigator.serviceWorker.controller) {
+          // New update available
+          console.log('[SW Manager] New service worker installed, update available');
+          this.notifyUpdateAvailable();
+        } else {
+          // Service worker installed for the first time
+          console.log('[SW Manager] Service worker installed for the first time');
+        }
+      }
+    });
+  }
+
+  /**
+   * Notify about available updates
+   */
+  private notifyUpdateAvailable(): void {
+    this.updateAvailableCallbacks.forEach(callback => callback());
+  }
+
+  /**
+   * Set up network event listeners
+   */
+  private setupNetworkListeners(): void {
+    window.addEventListener('online', () => {
+      console.log('[SW Manager] Back online');
+      this.isOnline = true;
+      this.onlineCallbacks.forEach(callback => callback());
+      
+      // Trigger background sync if available
+      this.triggerBackgroundSync();
+    });
+
+    window.addEventListener('offline', () => {
+      console.log('[SW Manager] Gone offline');
+      this.isOnline = false;
+      this.offlineCallbacks.forEach(callback => callback());
+    });
+  }
+
+  /**
+   * Set up service worker message listeners
+   */
+  private setupMessageListeners(): void {
+    if (!navigator.serviceWorker) return;
+
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      const { type, payload } = event.data as ServiceWorkerMessage;
+      
+      switch (type) {
+        case 'CACHE_UPDATED':
+          console.log('[SW Manager] Cache updated');
+          break;
+          
+        case 'OFFLINE_READY':
+          console.log('[SW Manager] App ready for offline use');
+          break;
+          
+        case 'ERROR':
+          console.error('[SW Manager] Service worker error:', payload);
+          break;
+          
+        default:
+          console.log('[SW Manager] Unknown message:', type, payload);
+      }
+    });
+  }
+
+  /**
+   * Start periodic update checker
+   */
+  private startUpdateChecker(): void {
+    // Check for updates every 30 minutes
+    setInterval(() => {
+      this.checkForUpdates();
+    }, 30 * 60 * 1000);
+  }
+
+  /**
+   * Manually check for service worker updates
+   */
+  public async checkForUpdates(): Promise<boolean> {
+    if (!this.registration) return false;
+
+    try {
+      await this.registration.update();
+      return true;
+    } catch (error) {
+      console.error('[SW Manager] Update check failed:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Skip waiting and activate new service worker
+   */
+  public async skipWaiting(): Promise<void> {
+    if (!this.registration || !this.registration.waiting) return;
+
+    // Send skip waiting message to service worker
+    await this.sendMessage({ type: 'SKIP_WAITING' });
+
+    // Reload the page to use new service worker
+    window.location.reload();
+  }
+
+  /**
+   * Send message to service worker
+   */
+  public async sendMessage(message: ServiceWorkerMessage): Promise<any> {
+    const controller = navigator.serviceWorker.controller;
+    if (!controller) {
+      throw new Error('No active service worker');
+    }
+
+    return new Promise((resolve, reject) => {
+      const messageChannel = new MessageChannel();
+      
+      messageChannel.port1.onmessage = (event) => {
+        if (event.data && event.data.error) {
+          reject(new Error(event.data.error));
+        } else {
+          resolve(event.data);
+        }
+      };
+
+      controller.postMessage(message, [messageChannel.port2]);
+    });
+  }
+
+  /**
+   * Cache a specific crisis resource
+   */
+  public async cacheCrisisResource(url: string): Promise<boolean> {
+    try {
+      await this.sendMessage({
+        type: 'CACHE_CRISIS_RESOURCE',
+        payload: { url }
+      });
+      return true;
+    } catch (error) {
+      console.error('[SW Manager] Failed to cache crisis resource:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Clear all caches
+   */
+  public async clearCache(): Promise<boolean> {
+    try {
+      await this.sendMessage({ type: 'CLEAR_CACHE' });
+      return true;
+    } catch (error) {
+      console.error('[SW Manager] Failed to clear cache:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get cache status and service worker info
+   */
+  public async getCacheStatus(): Promise<CacheStatus> {
+    try {
+      const version = await this.sendMessage({ type: 'GET_VERSION' });
+      
+      return {
+        isOnline: this.isOnline,
+        swRegistered: !!this.registration,
+        updateAvailable: !!(this.registration && this.registration.waiting),
+        cacheVersion: version?.version
+      };
+    } catch (error) {
+      console.error('[SW Manager] Failed to get cache status:', error);
+      return {
+        isOnline: this.isOnline,
+        swRegistered: !!this.registration,
+        updateAvailable: false
+      };
+    }
+  }
+
+  /**
+   * Trigger background sync for offline actions
+   */
+  private async triggerBackgroundSync(): Promise<void> {
+    if (!this.registration) {
+      console.log('[SW Manager] No service worker registration for background sync');
+      return;
+    }
+
+    try {
+      // Use modern approach with service worker messaging for background sync
+      await this.sendMessage({
+        type: 'TRIGGER_BACKGROUND_SYNC',
+        payload: {
+          syncTypes: ['crisis-message', 'mood-entry', 'safety-plan-update']
+        }
+      });
+      
+      console.log('[SW Manager] Background sync triggered via messaging');
+    } catch (error) {
+      console.warn('[SW Manager] Background sync trigger failed:', error);
+      
+        // Fallback: Try direct sync registration if supported
+        try {
+          // Check if sync is available (requires proper SW context)
+          if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
+            // This would normally be done in the service worker context
+            console.log('[SW Manager] Background sync API available');
+          }
+        } catch (syncError) {
+          console.log('[SW Manager] Background sync not supported in this browser');
+          // No additional action needed - graceful degradation
+        }
+      }
+    }
+
+    /**
+     * Enhanced public API methods
+     */
+
+    /**
+     * Get initialization status
+     */
+    public isInitialized(): boolean {
+      return this.isInitialized;
+    }
+
+    /**
+     * Wait for service worker to be ready
+     */
+    public async waitForInitialization(): Promise<void> {
+      if (this.initPromise) {
+        await this.initPromise;
+      }
+    }
+
+    /**
+     * Register callback for offline ready notifications
+     */
+    public onOfflineReady(callback: () => void): void {
+      this.offlineReadyCallbacks.push(callback);
+    }
+
+    /**
+     * Remove offline ready callback
+     */
+    public removeOfflineReadyCallback(callback: () => void): void {
+      const index = this.offlineReadyCallbacks.indexOf(callback);
+      if (index > -1) {
+        this.offlineReadyCallbacks.splice(index, 1);
+      }
+    }
+
+    /**
+     * Get enhanced cache status with additional metrics
+     */
+    public async getEnhancedCacheStatus(): Promise<CacheStatus> {
+      const basicStatus = await this.getCacheStatus();
+      
+      try {
+        // Get storage quota information
+        const storageQuota = await this.getStorageQuota();
+        
+        // Check if critical resources are cached
+        const criticalResourcesCached = await this.checkCriticalResourcesCache();
+        
+        return {
+          ...basicStatus,
+          offlineReady: await this.isOfflineReady(),
+          criticalResourcesCached,
+          lastUpdateCheck: new Date(),
+          storageQuota
+        };
+      } catch (error) {
+        console.warn('[SW Manager] Failed to get enhanced cache status:', error);
+        return basicStatus;
+      }
+    }
+
+    /**
+     * Get storage quota information
+     */
+    private async getStorageQuota(): Promise<{ used: number; available: number; percentage: number }> {
+      if ('storage' in navigator && 'estimate' in navigator.storage) {
+        const estimate = await navigator.storage.estimate();
+        const used = estimate.usage || 0;
+        const available = estimate.quota || 0;
+        const percentage = available > 0 ? (used / available) * 100 : 0;
+        
+        return { used, available, percentage };
+      }
+      
+      return { used: 0, available: 0, percentage: 0 };
+    }
+
+    /**
+     * Check if critical resources are cached
+     */
+    private async checkCriticalResourcesCache(): Promise<boolean> {
+      try {
+        const criticalResources = [
+          '/crisis-resources.json',
+          '/emergency-contacts.json',
+          '/offline-crisis.html',
+          '/offline.html'
+        ];
+
+        const cache = await caches.open('astral-static-v1.0.0');
+        
+        for (const resource of criticalResources) {
+          const response = await cache.match(resource);
+          if (!response) {
+            return false;
+          }
+        }
+        
+        return true;
+      } catch (error) {
+        console.warn('[SW Manager] Failed to check critical resources cache:', error);
+        return false;
+      }
+    }
+  }
+
+  /**
+   * Check if app is offline-ready
+   */
+  public async isOfflineReady(): Promise<boolean> {
+    if (!this.registration) return false;
+
+    try {
+      // Check if critical resources are cached
+      const cache = await caches.open('astral-static-v1.0.0');
+      const cachedUrls = await cache.keys();
+      
+      const criticalResources = [
+        '/',
+        '/manifest.json',
+        '/offline.html'
+      ];
+      
+      return criticalResources.every(url => 
+        cachedUrls.some(request => request.url.includes(url))
+      );
+    } catch (error) {
+      console.error('[SW Manager] Failed to check offline readiness:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Pre-cache crisis resources for offline access
+   */
+  public async precacheCrisisResources(): Promise<void> {
+    const crisisUrls = [
+      '/crisis',
+      '/safety-plan',
+      '/emergency-contacts',
+      '/crisis-resources'
+    ];
+
+    const promises = crisisUrls.map(url => this.cacheCrisisResource(url));
+    
+    try {
+      await Promise.all(promises);
+      console.log('[SW Manager] Crisis resources pre-cached successfully');
+    } catch (error) {
+      console.error('[SW Manager] Failed to pre-cache crisis resources:', error);
+    }
+  }
+
+  /**
+   * Event listener registration methods
+   */
+  public onUpdateAvailable(callback: () => void): void {
+    this.updateAvailableCallbacks.push(callback);
+  }
+
+  public onOffline(callback: () => void): void {
+    this.offlineCallbacks.push(callback);
+  }
+
+  public onOnline(callback: () => void): void {
+    this.onlineCallbacks.push(callback);
+  }
+
+  /**
+   * Remove event listeners
+   */
+  public removeUpdateListener(callback: () => void): void {
+    const index = this.updateAvailableCallbacks.indexOf(callback);
+    if (index > -1) {
+      this.updateAvailableCallbacks.splice(index, 1);
+    }
+  }
+
+  public removeOfflineListener(callback: () => void): void {
+    const index = this.offlineCallbacks.indexOf(callback);
+    if (index > -1) {
+      this.offlineCallbacks.splice(index, 1);
+    }
+  }
+
+  public removeOnlineListener(callback: () => void): void {
+    const index = this.onlineCallbacks.indexOf(callback);
+    if (index > -1) {
+      this.onlineCallbacks.splice(index, 1);
+    }
+  }
+
+  /**
+   * Get network status
+   */
+  public getNetworkStatus(): boolean {
+    return this.isOnline;
+  }
+
+  /**
+   * Force reload with new service worker
+   */
+  public forceReload(): void {
+    if (this.registration && this.registration.waiting) {
+      this.skipWaiting();
+    } else {
+      window.location.reload();
+    }
+  }
+}
+
+// Create singleton instance
+const serviceWorkerManager = new ServiceWorkerManager();
+
+// Export for use in other modules
+export default serviceWorkerManager;
+export { ServiceWorkerManager };
+export type { ServiceWorkerMessage, CacheStatus };

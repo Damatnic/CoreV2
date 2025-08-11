@@ -1,0 +1,17 @@
+{
+  "emergency": {
+    "title": "Crisis Support",
+    "subtitle": "Hindi kayo nag-iisa. Meron pong tulong 24/7.",
+    "call_988": {
+      "title": "Tumawag sa 2919 Crisis Hotline",
+      "description": "Libreng at confidential na suporta 24/7 para sa mga taong nasa krisis.",
+      "action": "Tumawag Ngayon"
+    }
+  },
+  "support": {
+    "you_matter": "Mahalaga kayo.",
+    "not_alone": "Hindi kayo nag-iisa.",
+    "help_available": "May tulong na makakakuha.",
+    "family_context": "Isaalang-alang ang pagdamay sa mga pinagkakatiwalaang miyembro ng pamilya na maaaring magbigay ng karagdagang suporta."
+  }
+}

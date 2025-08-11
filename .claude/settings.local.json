@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run lint)",
+      "Bash(npm run:*)",
+      "Bash(taskkill:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx:*)",
+      "Bash(git checkout:*)",
+      "Bash(grep:*)",
+      "Bash(cat:*)",
+      "Bash(set PORT=3001)",
+      "Bash(mv:*)"
+    ],
+    "deny": []
+  }
+}

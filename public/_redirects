@@ -1,0 +1,14 @@
+# API redirects
+/api/* /.netlify/functions/:splat 200
+
+# Asset handling - don't redirect
+/assets/* /assets/:splat 200!
+
+# Video files
+/Videos/* /Videos/:splat 200!
+
+# Service worker - return 404 instead of index.html
+/service-worker.js /404.html 404
+
+# SPA fallback for all other routes
+/* /index.html 200

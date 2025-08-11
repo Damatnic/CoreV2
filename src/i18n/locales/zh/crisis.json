@@ -1,0 +1,26 @@
+{
+  "emergency": {
+    "title": "危机支持",
+    "subtitle": "您并不孤单。24小时全天候提供帮助。",
+    "immediate_danger": "如果您处于直接危险中，请拨打120或前往最近的急诊室。",
+    "call_988": {
+      "title": "拨打400-161-9995危机干预热线",
+      "description": "为处于危机中的人及其亲友提供24小时免费保密支持。",
+      "number": "400-161-9995",
+      "action": "立即拨打"
+    }
+  },
+  "support": {
+    "you_matter": "您很重要。",
+    "not_alone": "您并不孤单。",
+    "help_available": "有帮助可获得。",
+    "safe_space": "这是一个安全空间。",
+    "take_time": "慢慢来。",
+    "breathe": "记得呼吸。"
+  },
+  "messages": {
+    "crisis_detected": "我们在这里支持您。看起来您可能正在经历困难时期。",
+    "help_available": "24小时全天候提供专业帮助。您不必独自面对这一切。",
+    "family_context": "考虑让值得信赖的家庭成员参与，他们可以提供额外支持。"
+  }
+}

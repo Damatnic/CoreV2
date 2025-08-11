@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"claudeCodeChat.permissions.yoloMode": true,
+		"github.copilot.nextEditSuggestions.enabled": true
+	}
+}

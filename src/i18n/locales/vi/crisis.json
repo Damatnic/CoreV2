@@ -1,0 +1,17 @@
+{
+  "emergency": {
+    "title": "Hỗ trợ khủng hoảng",
+    "subtitle": "Bạn không đơn độc. Trợ giúp có sẵn 24/7.",
+    "call_988": {
+      "title": "Gọi 1800-1567 Đường dây nóng khủng hoảng",
+      "description": "Hỗ trợ miễn phí và bảo mật 24/7 cho những người đang gặp khủng hoảng.",
+      "action": "Gọi ngay"
+    }
+  },
+  "support": {
+    "you_matter": "Bạn rất quan trọng.",
+    "not_alone": "Bạn không đơn độc.",
+    "help_available": "Có trợ giúp sẵn sàng.",
+    "community_context": "Cộng đồng và hỗ trợ văn hóa của bạn có thể là nguồn tài nguyên quý giá vào lúc này."
+  }
+}
