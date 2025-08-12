@@ -1,11 +1,37 @@
-// WebSocket service for real-time features
+/**
+ * Enhanced WebSocket Service for Astral Core
+ * Handles real-time communication for chat, notifications, and live updates
+ */
+
 import React from 'react';
+import { auth0Service } from './auth0Service';
+import notificationService from './notificationService';
+
+export type WebSocketEvent = 
+  | 'connect'
+  | 'disconnect'
+  | 'error'
+  | 'message'
+  | 'typing'
+  | 'presence'
+  | 'notification'
+  | 'dilemma_update'
+  | 'helper_status'
+  | 'crisis_alert'
+  | 'session_update'
+  | 'achievement_unlocked'
+  | 'room_joined'
+  | 'room_left'
+  | 'user_joined'
+  | 'user_left';
 
 export interface WebSocketMessage {
   type: string;
   payload: any;
   timestamp: number;
   userId?: string;
+  room?: string;
+  event?: WebSocketEvent;
 }
 
 export interface ChatMessage {
@@ -14,33 +40,56 @@ export interface ChatMessage {
   userId: string;
   username: string;
   timestamp: number;
-  type: 'text' | 'emoji' | 'system';
+  type: 'text' | 'emoji' | 'system' | 'crisis';
   roomId?: string;
+  metadata?: any;
 }
 
 export interface NotificationMessage {
   id: string;
   title: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
+  type: 'info' | 'success' | 'warning' | 'error' | 'crisis';
   timestamp: number;
   actionUrl?: string;
+  urgency?: 'low' | 'normal' | 'high' | 'crisis';
+}
+
+export interface TypingIndicator {
+  userId: string;
+  userName: string;
+  room: string;
+  isTyping: boolean;
+}
+
+export interface PresenceData {
+  userId: string;
+  status: 'online' | 'away' | 'busy' | 'offline';
+  lastSeen?: Date;
 }
 
 class WebSocketService {
   private ws: WebSocket | null = null;
   private reconnectAttempts = 0;
-  private readonly maxReconnectAttempts = 2; // Reduced from 5
-  private readonly reconnectInterval = 5000; // Increased from 1000ms
+  private readonly maxReconnectAttempts = 10;
+  private readonly reconnectInterval = 5000;
   private heartbeatInterval: NodeJS.Timeout | null = null;
   private readonly messageQueue: WebSocketMessage[] = [];
   private readonly listeners = new Map<string, Set<(message: any) => void>>();
   private readonly connectionListeners = new Set<(connected: boolean) => void>();
+  private readonly eventHandlers = new Map<WebSocketEvent, Set<(data: any) => void>>();
+  private typingIndicators = new Map<string, Map<string, NodeJS.Timeout>>();
+  private presenceData = new Map<string, PresenceData>();
+  private roomSubscriptions = new Set<string>();
   private demoMode = false;
+  private isAuthenticated = false;
+  private connectionPromise: Promise<void> | null = null;
+  private userId: string | null = null;
 
   constructor(private readonly url: string) {
     // Check if we're in demo mode or if WebSocket server is unavailable
     this.checkDemoMode();
+    this.setupLifecycleListeners();
     if (!this.demoMode) {
       this.connect();
     }
@@ -54,27 +103,94 @@ class WebSocketService {
     if (isDevelopment && isLocalhost) {
       // Try a quick ping to see if server is available
       this.demoMode = true; // Default to demo mode for now
-      this.demoMode = true;
     }
   }
 
-  private connect() {
+  private setupLifecycleListeners() {
+    // Reconnect when coming back online
+    window.addEventListener('online', () => {
+      console.log('Network is back online, reconnecting WebSocket...');
+      this.connect();
+    });
+
+    // Handle page visibility changes
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        // Page is hidden, stop heartbeat
+        this.stopHeartbeat();
+      } else {
+        // Page is visible again, restart heartbeat and check for missed notifications
+        if (this.isConnected()) {
+          this.startHeartbeat();
+          this.checkMissedNotifications();
+        }
+      }
+    });
+
+    // Clean up on page unload
+    window.addEventListener('beforeunload', () => {
+      this.disconnect();
+    });
+  }
+
+  private async connect(): Promise<void> {
+    // Return existing connection promise if connecting
+    if (this.connectionPromise) {
+      return this.connectionPromise;
+    }
+
+    // Already connected
+    if (this.isConnected() && this.ws?.readyState === WebSocket.OPEN) {
+      return Promise.resolve();
+    }
+
     if (this.demoMode) {
       // Don't try to connect in demo mode
       this.simulateDemoConnection();
-      return;
+      return Promise.resolve();
     }
 
+    this.connectionPromise = this.performConnect();
+    
     try {
-      this.ws = new WebSocket(this.url);
-      this.setupEventListeners();
-    } catch (error) {
-      // Silently handle connection failure on first attempt
-      if (this.reconnectAttempts === 0) {
-        console.info('WebSocket server not available, running in offline mode');
-      }
-      this.scheduleReconnect();
+      await this.connectionPromise;
+    } finally {
+      this.connectionPromise = null;
     }
+  }
+
+  private async performConnect(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      try {
+        // Get auth token if available
+        auth0Service.getAccessToken().then(token => {
+          // Get current user
+          const user = auth0Service.getCurrentUser();
+          if (user) {
+            this.userId = user.sub;
+          }
+
+          // Build WebSocket URL with auth if available
+          const wsUrl = token 
+            ? `${this.url}?token=${encodeURIComponent(token)}`
+            : this.url;
+
+          this.ws = new WebSocket(wsUrl);
+          this.setupEventListeners(resolve, reject);
+        }).catch(() => {
+          // Connect without auth
+          this.ws = new WebSocket(this.url);
+          this.setupEventListeners(resolve, reject);
+        });
+      } catch (error) {
+        // Silently handle connection failure on first attempt
+        if (this.reconnectAttempts === 0) {
+          console.info('WebSocket server not available, running in offline mode');
+        }
+        this.scheduleReconnect();
+        reject(error);
+      }
+    });
   }
 
   private simulateDemoConnection() {
@@ -85,7 +201,7 @@ class WebSocketService {
     }, 100);
   }
 
-  private setupEventListeners() {
+  private setupEventListeners(resolve?: Function, reject?: Function) {
     if (!this.ws) return;
 
     this.ws.onopen = () => {
@@ -94,9 +210,21 @@ class WebSocketService {
         console.info('✓ WebSocket connected');
       }
       this.reconnectAttempts = 0;
+      
+      // Authenticate if token is available
+      auth0Service.getAccessToken().then(token => {
+        if (token) {
+          this.authenticate(token);
+        }
+      });
+      
       this.startHeartbeat();
       this.notifyConnectionListeners(true);
+      this.rejoinRooms();
       this.flushMessageQueue();
+      this.emit('connect', { timestamp: Date.now() });
+      
+      if (resolve) resolve();
     };
 
     this.ws.onclose = (event) => {
@@ -105,16 +233,19 @@ class WebSocketService {
         console.info('WebSocket disconnected (offline mode)');
       }
       this.stopHeartbeat();
+      this.isAuthenticated = false;
       this.notifyConnectionListeners(false);
+      this.clearTypingIndicators();
+      this.emit('disconnect', { code: event.code, reason: event.reason });
       
       if (!event.wasClean && this.reconnectAttempts < this.maxReconnectAttempts) {
         this.scheduleReconnect();
       }
     };
 
-    this.ws.onerror = (_error) => {
-      // Suppress error logging - we'll handle it gracefully
-      // console.error('WebSocket error:', error);
+    this.ws.onerror = (error) => {
+      this.emit('error', error);
+      if (reject) reject(error);
     };
 
     this.ws.onmessage = (event) => {
@@ -128,16 +259,145 @@ class WebSocketService {
   }
 
   private handleMessage(message: WebSocketMessage) {
-    const listeners = this.listeners.get(message.type);
-    if (listeners) {
-      listeners.forEach(listener => {
-        try {
-          listener(message.payload);
-        } catch (error) {
-          console.error('Error in message listener:', error);
+    // Handle auth responses
+    if (message.type === 'auth_success') {
+      this.isAuthenticated = true;
+      console.log('WebSocket authenticated');
+      return;
+    }
+    
+    if (message.type === 'auth_error') {
+      console.error('WebSocket authentication failed:', message.payload);
+      this.disconnect();
+      return;
+    }
+
+    // Handle system messages
+    switch (message.type) {
+      case 'pong':
+        // Heartbeat response
+        break;
+      
+      case 'typing':
+        this.handleTypingIndicator(message.payload as TypingIndicator);
+        break;
+      
+      case 'presence':
+        this.handlePresenceUpdate(message.payload as PresenceData);
+        break;
+      
+      case 'notification':
+        this.handleNotification(message.payload);
+        break;
+      
+      case 'crisis_alert':
+        this.handleCrisisAlert(message.payload);
+        break;
+      
+      default:
+        // Handle regular message listeners
+        const listeners = this.listeners.get(message.type);
+        if (listeners) {
+          listeners.forEach(listener => {
+            try {
+              listener(message.payload);
+            } catch (error) {
+              console.error('Error in message listener:', error);
+            }
+          });
         }
+        
+        // Emit as event if applicable
+        if (message.event) {
+          this.emit(message.event, message.payload);
+        }
+    }
+  }
+
+  private authenticate(token: string) {
+    this.send('auth', { token });
+  }
+
+  private handleTypingIndicator(indicator: TypingIndicator) {
+    const { userId, room, isTyping } = indicator;
+    
+    if (!this.typingIndicators.has(room)) {
+      this.typingIndicators.set(room, new Map());
+    }
+
+    const roomIndicators = this.typingIndicators.get(room)!;
+
+    if (isTyping) {
+      // Clear existing timeout
+      const existingTimeout = roomIndicators.get(userId);
+      if (existingTimeout) {
+        clearTimeout(existingTimeout);
+      }
+
+      // Set new timeout to clear indicator after 3 seconds
+      const timeout = setTimeout(() => {
+        roomIndicators.delete(userId);
+        this.emit('typing', { room, userId, isTyping: false });
+      }, 3000);
+
+      roomIndicators.set(userId, timeout);
+    } else {
+      // Clear typing indicator
+      const timeout = roomIndicators.get(userId);
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+      roomIndicators.delete(userId);
+    }
+
+    // Emit typing event
+    this.emit('typing', indicator);
+  }
+
+  private handlePresenceUpdate(presence: PresenceData) {
+    this.presenceData.set(presence.userId, presence);
+    this.emit('presence', presence);
+  }
+
+  private handleNotification(data: any) {
+    // Show notification if page is not visible
+    if (document.hidden) {
+      notificationService.show({
+        title: data.title || 'New Notification',
+        body: data.message || 'You have a new notification',
+        urgency: data.urgency || 'normal',
+        category: data.type || 'system',
+        data: data.metadata
       });
     }
+
+    // Emit notification event
+    this.emit('notification', data);
+  }
+
+  private handleCrisisAlert(data: any) {
+    // Always show crisis notifications
+    notificationService.showCrisisNotification(
+      data.title || 'Crisis Alert',
+      data.message || 'Immediate assistance needed',
+      data
+    );
+
+    // Emit crisis alert event
+    this.emit('crisis_alert', data);
+  }
+
+  private clearTypingIndicators() {
+    this.typingIndicators.forEach(roomIndicators => {
+      roomIndicators.forEach(timeout => clearTimeout(timeout));
+    });
+    this.typingIndicators.clear();
+  }
+
+  private async checkMissedNotifications() {
+    // This would typically make an API call to check for missed notifications
+    // For now, we'll just emit an event
+    this.emit('check_missed_notifications', {});
   }
 
   private scheduleReconnect() {
@@ -145,18 +405,30 @@ class WebSocketService {
     
     // Stop trying after max attempts
     if (this.reconnectAttempts > this.maxReconnectAttempts) {
+      console.error('Max reconnection attempts reached');
       // Switch to demo mode after failing to connect
       this.demoMode = true;
       this.simulateDemoConnection();
       return;
     }
     
-    const delay = this.reconnectInterval * Math.pow(2, this.reconnectAttempts - 1);
+    const delay = Math.min(
+      this.reconnectInterval * Math.pow(2, this.reconnectAttempts - 1),
+      30000 // Max 30 seconds
+    );
+    
+    console.log(`Scheduling reconnection attempt ${this.reconnectAttempts} in ${delay}ms`);
     
     setTimeout(() => {
       // Silent reconnection attempt
       this.connect();
     }, delay);
+  }
+
+  private rejoinRooms() {
+    this.roomSubscriptions.forEach(room => {
+      this.send('join_room', { room });
+    });
   }
 
   private startHeartbeat() {
@@ -224,17 +496,61 @@ class WebSocketService {
   }
 
   // Public API
-  send(type: string, payload: any) {
+  send(type: string, payload: any, room?: string) {
     const message: WebSocketMessage = {
       type,
       payload,
       timestamp: Date.now(),
-      userId: localStorage.getItem('userId') || undefined
+      userId: this.userId || localStorage.getItem('userId') || undefined,
+      room
     };
 
     if (!this.sendMessage(message)) {
       // Queue message for when connection is restored
       this.messageQueue.push(message);
+    }
+  }
+
+  // Event handling methods
+  on(event: WebSocketEvent, handler: (data: any) => void): () => void {
+    if (!this.eventHandlers.has(event)) {
+      this.eventHandlers.set(event, new Set());
+    }
+    
+    this.eventHandlers.get(event)!.add(handler);
+    
+    // Return unsubscribe function
+    return () => {
+      this.off(event, handler);
+    };
+  }
+
+  off(event: WebSocketEvent, handler: (data: any) => void): void {
+    const handlers = this.eventHandlers.get(event);
+    if (handlers) {
+      handlers.delete(handler);
+    }
+  }
+
+  once(event: WebSocketEvent, handler: (data: any) => void): () => void {
+    const wrappedHandler = (data: any) => {
+      handler(data);
+      this.off(event, wrappedHandler);
+    };
+    
+    return this.on(event, wrappedHandler);
+  }
+
+  private emit(event: WebSocketEvent, data: any): void {
+    const handlers = this.eventHandlers.get(event);
+    if (handlers) {
+      handlers.forEach(handler => {
+        try {
+          handler(data);
+        } catch (error) {
+          console.error(`Error in WebSocket event handler for ${event}:`, error);
+        }
+      });
     }
   }
 
@@ -284,21 +600,41 @@ class WebSocketService {
     }
   }
 
-  // Chat-specific methods
-  joinChatRoom(roomId: string) {
+  // Room management
+  joinRoom(roomId: string) {
+    this.roomSubscriptions.add(roomId);
     this.send('join_room', { roomId });
   }
 
-  leaveChatRoom(roomId: string) {
+  leaveRoom(roomId: string) {
+    this.roomSubscriptions.delete(roomId);
+    
+    // Clear typing indicators for this room
+    const roomIndicators = this.typingIndicators.get(roomId);
+    if (roomIndicators) {
+      roomIndicators.forEach(timeout => clearTimeout(timeout));
+      this.typingIndicators.delete(roomId);
+    }
+    
     this.send('leave_room', { roomId });
   }
 
-  sendChatMessage(roomId: string, message: string) {
+  // Chat-specific methods
+  joinChatRoom(roomId: string) {
+    this.joinRoom(roomId);
+  }
+
+  leaveChatRoom(roomId: string) {
+    this.leaveRoom(roomId);
+  }
+
+  sendChatMessage(roomId: string, message: string, metadata?: any) {
     this.send('chat_message', {
       roomId,
       message,
+      metadata,
       timestamp: Date.now()
-    });
+    }, roomId);
   }
 
   // Notification methods
@@ -317,11 +653,40 @@ class WebSocketService {
 
   // Typing indicators
   startTyping(roomId: string) {
-    this.send('typing_start', { roomId });
+    this.send('typing', { roomId, isTyping: true }, roomId);
   }
 
   stopTyping(roomId: string) {
-    this.send('typing_stop', { roomId });
+    this.send('typing', { roomId, isTyping: false }, roomId);
+  }
+
+  getTypingUsers(roomId: string): string[] {
+    const roomIndicators = this.typingIndicators.get(roomId);
+    return roomIndicators ? Array.from(roomIndicators.keys()) : [];
+  }
+
+  // Presence methods
+  getUserPresence(userId: string): PresenceData | undefined {
+    return this.presenceData.get(userId);
+  }
+
+  // Crisis support
+  sendCrisisAlert(userId: string, severity: 'low' | 'medium' | 'high' | 'critical') {
+    this.send('crisis_alert', {
+      userId,
+      severity,
+      timestamp: Date.now()
+    });
+  }
+
+  // Helper status
+  updateHelperStatus(status: 'available' | 'busy' | 'offline') {
+    this.send('helper_status', { status });
+  }
+
+  // Dilemma updates
+  requestDilemmaUpdate(dilemmaId: string) {
+    this.send('dilemma_update', { dilemmaId });
   }
 }
 
@@ -398,14 +763,38 @@ let wsServiceInstance: WebSocketService | null = null;
 
 export const getWebSocketService = () => {
   if (!wsServiceInstance) {
-    // Use mock WebSocket for development
-    const wsUrl = process.env.NODE_ENV === 'development' 
-      ? 'ws://localhost:8080/ws' 
-      : 'wss://astral-core.netlify.app/ws';
+    // Use environment variable or default URLs
+    const wsUrl = import.meta.env.VITE_WS_URL || 
+      (process.env.NODE_ENV === 'development' 
+        ? 'ws://localhost:8080/ws' 
+        : 'wss://api.astralcore.app/ws');
     
     wsServiceInstance = new WebSocketService(wsUrl);
   }
   return wsServiceInstance;
 };
+
+// Auto-connect when auth is available
+if (typeof window !== 'undefined') {
+  window.addEventListener('load', async () => {
+    // Wait a bit for auth to initialize
+    setTimeout(async () => {
+      const service = getWebSocketService();
+      const token = await auth0Service.getAccessToken();
+      if (token) {
+        service.connect().catch(console.error);
+      }
+    }, 1000);
+  });
+
+  // Listen for auth events
+  window.addEventListener('auth-success', () => {
+    getWebSocketService().connect().catch(console.error);
+  });
+
+  window.addEventListener('auth-logout', () => {
+    getWebSocketService().disconnect();
+  });
+}
 
 export default WebSocketService;

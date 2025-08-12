@@ -1,7 +1,15 @@
-// Privacy-compliant analytics service for mental health platform
-// Follows GDPR, HIPAA-adjacent principles, and user privacy first approach
+/**
+ * Analytics Service for Astral Core
+ * Privacy-compliant analytics for mental health platform
+ * Follows GDPR, HIPAA-adjacent principles, and user privacy first approach
+ */
 
 import React from 'react';
+import errorHandlingService from './errorHandlingService';
+import apiService from './apiService';
+import { auth0Service } from './auth0Service';
+import webSocketService from './webSocketService';
+import notificationService from './notificationService';
 
 export interface AnalyticsEvent {
   id: string; // Unique event identifier
@@ -227,7 +235,7 @@ class AnalyticsService {
 
       localStorage.setItem('analytics_events', JSON.stringify(processedEvents));
     } catch (error) {
-      console.error('Failed to enforce data retention:', error);
+      console.error('Astral Core Analytics: Failed to enforce data retention:', error);
     }
   }
 
@@ -462,6 +470,16 @@ class AnalyticsService {
         privacySettings: this.config.privacySettings
       };
 
+      // Use Astral Core API client for proper error handling
+      await apiService.post('/analytics/events', payload, {
+        headers: {
+          'Privacy-Compliant': 'true',
+          'GDPR-Compliant': this.config.gdprCompliant.toString(),
+          'Mental-Health-Platform': 'true'
+        }
+      });
+      
+      /* Original fetch code for reference:
       await fetch(this.config.endpoint, {
         method: 'POST',
         headers: {
@@ -471,14 +489,14 @@ class AnalyticsService {
           'Mental-Health-Platform': 'true'
         },
         body: JSON.stringify(payload)
-      });
+      }); */
     } catch (error) {
-      console.error('Failed to send analytics events:', error);
+      console.error('Astral Core Analytics: Failed to send events:', error);
       
       // Store failed events for retry (with limits)
-      const failed = localStorage.getItem('analytics_failed') || '[]';
+      const failed = localStorage.getItem('astralcore_analytics_failed') || '[]';
       const failedEvents = [...JSON.parse(failed), ...events];
-      localStorage.setItem('analytics_failed', JSON.stringify(failedEvents.slice(-100)));
+      localStorage.setItem('astralcore_analytics_failed', JSON.stringify(failedEvents.slice(-100)));
     }
   }
 
@@ -643,12 +661,12 @@ class AnalyticsService {
       };
 
       // In a real implementation, this would trigger a server-side export process
-      console.log('User data export requested:', userData);
+      console.log('Astral Core Analytics: User data export requested:', userData);
       
       exportRequest.status = 'completed';
       return exportRequest;
     } catch (error) {
-      console.error('Failed to export user data:', error);
+      console.error('Astral Core Analytics: Failed to export user data:', error);
       exportRequest.status = 'failed';
       return exportRequest;
     }
@@ -700,7 +718,7 @@ class AnalyticsService {
 
       return deletionRequest;
     } catch (error) {
-      console.error('Failed to delete user data:', error);
+      console.error('Astral Core Analytics: Failed to delete user data:', error);
       deletionRequest.status = 'failed';
       return deletionRequest;
     }
@@ -801,7 +819,15 @@ class AnalyticsService {
   // Debug methods
   getStoredEvents(): AnalyticsEvent[] {
     const stored = localStorage.getItem('analytics_events');
-    return stored ? JSON.parse(stored) : [];
+    if (!stored) return [];
+    
+    try {
+      return JSON.parse(stored);
+    } catch (error) {
+      // Handle malformed JSON gracefully
+      console.warn('Astral Core Analytics: Failed to parse stored events:', error);
+      return [];
+    }
   }
 
   getJourney(): UserJourney {
@@ -879,15 +905,228 @@ export const useAnalytics = () => {
   };
 };
 
+// Web Vitals tracking
+export class WebVitalsTracker {
+  private analytics: AnalyticsService;
+
+  constructor(analytics: AnalyticsService) {
+    this.analytics = analytics;
+    this.initializeWebVitals();
+  }
+
+  private async initializeWebVitals() {
+    if ('web-vitals' in window) {
+      const webVitals = (window as any)['web-vitals'];
+      
+      // Track Core Web Vitals
+      webVitals.getCLS((metric: any) => this.reportWebVital('CLS', metric));
+      webVitals.getFID((metric: any) => this.reportWebVital('FID', metric));
+      webVitals.getFCP((metric: any) => this.reportWebVital('FCP', metric));
+      webVitals.getLCP((metric: any) => this.reportWebVital('LCP', metric));
+      webVitals.getTTFB((metric: any) => this.reportWebVital('TTFB', metric));
+    }
+  }
+
+  private reportWebVital(name: string, metric: any) {
+    this.analytics.track(`web_vital_${name}`, 'performance', {
+      value: metric.value,
+      rating: metric.rating,
+      delta: metric.delta,
+      id: metric.id
+    });
+  }
+}
+
+// A/B Testing support
+export class ABTestingManager {
+  private experiments: Map<string, any> = new Map();
+  private analytics: AnalyticsService;
+
+  constructor(analytics: AnalyticsService) {
+    this.analytics = analytics;
+    this.loadExperiments();
+  }
+
+  private loadExperiments() {
+    const stored = localStorage.getItem('ab_experiments');
+    if (stored) {
+      const experiments = JSON.parse(stored);
+      Object.entries(experiments).forEach(([key, value]) => {
+        this.experiments.set(key, value);
+      });
+    }
+  }
+
+  getVariant(experimentId: string, variants: string[]): string {
+    // Check if user already has a variant
+    if (this.experiments.has(experimentId)) {
+      return this.experiments.get(experimentId);
+    }
+
+    // Assign random variant
+    const variant = variants[Math.floor(Math.random() * variants.length)];
+    this.experiments.set(experimentId, variant);
+    
+    // Save and track
+    this.saveExperiments();
+    this.analytics.track('ab_test_assignment', 'feature_usage', {
+      experimentId,
+      variant,
+      timestamp: Date.now()
+    });
+
+    return variant;
+  }
+
+  trackConversion(experimentId: string, conversionType: string) {
+    const variant = this.experiments.get(experimentId);
+    if (variant) {
+      this.analytics.track('ab_test_conversion', 'feature_usage', {
+        experimentId,
+        variant,
+        conversionType,
+        timestamp: Date.now()
+      });
+    }
+  }
+
+  private saveExperiments() {
+    const obj = Object.fromEntries(this.experiments);
+    localStorage.setItem('ab_experiments', JSON.stringify(obj));
+  }
+}
+
+// Session Recording (privacy-compliant)
+export class SessionRecorder {
+  private analytics: AnalyticsService;
+  private recording: boolean = false;
+  private events: any[] = [];
+  private startTime: number = 0;
+
+  constructor(analytics: AnalyticsService) {
+    this.analytics = analytics;
+  }
+
+  startRecording(consent: boolean = false) {
+    if (!consent) {
+      console.warn('Session recording requires explicit consent');
+      return;
+    }
+
+    this.recording = true;
+    this.startTime = Date.now();
+    this.events = [];
+
+    // Record user interactions (privacy-compliant)
+    document.addEventListener('click', this.recordEvent);
+    document.addEventListener('input', this.recordEvent);
+    document.addEventListener('scroll', this.recordEvent);
+  }
+
+  private recordEvent = (event: Event) => {
+    if (!this.recording) return;
+
+    // Sanitize event data
+    const sanitizedEvent = {
+      type: event.type,
+      timestamp: Date.now() - this.startTime,
+      target: {
+        tagName: (event.target as HTMLElement)?.tagName,
+        className: (event.target as HTMLElement)?.className,
+        // Don't record actual input values for privacy
+        value: event.type === 'input' ? '[REDACTED]' : undefined
+      }
+    };
+
+    this.events.push(sanitizedEvent);
+  };
+
+  stopRecording() {
+    this.recording = false;
+    document.removeEventListener('click', this.recordEvent);
+    document.removeEventListener('input', this.recordEvent);
+    document.removeEventListener('scroll', this.recordEvent);
+
+    // Send recording data
+    if (this.events.length > 0) {
+      this.analytics.track('session_recording', 'user_action', {
+        duration: Date.now() - this.startTime,
+        eventCount: this.events.length,
+        // Don't send actual events, just metadata
+        metadata: {
+          clicks: this.events.filter(e => e.type === 'click').length,
+          inputs: this.events.filter(e => e.type === 'input').length,
+          scrolls: this.events.filter(e => e.type === 'scroll').length
+        }
+      });
+    }
+  }
+}
+
 // Singleton instance
 let analyticsServiceInstance: AnalyticsService | null = null;
 
 export const getAnalyticsService = () => {
   if (!analyticsServiceInstance) {
-    const optedOut = localStorage.getItem('analytics_opted_out') === 'true';
+    const optedOut = localStorage.getItem('astralcore_analytics_opted_out') === 'true';
     analyticsServiceInstance = new AnalyticsService({ enabled: !optedOut });
+    
+    // Initialize additional tracking
+    new WebVitalsTracker(analyticsServiceInstance);
+    
+    // Set up error tracking integration
+    errorHandlingService.onError((error) => {
+      analyticsServiceInstance!.trackError(
+        new Error(error.message),
+        error.category
+      );
+    });
+
+    // Set up WebSocket analytics
+    webSocketService.on('connect', () => {
+      analyticsServiceInstance!.track('websocket_connected', 'performance', {
+        timestamp: Date.now()
+      });
+    });
+
+    webSocketService.on('disconnect', (data) => {
+      analyticsServiceInstance!.track('websocket_disconnected', 'performance', {
+        code: data.code,
+        reason: data.reason
+      });
+    });
   }
   return analyticsServiceInstance;
 };
+
+// Export singleton for Astral Core
+export const astralCoreAnalytics = getAnalyticsService();
+
+// Initialize with Auth0 user when authenticated
+if (typeof window !== 'undefined') {
+  window.addEventListener('auth-success', (event: any) => {
+    const user = event.detail?.user || auth0Service.getCurrentUser();
+    if (user?.sub) {
+      astralCoreAnalytics.setUserId(user.sub);
+      astralCoreAnalytics.track('user_authenticated', 'user_action', {
+        provider: 'auth0',
+        timestamp: Date.now()
+      });
+    }
+  });
+
+  window.addEventListener('auth-logout', () => {
+    astralCoreAnalytics.track('user_logout', 'user_action', {
+      timestamp: Date.now()
+    });
+    astralCoreAnalytics.endSession();
+  });
+}
+
+// Export A/B testing manager
+export const abTesting = new ABTestingManager(astralCoreAnalytics);
+
+// Export session recorder
+export const sessionRecorder = new SessionRecorder(astralCoreAnalytics);
 
 export default AnalyticsService;

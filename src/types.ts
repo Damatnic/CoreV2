@@ -1,4 +1,16 @@
 // --- Interfaces ---
+
+export interface User {
+  id: string;
+  email: string;
+  name?: string;
+  role?: string;
+  picture?: string;
+  isEmailVerified?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface Dilemma {
   id: string;
   userToken: string;
@@ -103,6 +115,7 @@ export interface Toast {
     id: string;
     message: string;
     type: 'success' | 'error' | 'info' | 'warning';
+    timestamp?: number;
 }
 
 export interface ConfirmationModalState {

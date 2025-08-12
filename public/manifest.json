@@ -28,7 +28,7 @@
       "purpose": "any"
     }
   ],
-  "categories": ["health", "medical", "lifestyle", "productivity"],
+  "categories": ["health", "medical", "lifestyle", "productivity", "social"],
   "shortcuts": [
     {
       "name": "Crisis Support",
@@ -115,5 +115,20 @@
     }
   ],
   "handle_links": "preferred",
-  "capture_links": "new-client"
+  "capture_links": "new-client",
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
+  "lang": "en",
+  "dir": "ltr",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui", "browser"],
+  "id": "/astral-core",
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }

@@ -1,0 +1,30 @@
+{
+  "timestamp": "2025-08-11T04:59:08.298Z",
+  "backupName": "astral-backup-2025-08-11T04-59-08",
+  "projectName": "astral-core-react",
+  "projectVersion": "1.0.0",
+  "fileCount": 656,
+  "projectSizeBytes": 35710488,
+  "projectSizeMB": "34.06",
+  "nodeVersion": "v22.17.0",
+  "npmVersion": "10.9.2",
+  "platform": "win32",
+  "excludedPatterns": [
+    "node_modules",
+    "dist",
+    "build",
+    ".git",
+    "*.log",
+    "backups",
+    ".env",
+    "coverage",
+    ".cache",
+    "playwright-report",
+    "test-results"
+  ],
+  "dependencies": 28,
+  "devDependencies": 40,
+  "checksum": "0f329552fce1ff9440a7fa68c576a821745ac1a60fff676206856dd6e37939ec",
+  "archiveSize": 48644238,
+  "archiveSizeMB": "46.39"
+}

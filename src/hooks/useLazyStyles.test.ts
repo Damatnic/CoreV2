@@ -13,21 +13,44 @@ jest.mock('react-router-dom', () => ({
 }));
 
 // Mock DOM methods
-const mockLink = {
-  rel: '',
-  href: '',
-  media: '',
-  onload: null,
-  onerror: null,
-  addEventListener: jest.fn(),
-  removeEventListener: jest.fn()
-};
-
 const mockAppendChild = jest.fn();
-const mockCreateElement = jest.fn(() => mockLink);
+const mockRemoveChild = jest.fn();
+const mockQuerySelectorAll = jest.fn(() => []);
 
+// Create a proper mock HTMLLinkElement
+class MockHTMLLinkElement {
+  rel = '';
+  href = '';
+  media = '';
+  onload: (() => void) | null = null;
+  onerror: (() => void) | null = null;
+  dataset: Record<string, string> = {};
+  addEventListener = jest.fn();
+  removeEventListener = jest.fn();
+  setAttribute = jest.fn();
+  getAttribute = jest.fn();
+  removeAttribute = jest.fn();
+  
+  // Make it behave like a Node
+  nodeType = 1;
+  nodeName = 'LINK';
+  parentNode = null;
+}
+
+const mockCreateElement = jest.fn((tagName: string) => {
+  if (tagName === 'link') {
+    return new MockHTMLLinkElement() as any;
+  }
+  return document.createElement(tagName);
+});
+
+// Mock document.head properly
 Object.defineProperty(document, 'head', {
-  value: { appendChild: mockAppendChild },
+  value: { 
+    appendChild: mockAppendChild,
+    removeChild: mockRemoveChild,
+    querySelectorAll: mockQuerySelectorAll
+  },
   writable: true
 });
 

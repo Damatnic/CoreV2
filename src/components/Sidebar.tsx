@@ -4,22 +4,22 @@ import { SeekerSidebar } from './SeekerSidebar';
 import { HelperSidebar } from './HelperSidebar';
 
 export const Sidebar: React.FC<{
-  activeView: ActiveView;
-  setActiveView: (view: ActiveView) => void;
-  isAuthenticated: boolean;
-  onLogout: () => void;
-  onlineHelperCount: number;
-  userToken: string | null;
-  helperProfile: Helper | null;
+  activeView?: ActiveView;
+  setActiveView?: (view: ActiveView) => void;
+  isAuthenticated?: boolean;
+  onLogout?: () => void;
+  onlineHelperCount?: number;
+  userToken?: string | null;
+  helperProfile?: Helper | null;
 }> = React.memo(
   ({
-    activeView,
-    setActiveView,
-    isAuthenticated,
-    onLogout,
-    onlineHelperCount,
-    userToken,
-    helperProfile,
+    activeView = 'dashboard',
+    setActiveView = () => {},
+    isAuthenticated = false,
+    onLogout = () => {},
+    onlineHelperCount = 0,
+    userToken = null,
+    helperProfile = null,
   }) => {
     return (
       <aside className="sidebar">

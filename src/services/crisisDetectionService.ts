@@ -86,12 +86,43 @@ class EnhancedCrisisDetectionService {
     'this evening', 'in a few hours', 'before morning', 'cant wait', 'ready to'
   ];
 
-  // TODO: Integrate protective factors functionality (see todos list)
+  // Enhanced protective factors that can reduce crisis risk
+  private protectiveFactorsList = {
+    ambivalence: ['but', 'except', 'although', 'however', 'maybe', 'not sure', 'part of me'],
+    life_responsibilities: ['family', 'children', 'kids', 'pet', 'job', 'work', 'responsibility', 'parents', 'spouse'],
+    professional_support: ['therapist', 'counselor', 'doctor', 'psychiatrist', 'medication', 'treatment', 'therapy'],
+    future_orientation: ['tomorrow', 'future', 'plans', 'hope', 'goals', 'dreams', 'looking forward'],
+    social_connection: ['friends', 'loved ones', 'support', 'community', 'church', 'group', 'team'],
+    coping_strategies: ['meditation', 'exercise', 'music', 'art', 'writing', 'breathing', 'walk', 'cope'],
+    reasons_for_living: ['meaning', 'purpose', 'belief', 'faith', 'values', 'important to me'],
+    help_seeking: ['want help', 'need support', 'reaching out', 'asking for help', 'want to get better']
+  };
 
   /**
    * Analyze text for crisis indicators using advanced pattern matching
    */
   public analyzeCrisisContent(text: string): CrisisAnalysisResult {
+    // Input validation - handle null, undefined, and non-string inputs
+    if (!text || typeof text !== 'string') {
+      return {
+        hasCrisisIndicators: false,
+        severityLevel: 'none',
+        detectedCategories: [],
+        confidence: 0,
+        recommendedActions: [],
+        escalationRequired: false,
+        emergencyServices: false,
+        riskFactors: [],
+        protectiveFactors: [],
+        analysisDetails: {
+          triggeredKeywords: [],
+          sentimentScore: 0,
+          contextualFactors: [],
+          urgencyLevel: 0
+        }
+      };
+    }
+
     const normalizedText = text.toLowerCase().trim();
     const triggeredKeywords: CrisisIndicator[] = [];
     const detectedCategories = new Set<string>();
@@ -135,23 +166,48 @@ class EnhancedCrisisDetectionService {
       maxSeverity = this.escalateSeverity(maxSeverity);
       escalationRequired = true;
     }
+    
+    // Apply protective factors to reduce severity (if not emergency)
+    const protectiveScore = this.calculateProtectiveFactorScore(identifiedProtectiveFactors);
+    if (protectiveScore > 0 && maxSeverity !== 'critical' && !emergencyServices) {
+      // Reduce urgency based on protective factors
+      urgencyLevel = Math.max(0, urgencyLevel * (1 - protectiveScore * 0.5));
+      
+      // Consider reducing severity if strong protective factors present
+      if (protectiveScore > 0.4 && maxSeverity !== 'none') {
+        const originalSeverity = maxSeverity;
+        maxSeverity = this.reduceSeverity(maxSeverity);
+        
+        // Log when protective factors reduce severity for transparency
+        if (originalSeverity !== maxSeverity) {
+          console.log(`[Crisis Detection] Severity reduced from ${originalSeverity} to ${maxSeverity} due to protective factors:`, identifiedProtectiveFactors);
+        }
+      }
+      
+      // Reduce escalation requirement if protective factors are strong
+      if (protectiveScore > 0.5 && escalationRequired && maxSeverity !== 'high') {
+        escalationRequired = false;
+      }
+    }
 
-    // Generate recommended actions
+    // Generate recommended actions (now accounting for protective factors)
     const recommendedActions = this.generateRecommendedActions({
       severityLevel: maxSeverity,
       categories: Array.from(detectedCategories),
       urgencyLevel,
       emergencyServices,
-      escalationRequired
+      escalationRequired,
+      protectiveFactors: identifiedProtectiveFactors
     });
 
-    // Calculate confidence score
+    // Calculate confidence score (now includes protective factors)
     const confidence = this.calculateConfidence({
       triggeredKeywords: triggeredKeywords.length,
       severityLevel: maxSeverity,
       urgencyLevel,
       sentimentScore,
-      contextualFactors: contextualFactors.length
+      contextualFactors: contextualFactors.length,
+      protectiveFactors: identifiedProtectiveFactors.length
     });
 
     return {
@@ -302,24 +358,48 @@ class EnhancedCrisisDetectionService {
    */
   private identifyProtectiveFactors(text: string): string[] {
     const factors: string[] = [];
+    const normalizedText = text.toLowerCase();
     
-    if (/\b(but|except|although|however)\b/.test(text)) {
-      factors.push('ambivalence');
-    }
-    
-    if (/\b(family|children|pet|responsibility)\b/.test(text)) {
-      factors.push('life_responsibilities');
-    }
-    
-    if (/\b(help|therapist|counselor|doctor)\b/.test(text)) {
-      factors.push('professional_support');
-    }
-    
-    if (/\b(tomorrow|future|plans|hope)\b/.test(text)) {
-      factors.push('future_orientation');
+    // Check each protective factor category
+    for (const [factorName, keywords] of Object.entries(this.protectiveFactorsList)) {
+      for (const keyword of keywords) {
+        if (normalizedText.includes(keyword)) {
+          if (!factors.includes(factorName)) {
+            factors.push(factorName);
+          }
+          break; // Move to next factor category once one keyword is found
+        }
+      }
     }
     
     return factors;
+  }
+  
+  /**
+   * Calculate the protective factor score (0-1) that reduces risk
+   */
+  private calculateProtectiveFactorScore(protectiveFactors: string[]): number {
+    if (protectiveFactors.length === 0) return 0;
+    
+    // Weight different protective factors
+    const weights: Record<string, number> = {
+      professional_support: 0.25,  // Already getting help is very protective
+      help_seeking: 0.20,          // Wanting help is protective
+      life_responsibilities: 0.15, // Having responsibilities to others
+      social_connection: 0.15,     // Having support network
+      future_orientation: 0.10,    // Having future plans
+      coping_strategies: 0.10,     // Having ways to cope
+      reasons_for_living: 0.15,    // Having meaning/purpose
+      ambivalence: 0.10           // Uncertainty about harming self
+    };
+    
+    let totalScore = 0;
+    for (const factor of protectiveFactors) {
+      totalScore += weights[factor] || 0.05;
+    }
+    
+    // Cap at 0.7 to avoid completely negating high-risk situations
+    return Math.min(totalScore, 0.7);
   }
 
   /**
@@ -331,6 +411,7 @@ class EnhancedCrisisDetectionService {
     urgencyLevel: number;
     emergencyServices: boolean;
     escalationRequired: boolean;
+    protectiveFactors?: string[];
   }): string[] {
     const actions: string[] = [];
 
@@ -363,6 +444,25 @@ class EnhancedCrisisDetectionService {
       actions.push('Provide comprehensive resource list');
       actions.push('Connect with peer support');
     }
+    
+    // Add actions based on protective factors
+    if (params.protectiveFactors && params.protectiveFactors.length > 0) {
+      if (params.protectiveFactors.includes('professional_support')) {
+        actions.push('Encourage continued engagement with current treatment');
+      }
+      if (params.protectiveFactors.includes('help_seeking')) {
+        actions.push('Facilitate connection to requested support resources');
+      }
+      if (params.protectiveFactors.includes('life_responsibilities')) {
+        actions.push('Reinforce importance of responsibilities and connections');
+      }
+      if (params.protectiveFactors.includes('coping_strategies')) {
+        actions.push('Support and expand existing coping mechanisms');
+      }
+      if (params.protectiveFactors.includes('social_connection')) {
+        actions.push('Encourage reaching out to support network');
+      }
+    }
 
     return actions;
   }
@@ -376,6 +476,7 @@ class EnhancedCrisisDetectionService {
     urgencyLevel: number;
     sentimentScore: number;
     contextualFactors: number;
+    protectiveFactors?: number;
   }): number {
     let confidence = 0;
 
@@ -395,6 +496,11 @@ class EnhancedCrisisDetectionService {
     // Sentiment analysis
     if (params.sentimentScore < -2) {
       confidence += 10;
+    }
+    
+    // Protective factors increase confidence in our assessment
+    if (params.protectiveFactors && params.protectiveFactors > 0) {
+      confidence += Math.min(params.protectiveFactors * 2, 10);
     }
 
     return Math.min(confidence, 100);
@@ -419,6 +525,19 @@ class EnhancedCrisisDetectionService {
       'critical': 'critical'
     };
     return escalationMap[currentSeverity as keyof typeof escalationMap] || currentSeverity;
+  }
+
+  /**
+   * Reduce severity level based on protective factors
+   */
+  private reduceSeverity(currentSeverity: string): string {
+    const reductionMap = {
+      'critical': 'high',  // Critical rarely gets reduced
+      'high': 'medium',
+      'medium': 'low',
+      'low': 'low'
+    };
+    return reductionMap[currentSeverity as keyof typeof reductionMap] || currentSeverity;
   }
 
   /**
@@ -560,7 +679,8 @@ class EnhancedCrisisDetectionService {
   }
 }
 
-// Singleton instance
-export const crisisDetectionService = new EnhancedCrisisDetectionService();
-export default crisisDetectionService;
+// Singleton instance for Astral Core
+export const astralCoreCrisisDetection = new AstralCoreCrisisDetectionService();
+export const crisisDetectionService = astralCoreCrisisDetection; // Backward compatibility
+export default astralCoreCrisisDetection;
 export type { CrisisAnalysisResult, CrisisIndicator, CrisisEscalationAction };

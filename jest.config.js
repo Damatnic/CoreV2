@@ -8,7 +8,6 @@ module.exports = {
     'node_modules/(?!(expo-auth-session|expo-constants|@expo|react-markdown|remark-gfm)/)'
   ],
   moduleNameMapper: {
-    '^.*/webAuthService$': '<rootDir>/src/__mocks__/webAuthService.ts',
     '^workbox-(.*)$': '<rootDir>/tests/__mocks__/workbox-$1.js',
     '\\.css$': 'identity-obj-proxy',
     '\\.module\\.css$': 'identity-obj-proxy'

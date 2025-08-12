@@ -9,13 +9,13 @@ import React, { useState, useEffect } from 'react';
 import './CrisisAlert.css';
 
 interface CrisisAlertProps {
-  show: boolean;
-  severity: 'none' | 'low' | 'medium' | 'high' | 'critical';
-  message: string;
-  actions: string[];
-  resources: string[];
-  emergencyMode: boolean;
-  onDismiss: () => void;
+  show?: boolean;
+  severity?: 'none' | 'low' | 'medium' | 'high' | 'critical';
+  message?: string;
+  actions?: string[];
+  resources?: string[];
+  emergencyMode?: boolean;
+  onDismiss?: () => void;
   onEmergencyCall?: () => void;
   onCrisisChat?: () => void;
   userType?: 'seeker' | 'helper';
@@ -58,13 +58,13 @@ const emergencyContacts: EmergencyContact[] = [
 ];
 
 export function CrisisAlert({
-  show,
-  severity,
-  message,
-  actions,
-  resources,
-  emergencyMode,
-  onDismiss,
+  show = false,
+  severity = 'none',
+  message = '',
+  actions = [],
+  resources = [],
+  emergencyMode = false,
+  onDismiss = () => {},
   onEmergencyCall,
   onCrisisChat,
   userType = 'seeker'

@@ -40,7 +40,42 @@
     "one_step": "خطوة واحدة في كل مرة.",
     "tomorrow_different": "قد يكون الغد مختلفاً.",
     "strength_within": "لديك قوة بداخلك.",
-    "reach_out": "لا بأس في طلب المساعدة."
+    "reach_out": "لا بأس في طلب المساعدة.",
+    "allah_with_you": "الله معك في كل خطوة.",
+    "patience_virtue": "الصبر مفتاح الفرج.",
+    "family_support": "عائلتك تحبك وتدعمك.",
+    "honor_preserved": "كرامتك محفوظة معنا."
+  },
+  "cultural_support": {
+    "islamic_healing": {
+      "title": "الدعم الروحي الإسلامي",
+      "prayer": "الصلاة والدعاء للسكينة",
+      "quran": "قراءة القرآن للطمأنينة",
+      "dhikr": "الذكر والاستغفار",
+      "ruqyah": "الرقية الشرعية",
+      "mosque_support": "الدعم من المسجد المحلي"
+    },
+    "family_honor": {
+      "title": "حماية شرف العائلة",
+      "description": "نحن نفهم أهمية السرية وحماية سمعة العائلة",
+      "private_support": "دعم خاص وسري تماماً",
+      "family_mediation": "وساطة عائلية محترمة",
+      "elder_consultation": "استشارة كبار العائلة بحكمة"
+    },
+    "gender_specific": {
+      "title": "خدمات خاصة بالجنس",
+      "women_support": "دعم نسائي متخصص",
+      "men_support": "دعم رجالي متخصص",
+      "female_counselors": "مستشارات نساء متاحات",
+      "male_counselors": "مستشارون رجال متاحون"
+    },
+    "community_resources": {
+      "title": "موارد المجتمع",
+      "imam_counseling": "الإرشاد من الإمام",
+      "islamic_centers": "المراكز الإسلامية",
+      "family_councils": "مجالس العائلة",
+      "trusted_elders": "كبار السن الموثوقون"
+    }
   },
   "safety_plan": {
     "title": "خطة السلامة للأزمات",

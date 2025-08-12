@@ -46,7 +46,10 @@ describe('dilemmaStore', () => {
     });
 
     expect(useDilemmaStore.getState().isLoading).toBe(false);
-    expect(useDilemmaStore.getState().allDilemmas).toEqual([]);
+    // When API fails, sample community posts are provided
+    const dilemmas = useDilemmaStore.getState().allDilemmas;
+    expect(dilemmas.length).toBeGreaterThan(0);
+    expect(dilemmas[0].id).toContain('community-');
   });
 
   test('postDilemma should call the API and refresh dilemmas', async () => {

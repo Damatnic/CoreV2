@@ -1,5 +1,9 @@
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig, loadEnv, splitVendorChunkPlugin } from 'vite';
 import react from '@vitejs/plugin-react';
+import { visualizer } from 'rollup-plugin-visualizer';
+import viteCompression from 'vite-plugin-compression';
+import { VitePWA } from 'vite-plugin-pwa';
+import legacy from '@vitejs/plugin-legacy';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -10,7 +14,83 @@ export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
   
   return {
-    plugins: [react()],
+    plugins: [
+      react({
+        fastRefresh: true,
+        babel: {
+          plugins: isProduction ? [
+            ['@babel/plugin-transform-react-constant-elements'],
+            ['@babel/plugin-transform-react-inline-elements'],
+          ] : [],
+        },
+      }),
+      splitVendorChunkPlugin(),
+      // Compression plugins for production
+      isProduction && viteCompression({
+        verbose: true,
+        disable: false,
+        threshold: 10240,
+        algorithm: 'gzip',
+        ext: '.gz',
+      }),
+      isProduction && viteCompression({
+        verbose: true,
+        disable: false,
+        threshold: 10240,
+        algorithm: 'brotliCompress',
+        ext: '.br',
+      }),
+      // PWA support
+      VitePWA({
+        registerType: 'autoUpdate',
+        includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
+        manifest: {
+          name: 'Astral Core Mental Health',
+          short_name: 'Astral Core',
+          theme_color: '#4A90E2',
+          background_color: '#ffffff',
+          display: 'standalone',
+        },
+        workbox: {
+          runtimeCaching: [
+            {
+              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'google-fonts-cache',
+                expiration: {
+                  maxEntries: 10,
+                  maxAgeSeconds: 60 * 60 * 24 * 365,
+                },
+              },
+            },
+            {
+              urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|avif)$/,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'images-cache',
+                expiration: {
+                  maxEntries: 100,
+                  maxAgeSeconds: 60 * 60 * 24 * 30,
+                },
+              },
+            },
+          ],
+        },
+      }),
+      // Legacy browser support
+      legacy({
+        targets: ['defaults', 'not IE 11'],
+        additionalLegacyPolyfills: ['regenerator-runtime/runtime'],
+      }),
+      // Bundle visualizer (only in analyze mode)
+      process.env.ANALYZE === 'true' && visualizer({
+        open: true,
+        filename: 'dist/bundle-stats.html',
+        gzipSize: true,
+        brotliSize: true,
+      }),
+    ].filter(Boolean),
     publicDir: 'public',
     resolve: {
       alias: {
@@ -38,12 +118,29 @@ export default defineConfig(({ mode }) => {
           manualChunks: (id) => {
             // Vendor chunk for node_modules
             if (id.includes('node_modules')) {
-              // Split react and react-dom into their own chunk
-              if (id.includes('react') || id.includes('react-dom')) {
+              // React ecosystem
+              if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
                 return 'react-vendor';
+              }
+              // State management
+              if (id.includes('zustand') || id.includes('immer')) {
+                return 'state-vendor';
+              }
+              // UI libraries
+              if (id.includes('@mui') || id.includes('@emotion') || id.includes('styled-components')) {
+                return 'ui-vendor';
+              }
+              // Utilities
+              if (id.includes('lodash') || id.includes('date-fns') || id.includes('axios')) {
+                return 'utils-vendor';
               }
               // Other vendor dependencies
               return 'vendor';
+            }
+            
+            // Crisis features (always loaded)
+            if (id.includes('services/crisis') || id.includes('components/Crisis')) {
+              return 'crisis-core';
             }
             
             // Components chunk
@@ -59,6 +156,16 @@ export default defineConfig(({ mode }) => {
             // Stores chunk
             if (id.includes('/stores/')) {
               return 'stores';
+            }
+            
+            // Wellness features
+            if (id.includes('wellness') || id.includes('mood') || id.includes('assessment')) {
+              return 'wellness';
+            }
+            
+            // Communication features
+            if (id.includes('chat') || id.includes('message') || id.includes('websocket')) {
+              return 'communication';
             }
             
             // Utils chunk
