@@ -1,12 +1,15 @@
-# CoreV2 Mental Health Platform
+# 🧠 CoreV2 Mental Health Platform
 
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/Damatnic/CoreV2)
 [![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-success)]()
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6.3-blue)]()
 [![React](https://img.shields.io/badge/React-18.3.1-blue)]()
 [![Vite](https://img.shields.io/badge/Vite-5.4.19-purple)]()
 [![PWA](https://img.shields.io/badge/PWA-Enabled-orange)]()
 
-A comprehensive, accessible, and secure mental health support platform built with React, TypeScript, and modern web technologies. CoreV2 provides crisis intervention, peer support, wellness tracking, and professional resources in a safe, user-centered environment.
+**A life-saving mental health support platform with crisis intervention, wellness tools, and 24/7 offline support.**
+
+CoreV2 provides immediate crisis support, mental health assessments, wellness tracking, and peer support in a secure, accessible environment. Built with React, TypeScript, and modern web technologies.
 
 ## 🌟 Features
 
@@ -45,8 +48,8 @@ A comprehensive, accessible, and secure mental health support platform built wit
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/astral-core.git
-cd astral-core
+git clone https://github.com/Damatnic/CoreV2.git
+cd CoreV2
 
 # Install dependencies
 npm install

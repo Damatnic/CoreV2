@@ -28,7 +28,9 @@
       "Bash(/dev/null)",
       "Bash(start http://localhost:5173)",
       "Bash(netlify dev:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "deny": []
   }
