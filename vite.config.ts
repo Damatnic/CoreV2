@@ -4,6 +4,7 @@ import { visualizer } from 'rollup-plugin-visualizer';
 import viteCompression from 'vite-plugin-compression';
 // import { VitePWA } from 'vite-plugin-pwa';
 import legacy from '@vitejs/plugin-legacy';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -66,6 +67,13 @@ export default defineConfig(({ mode }) => {
       minify: isProduction ? 'terser' : false, // Aggressive minification with terser
       target: 'es2015', // Support older browsers while maintaining performance
       rollupOptions: {
+        plugins: [
+          // Ensure proper module resolution
+          nodeResolve({
+            preferBuiltins: false,
+            browser: true
+          })
+        ],
         // Exclude video files from bundling completely
         external: (id) => {
           return /\.(mp4|webm|mov|avi)$/.test(id);
@@ -186,7 +194,9 @@ export default defineConfig(({ mode }) => {
         'buffer',
         // Force bundling of potential CommonJS modules
         'i18next',
-        'react-i18next'
+        'react-i18next',
+        // Add Rollup for build process
+        'rollup'
       ],
       exclude: [
         // Exclude service worker related files
