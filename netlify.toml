@@ -10,8 +10,8 @@
   autoLaunch = false
 
 [build.environment]
-  NODE_VERSION = "20"
-  NPM_VERSION = "10"
+  NODE_VERSION = "18.17.0"
+  NPM_VERSION = "9.6.7"
 
 # Service Worker specific headers
 [[headers]]
