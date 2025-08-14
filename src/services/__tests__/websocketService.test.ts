@@ -1,11 +1,11 @@
-import { WebSocketService } from '../websocketService';
+import { getWebSocketService } from '../webSocketService';
 
 // Mock WebSocket
 class MockWebSocket {
-  static CONNECTING = 0;
-  static OPEN = 1;
-  static CLOSING = 2;
-  static CLOSED = 3;
+  static readonly CONNECTING = 0;
+  static readonly OPEN = 1;
+  static readonly CLOSING = 2;
+  static readonly CLOSED = 3;
 
   readyState = MockWebSocket.CONNECTING;
   url: string;
@@ -28,7 +28,7 @@ class MockWebSocket {
     }, 100);
   }
 
-  send = jest.fn((data: string) => {
+  send = jest.fn((_data: string) => {
     if (this.readyState !== MockWebSocket.OPEN) {
       throw new Error('WebSocket is not open');
     }
@@ -48,11 +48,11 @@ class MockWebSocket {
 global.WebSocket = MockWebSocket as any;
 
 describe('WebSocketService', () => {
-  let service: WebSocketService;
+  let service: any;
   let mockWebSocket: MockWebSocket;
 
   beforeEach(() => {
-    service = new WebSocketService();
+    service = getWebSocketService();
     jest.clearAllMocks();
   });
 
@@ -89,9 +89,15 @@ describe('WebSocketService', () => {
 
     it('should handle connection failures gracefully', async () => {
       // Mock WebSocket constructor to throw error
-      global.WebSocket = jest.fn().mockImplementation(() => {
+      const FailingWebSocket = function() {
         throw new Error('Connection failed');
-      });
+      } as any;
+      FailingWebSocket.CONNECTING = 0;
+      FailingWebSocket.OPEN = 1;
+      FailingWebSocket.CLOSING = 2;
+      FailingWebSocket.CLOSED = 3;
+      
+      global.WebSocket = FailingWebSocket;
 
       const connection = await service.connect('ws://invalid-url');
 

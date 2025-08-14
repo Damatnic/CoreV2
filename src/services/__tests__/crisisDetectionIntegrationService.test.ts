@@ -119,7 +119,7 @@ describe('CrisisDetectionIntegrationService', () => {
       );
       
       expect(result.score).toBeLessThan(0.5);
-      expect(result.severity).toBeOneOf(['none', 'low', 'medium']);
+      expect(['none', 'low', 'medium']).toContain(result.severity);
     });
   });
 
@@ -134,7 +134,7 @@ describe('CrisisDetectionIntegrationService', () => {
       
       expect(result.interventionRecommendations).toBeDefined();
       expect(result.escalationRequired).toBe(true);
-      expect(result.severity).toBeOneOf(['high', 'critical']);
+      expect(['high', 'critical']).toContain(result.severity);
       expect(result.isCrisis).toBe(true);
     });
 

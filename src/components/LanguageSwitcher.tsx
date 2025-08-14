@@ -9,7 +9,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { changeLanguage, getCulturalContext, isRTLLanguage } from '../i18n';
+import { changeLanguage, getCulturalContext } from '../i18n';
 
 interface Language {
   code: string;
@@ -179,7 +179,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
             </span>
           )}
           <svg
-            className={`language-arrow ${isOpen ? 'language-arrow--open' : ''}`}
+            className={isOpen ? 'language-arrow language-arrow--open' : 'language-arrow'}
             width="12"
             height="12"
             viewBox="0 0 12 12"

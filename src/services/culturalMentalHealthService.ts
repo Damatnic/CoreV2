@@ -1003,7 +1003,6 @@ export const culturalMentalHealthService = CulturalMentalHealthService.getInstan
 
 // Export types
 export type {
-  CulturalMentalHealthContent,
   CopingStrategy,
   CrisisApproach,
   SupportResource,

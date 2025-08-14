@@ -171,7 +171,7 @@ describe('WebAuthSession', () => {
       expect(typeof promptAsync).toBe('function');
       
       // Test that calling promptAsync would redirect
-      const originalHref = mockLocation.href;
+      // const originalHref = mockLocation.href;
       promptAsync();
       
       // The href should be updated to the auth URL

@@ -4,7 +4,7 @@
  * Environment variables and initialization setup
  */
 
-import { initializeSentry, ErrorTrackingService } from '../services/errorTracking';
+import { initializeSentry, ErrorTrackingService } from '../services/errorTrackingService';
 
 // Environment variables configuration
 export const sentryConfig = {
@@ -33,7 +33,7 @@ export const initializeErrorTracking = () => {
 
   // Initialize Sentry
   try {
-    initializeSentry(sentryConfig.dsn);
+    initializeSentry();
     
     // Add initial breadcrumb
     ErrorTrackingService.addBreadcrumb(

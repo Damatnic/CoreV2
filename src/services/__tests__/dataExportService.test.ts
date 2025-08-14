@@ -1,4 +1,4 @@
-import DataExportService, { getDataExportService, useDataExport, ExportOptions, UserDataExport } from '../dataExportService';
+import DataExportService, { getDataExportService, useDataExport, ExportOptions } from '../dataExportService';
 import { renderHook, act } from '@testing-library/react';
 
 // Mock localStorage

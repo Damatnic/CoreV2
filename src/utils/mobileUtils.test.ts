@@ -271,10 +271,10 @@ describe('mobileUtils', () => {
       const mockScrollIntoView = jest.fn();
       input.scrollIntoView = mockScrollIntoView;
       
-      let focusHandler: (event: FocusEvent) => void;
+      let focusHandler: any;
       input.addEventListener = jest.fn((event, handler) => {
         if (event === 'focus') {
-          focusHandler = handler;
+          focusHandler = handler as (event: FocusEvent) => void;
         }
       });
       
@@ -283,7 +283,7 @@ describe('mobileUtils', () => {
       enhanceMobileFocus();
 
       // Trigger focus event
-      focusHandler!({ target: input } as FocusEvent);
+      (focusHandler as any)({ target: input } as unknown as FocusEvent);
 
       expect(input.classList.contains('mobile-input-focused')).toBe(true);
 
@@ -300,11 +300,11 @@ describe('mobileUtils', () => {
 
     test('should remove focus class on blur', () => {
       const input = document.createElement('input');
-      let blurHandler: (event: FocusEvent) => void;
+      let blurHandler: any;
       
       input.addEventListener = jest.fn((event, handler) => {
         if (event === 'blur') {
-          blurHandler = handler;
+          blurHandler = handler as (event: FocusEvent) => void;
         }
       });
       
@@ -314,7 +314,7 @@ describe('mobileUtils', () => {
       enhanceMobileFocus();
 
       // Trigger blur event
-      blurHandler!({ target: input } as FocusEvent);
+      blurHandler!({ target: input } as unknown as FocusEvent);
 
       expect(input.classList.contains('mobile-input-focused')).toBe(false);
     });
@@ -494,7 +494,7 @@ describe('mobileUtils', () => {
       
       element.addEventListener = jest.fn((event, handler) => {
         if (event === 'touchstart') {
-          touchStartHandler = handler;
+          touchStartHandler = handler as () => void;
         }
       });
 
@@ -514,9 +514,9 @@ describe('mobileUtils', () => {
       
       element.addEventListener = jest.fn((event, handler) => {
         if (event === 'touchstart') {
-          touchStartHandler = handler;
+          touchStartHandler = handler as () => void;
         } else if (event === 'touchend') {
-          touchEndHandler = handler;
+          touchEndHandler = handler as () => void;
         }
       });
 
@@ -546,9 +546,9 @@ describe('mobileUtils', () => {
       
       element.addEventListener = jest.fn((event, handler) => {
         if (event === 'touchstart') {
-          touchStartHandler = handler;
+          touchStartHandler = handler as () => void;
         } else if (event === 'touchend') {
-          touchEndHandler = handler;
+          touchEndHandler = handler as () => void;
         }
       });
 
@@ -575,7 +575,7 @@ describe('mobileUtils', () => {
       
       element.addEventListener = jest.fn((event, handler) => {
         if (event === 'touchcancel') {
-          touchCancelHandler = handler;
+          touchCancelHandler = handler as () => void;
         }
       });
 
@@ -593,7 +593,7 @@ describe('mobileUtils', () => {
       
       element.addEventListener = jest.fn((event, handler) => {
         if (event === 'touchstart') {
-          touchStartHandler = handler;
+          touchStartHandler = handler as () => void;
         }
       });
 
@@ -849,7 +849,7 @@ describe('mobileUtils', () => {
       
       element.addEventListener = jest.fn((event, handler) => {
         if (event === 'touchstart') {
-          touchStartHandler = handler;
+          touchStartHandler = handler as () => void;
         }
       });
 
@@ -870,9 +870,9 @@ describe('mobileUtils', () => {
       
       input.addEventListener = jest.fn((event, handler) => {
         if (event === 'focus') {
-          focusHandler = handler;
+          focusHandler = handler as (event: FocusEvent) => void;
         } else if (event === 'blur') {
-          blurHandler = handler;
+          blurHandler = handler as (event: FocusEvent) => void;
         }
       });
       
@@ -882,8 +882,8 @@ describe('mobileUtils', () => {
 
       // Rapid focus/blur events
       for (let i = 0; i < 100; i++) {
-        focusHandler!({ target: input } as FocusEvent);
-        blurHandler!({ target: input } as FocusEvent);
+        focusHandler!({ target: input } as unknown as FocusEvent);
+        blurHandler!({ target: input } as unknown as FocusEvent);
       }
 
       expect(input.classList.contains('mobile-input-focused')).toBe(false);

@@ -4,8 +4,6 @@
 
 import {
   MobileAccessibilityAuditor,
-  AccessibilityAuditResult,
-  AccessibilityIssue,
 } from './accessibilityAuditor';
 
 describe('accessibilityAuditor', () => {
@@ -36,7 +34,7 @@ describe('accessibilityAuditor', () => {
             style: { outline: '2px solid blue' },
           } as CSSStyleRule,
         ],
-      } as CSSStyleSheet,
+      } as unknown as CSSStyleSheet,
     ];
 
     Object.defineProperty(document, 'styleSheets', {
@@ -45,7 +43,7 @@ describe('accessibilityAuditor', () => {
     });
 
     // Mock window.getComputedStyle
-    window.getComputedStyle = jest.fn((element, pseudoElement) => {
+    window.getComputedStyle = jest.fn((_element, pseudoElement) => {
       const defaultStyle = {
         color: 'rgb(0, 0, 0)',
         backgroundColor: 'rgb(255, 255, 255)',
@@ -431,7 +429,7 @@ describe('accessibilityAuditor', () => {
               style: { color: 'blue' },
             } as CSSStyleRule,
           ],
-        }] as CSSStyleSheet[],
+        }] as unknown as CSSStyleSheet[],
         writable: true,
       });
 
@@ -453,7 +451,7 @@ describe('accessibilityAuditor', () => {
           get cssRules() {
             throw new Error('Cannot access cross-origin stylesheet');
           },
-        }] as CSSStyleSheet[],
+        }] as unknown as CSSStyleSheet[],
         writable: true,
       });
 

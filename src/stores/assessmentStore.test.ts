@@ -4,7 +4,7 @@ import { act } from 'react';
 import { authState } from '../contexts/AuthContext';
 
 // Mock fetch globally
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 const mockedFetch = global.fetch as jest.MockedFunction<typeof fetch>;
 
 const initialState = useAssessmentStore.getState();

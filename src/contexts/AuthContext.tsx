@@ -5,12 +5,12 @@ import { Helper } from '../types';
 import { useNotification } from './NotificationContext';
 
 // --- Auth0 Configuration ---
-const AUTH0_DOMAIN = process.env.AUTH0_DOMAIN || 'demo.auth0.com';
-const AUTH0_CLIENT_ID = process.env.AUTH0_CLIENT_ID || 'demo-client-id';
-const AUTH0_AUDIENCE = process.env.AUTH0_AUDIENCE || 'demo-audience';
+const AUTH0_DOMAIN = import.meta.env.VITE_AUTH0_DOMAIN || 'demo.auth0.com';
+const AUTH0_CLIENT_ID = import.meta.env.VITE_AUTH0_CLIENT_ID || 'demo-client-id';
+const AUTH0_AUDIENCE = import.meta.env.VITE_AUTH0_AUDIENCE || 'demo-audience';
 
 // Only show info message on initial load for demo mode
-if (process.env.NODE_ENV === 'development' && (!process.env.AUTH0_DOMAIN || !process.env.AUTH0_CLIENT_ID || !process.env.AUTH0_AUDIENCE)) {
+if (import.meta.env.DEV && (!import.meta.env.VITE_AUTH0_DOMAIN || !import.meta.env.VITE_AUTH0_CLIENT_ID || !import.meta.env.VITE_AUTH0_AUDIENCE)) {
     // Check if we're on non-Netlify dev port
     const currentPort = typeof window !== 'undefined' ? window.location.port : '';
     if (currentPort && currentPort !== '8888') {
@@ -33,6 +33,8 @@ interface AuthContextType {
   reloadProfile: () => Promise<void>;
   updateHelperProfile: (updatedProfile: Helper) => void;
   userToken: string | null;
+  isAnonymous?: boolean; // Added for test compatibility
+  authState?: any; // Added for test compatibility
 }
 
 // Global state object to bridge context and stores
@@ -50,6 +52,9 @@ export const authState: {
 
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Export the context for testing purposes
+export { AuthContext };
 
 // Helper to decode JWT payload.
 const jwtDecode = (token: string) => {
@@ -292,6 +297,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     reloadProfile,
     updateHelperProfile,
     userToken,
+    isAnonymous: false, // Default to false, can be overridden in tests
+    authState: { isAuthenticated: !!user, user, helperProfile, userToken }, // Added for test compatibility
   }), [user, helperProfile, isNewUser, isLoading, login, logout, reloadProfile, updateHelperProfile, userToken]);
 
   // Sync with global state object

@@ -10,7 +10,25 @@
       "Bash(grep:*)",
       "Bash(cat:*)",
       "Bash(set PORT=3001)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(dir:*)",
+      "Bash(del \"~$TLIFY_NEON_SETUP.md\")",
+      "Bash(rm:*)",
+      "Bash(true)",
+      "Bash(npm install:*)",
+      "Bash(touch:*)",
+      "Bash(cp:*)",
+      "Bash(npm test:*)",
+      "Bash(npm audit:*)",
+      "Bash(mkdir:*)",
+      "Bash(node:*)",
+      "Bash(curl:*)",
+      "Bash(start http://localhost:3005)",
+      "Bash(/dev/null)",
+      "Bash(start http://localhost:5173)",
+      "Bash(netlify dev:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

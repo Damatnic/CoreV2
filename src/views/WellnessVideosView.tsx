@@ -80,7 +80,7 @@ const localVideos: WellnessVideo[] = [
 ];
 
 export const WellnessVideosView: React.FC<{
-    setActiveView: (view: View) => void;
+    setActiveView?: (view: View) => void;
 }> = ({ setActiveView }) => {
     const [videos, setVideos] = useState<WellnessVideo[]>([]);
     const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
@@ -287,7 +287,7 @@ export const WellnessVideosView: React.FC<{
                 video.currentTime = 0;
             }
         });
-        setActiveView('wellness-tracking');
+        setActiveView?.('wellness-tracking');
     };
 
     return (

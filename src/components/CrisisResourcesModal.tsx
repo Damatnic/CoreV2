@@ -285,25 +285,25 @@ export const CrisisResourcesModal: React.FC<CrisisResourcesModalProps> = ({
 
         <div className="crisis-modal__tabs">
           <button
-            className={`crisis-tab ${activeTab === 'emergency' ? 'crisis-tab--active' : ''}`}
+            className={activeTab === 'emergency' ? 'crisis-tab crisis-tab--active' : 'crisis-tab'}
             onClick={() => setActiveTab('emergency')}
           >
             Emergency
           </button>
           <button
-            className={`crisis-tab ${activeTab === 'support' ? 'crisis-tab--active' : ''}`}
+            className={activeTab === 'support' ? 'crisis-tab crisis-tab--active' : 'crisis-tab'}
             onClick={() => setActiveTab('support')}
           >
             Support
           </button>
           <button
-            className={`crisis-tab ${activeTab === 'coping' ? 'crisis-tab--active' : ''}`}
+            className={activeTab === 'coping' ? 'crisis-tab crisis-tab--active' : 'crisis-tab'}
             onClick={() => setActiveTab('coping')}
           >
             Coping
           </button>
           <button
-            className={`crisis-tab ${activeTab === 'safety' ? 'crisis-tab--active' : ''}`}
+            className={activeTab === 'safety' ? 'crisis-tab crisis-tab--active' : 'crisis-tab'}
             onClick={() => setActiveTab('safety')}
           >
             Safety Plan

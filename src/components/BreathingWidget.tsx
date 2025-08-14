@@ -206,7 +206,7 @@ export const BreathingWidget: React.FC<{
           {breathingPatterns.map((pattern) => (
             <button
               key={pattern.name}
-              className={`pattern-option ${selectedPattern.name === pattern.name ? 'selected' : ''}`}
+              className={selectedPattern.name === pattern.name ? 'pattern-option selected' : 'pattern-option'}
               onClick={() => setSelectedPattern(pattern)}
             >
               <div className="pattern-name">{pattern.name}</div>
@@ -272,7 +272,7 @@ export const BreathingWidget: React.FC<{
 
       <div className="breathing-controls">
         <button
-          className={`breathing-button ${isActive ? 'stop' : 'start'}`}
+          className={isActive ? 'breathing-button stop' : 'breathing-button start'}
           onClick={() => setIsActive(!isActive)}
         >
           {isActive ? (

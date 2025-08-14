@@ -933,4 +933,5 @@ class CulturalAssessmentService {
 }
 
 // Export singleton instance
+export default CulturalAssessmentService;
 export const culturalAssessmentService = new CulturalAssessmentService();

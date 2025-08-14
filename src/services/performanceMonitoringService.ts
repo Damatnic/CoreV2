@@ -7,12 +7,15 @@
  * @license Apache-2.0
  */
 
-import { getCLS, getFCP, getFID, getLCP, getTTFB, INP } from 'web-vitals';
+import { onCLS, onFCP, onINP, onLCP, onTTFB } from 'web-vitals';
+
+// Type aliases for union types
+type PerformanceRating = 'good' | 'needs-improvement' | 'poor';
 
 interface PerformanceMetric {
   name: string;
   value: number;
-  rating: 'good' | 'needs-improvement' | 'poor';
+  rating: PerformanceRating;
   timestamp: number;
   metadata?: Record<string, any>;
 }
@@ -49,10 +52,9 @@ interface PerformanceReport {
   webVitals: {
     FCP?: PerformanceMetric;
     LCP?: PerformanceMetric;
-    FID?: PerformanceMetric;
+    INP?: PerformanceMetric;
     CLS?: PerformanceMetric;
     TTFB?: PerformanceMetric;
-    INP?: PerformanceMetric;
   };
   customMetrics: PerformanceMetric[];
   resources: ResourceTiming[];
@@ -71,10 +73,10 @@ interface PerformanceReport {
 
 class PerformanceMonitoringService {
   private static instance: PerformanceMonitoringService;
-  private sessionId: string;
+  private readonly sessionId: string;
   private userId?: string;
   private report: PerformanceReport;
-  private observers: Map<string, PerformanceObserver> = new Map();
+  private readonly observers: Map<string, PerformanceObserver> = new Map();
   private isInitialized = false;
   private reportInterval: number | null = null;
   private interactionBuffer: UserInteraction[] = [];
@@ -84,10 +86,9 @@ class PerformanceMonitoringService {
   private readonly thresholds = {
     FCP: { good: 1800, poor: 3000 },
     LCP: { good: 2500, poor: 4000 },
-    FID: { good: 100, poor: 300 },
+    INP: { good: 200, poor: 500 },
     CLS: { good: 0.1, poor: 0.25 },
     TTFB: { good: 800, poor: 1800 },
-    INP: { good: 200, poor: 500 }
   };
 
   private constructor() {
@@ -143,42 +144,35 @@ class PerformanceMonitoringService {
    */
   private monitorWebVitals(): void {
     // First Contentful Paint
-    getFCP((metric) => {
+    onFCP((metric) => {
       this.report.webVitals.FCP = this.formatWebVital('FCP', metric.value);
       this.logMetric('FCP', metric.value);
     });
     
     // Largest Contentful Paint
-    getLCP((metric) => {
+    onLCP((metric) => {
       this.report.webVitals.LCP = this.formatWebVital('LCP', metric.value);
       this.logMetric('LCP', metric.value);
     });
     
-    // First Input Delay
-    getFID((metric) => {
-      this.report.webVitals.FID = this.formatWebVital('FID', metric.value);
-      this.logMetric('FID', metric.value);
+    // Interaction to Next Paint (replaces FID in web-vitals v5)
+    onINP((metric) => {
+      this.report.webVitals.INP = this.formatWebVital('INP', metric.value);
+      this.logMetric('INP', metric.value);
     });
     
     // Cumulative Layout Shift
-    getCLS((metric) => {
+    onCLS((metric) => {
       this.report.webVitals.CLS = this.formatWebVital('CLS', metric.value);
       this.logMetric('CLS', metric.value);
     });
     
     // Time to First Byte
-    getTTFB((metric) => {
+    onTTFB((metric) => {
       this.report.webVitals.TTFB = this.formatWebVital('TTFB', metric.value);
       this.logMetric('TTFB', metric.value);
     });
     
-    // Interaction to Next Paint (new metric)
-    if (typeof INP !== 'undefined') {
-      INP((metric) => {
-        this.report.webVitals.INP = this.formatWebVital('INP', metric.value);
-        this.logMetric('INP', metric.value);
-      });
-    }
   }
 
   /**
@@ -255,8 +249,8 @@ class PerformanceMonitoringService {
     
     // Track navigation timing
     if ('PerformanceNavigationTiming' in window) {
-      const navTiming = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-      if (navTiming) {
+      const navTiming = performance.getEntriesByType('navigation')[0];
+      if (navTiming && navTiming instanceof PerformanceNavigationTiming) {
         this.trackCustomMetric('page_load_time', navTiming.loadEventEnd - navTiming.fetchStart);
         this.trackCustomMetric('dom_interactive', navTiming.domInteractive - navTiming.fetchStart);
         this.trackCustomMetric('dom_complete', navTiming.domComplete - navTiming.fetchStart);
@@ -490,16 +484,15 @@ class PerformanceMonitoringService {
   /**
    * Get performance summary
    */
-  getPerformanceSummary(): {
-    webVitals: Record<string, any>;
-    score: number;
-    recommendations: string[];
-  } {
+  /**
+   * Calculate performance score based on Web Vitals
+   */
+  private calculateWebVitalsScore(): { score: number; recommendations: string[] } {
     const webVitals = this.report.webVitals;
     let score = 100;
     const recommendations: string[] = [];
     
-    // Calculate score based on Web Vitals
+    // FCP scoring
     if (webVitals.FCP) {
       if (webVitals.FCP.rating === 'needs-improvement') score -= 10;
       if (webVitals.FCP.rating === 'poor') {
@@ -508,6 +501,7 @@ class PerformanceMonitoringService {
       }
     }
     
+    // LCP scoring
     if (webVitals.LCP) {
       if (webVitals.LCP.rating === 'needs-improvement') score -= 10;
       if (webVitals.LCP.rating === 'poor') {
@@ -516,23 +510,45 @@ class PerformanceMonitoringService {
       }
     }
     
-    if (webVitals.FID) {
-      if (webVitals.FID.rating === 'needs-improvement') score -= 10;
-      if (webVitals.FID.rating === 'poor') {
-        score -= 20;
-        recommendations.push('Reduce First Input Delay by breaking up long tasks and optimizing JavaScript execution');
+    return { score, recommendations };
+  }
+
+  /**
+   * Get interaction and layout recommendations
+   */
+  private getInteractionRecommendations(): { scoreReduction: number; recommendations: string[] } {
+    const webVitals = this.report.webVitals;
+    let scoreReduction = 0;
+    const recommendations: string[] = [];
+    
+    // INP scoring
+    if (webVitals.INP) {
+      if (webVitals.INP.rating === 'needs-improvement') scoreReduction += 10;
+      if (webVitals.INP.rating === 'poor') {
+        scoreReduction += 20;
+        recommendations.push('Reduce Interaction to Next Paint by breaking up long tasks and optimizing JavaScript execution');
       }
     }
     
+    // CLS scoring
     if (webVitals.CLS) {
-      if (webVitals.CLS.rating === 'needs-improvement') score -= 10;
+      if (webVitals.CLS.rating === 'needs-improvement') scoreReduction += 10;
       if (webVitals.CLS.rating === 'poor') {
-        score -= 20;
+        scoreReduction += 20;
         recommendations.push('Fix Cumulative Layout Shift by specifying dimensions for images and avoiding dynamic content injection');
       }
     }
     
-    // Add memory recommendations
+    return { scoreReduction, recommendations };
+  }
+
+  /**
+   * Get system-level recommendations
+   */
+  private getSystemRecommendations(): string[] {
+    const recommendations: string[] = [];
+    
+    // Memory recommendations
     if (this.report.memory) {
       const memoryUsage = this.report.memory.usedJSHeapSize / this.report.memory.jsHeapSizeLimit;
       if (memoryUsage > 0.8) {
@@ -540,15 +556,34 @@ class PerformanceMonitoringService {
       }
     }
     
-    // Add connection recommendations
+    // Connection recommendations
     if (this.report.connection?.effectiveType === '2g' || this.report.connection?.effectiveType === 'slow-2g') {
       recommendations.push('Slow connection detected. Ensure critical resources are cached and minimize payload sizes');
     }
     
+    return recommendations;
+  }
+
+  getPerformanceSummary(): {
+    webVitals: Record<string, any>;
+    score: number;
+    recommendations: string[];
+  } {
+    const webVitalsResult = this.calculateWebVitalsScore();
+    const interactionResult = this.getInteractionRecommendations();
+    const systemRecommendations = this.getSystemRecommendations();
+    
+    const totalScore = Math.max(0, webVitalsResult.score - interactionResult.scoreReduction);
+    const allRecommendations = [
+      ...webVitalsResult.recommendations,
+      ...interactionResult.recommendations,
+      ...systemRecommendations
+    ];
+    
     return {
-      webVitals,
-      score: Math.max(0, score),
-      recommendations
+      webVitals: this.report.webVitals,
+      score: totalScore,
+      recommendations: allRecommendations
     };
   }
 
@@ -594,20 +629,27 @@ class PerformanceMonitoringService {
   private getResourceType(url: string): string {
     if (url.includes('.js')) return 'script';
     if (url.includes('.css')) return 'style';
-    if (url.match(/\.(jpg|jpeg|png|gif|webp|svg)/)) return 'image';
-    if (url.match(/\.(woff|woff2|ttf|otf)/)) return 'font';
+    
+    const imageRegex = /\.(jpg|jpeg|png|gif|webp|svg)/;
+    if (imageRegex.exec(url)) return 'image';
+    
+    const fontRegex = /\.(woff|woff2|ttf|otf)/;
+    if (fontRegex.exec(url)) return 'font';
+    
     if (url.includes('/api/')) return 'api';
     return 'other';
   }
   
   private getTargetSelector(element: HTMLElement): string {
     if (element.id) return `#${element.id}`;
-    if (element.className) return `.${element.className.split(' ')[0]}`;
+    if (element.className && typeof element.className === 'string') {
+      return `.${element.className.split(' ')[0]}`;
+    }
     return element.tagName.toLowerCase();
   }
   
   private generateSessionId(): string {
-    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
   
   private createEmptyReport(): PerformanceReport {
@@ -667,6 +709,7 @@ class PerformanceMonitoringService {
 
 // Export singleton instance
 export const performanceMonitoring = PerformanceMonitoringService.getInstance();
+export const performanceMonitoringService = performanceMonitoring;
 
 // Auto-initialize on page load
 if (typeof window !== 'undefined') {

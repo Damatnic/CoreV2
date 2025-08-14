@@ -1,5 +1,4 @@
 import SecurityService, { 
-  RateLimitConfig, 
   ValidationRule, 
   SecurityConfig,
   useSecurity,
@@ -579,7 +578,7 @@ describe('SecurityService', () => {
       const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
       const existingLogs: any[] = [];
       const mockGetItem = jest.fn(() => JSON.stringify(existingLogs));
-      const mockSetItem = jest.fn((key, value) => {
+      const mockSetItem = jest.fn((_key, value) => {
         existingLogs.length = 0;
         existingLogs.push(...JSON.parse(value));
       });

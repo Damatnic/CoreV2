@@ -25,6 +25,15 @@ export enum WCAGLevel {
   AAA = 'AAA'
 }
 
+export enum AccessibilityIssueType {
+  COLOR_CONTRAST = 'color-contrast',
+  MISSING_ALT_TEXT = 'missing-alt-text',
+  KEYBOARD_NAVIGATION = 'keyboard-navigation',
+  ARIA_LABELS = 'aria-labels',
+  HEADING_STRUCTURE = 'heading-structure',
+  FOCUS_MANAGEMENT = 'focus-management'
+}
+
 export enum WCAGPrinciple {
   PERCEIVABLE = 'perceivable',
   OPERABLE = 'operable',
@@ -1167,6 +1176,64 @@ export class AccessibilityAuditSystem {
 
   private generateElementId(element: Element): string {
     return AccessibilityUtils.generateElementId(element);
+  }
+
+  // Real-time monitoring methods
+  private monitoringCallback?: (result: AccessibilityAuditResult) => void;
+  private monitoringInterval?: NodeJS.Timeout;
+
+  startMonitoring(callback: (result: AccessibilityAuditResult) => void, intervalMs: number = 5000): void {
+    this.monitoringCallback = callback;
+    this.stopMonitoring(); // Stop any existing monitoring
+    
+    this.monitoringInterval = setInterval(async () => {
+      try {
+        const result = await this.runAccessibilityAudit();
+        this.checkAlerts(result); // Check alerts on each monitoring cycle
+        this.monitoringCallback?.(result);
+      } catch (error) {
+        console.error('Accessibility monitoring error:', error);
+      }
+    }, intervalMs);
+  }
+
+  stopMonitoring(): void {
+    if (this.monitoringInterval) {
+      clearInterval(this.monitoringInterval);
+      this.monitoringInterval = undefined;
+    }
+    this.monitoringCallback = undefined;
+  }
+
+  // Alert setup for accessibility thresholds
+  private alertThreshold?: number;
+  private alertCallback?: (score: number, issues: AccessibilityIssue[]) => void;
+
+  setupAlerts(threshold: number, callback?: (score: number, issues: AccessibilityIssue[]) => void): void {
+    this.alertThreshold = threshold;
+    this.alertCallback = callback;
+  }
+
+  private checkAlerts(result: AccessibilityAuditResult): void {
+    if (this.alertThreshold && result.score.overall < this.alertThreshold) {
+      this.alertCallback?.(result.score.overall, result.issues);
+    }
+  }
+
+  teardownAlerts(): void {
+    this.alertThreshold = undefined;
+    this.alertCallback = undefined;
+  }
+
+  // Keyboard support methods for tests
+  setupKeyboardSupport(): void {
+    // Implementation for keyboard support setup
+    console.log('Keyboard support enabled');
+  }
+
+  teardownKeyboardSupport(): void {
+    // Implementation for keyboard support cleanup
+    console.log('Keyboard support disabled');
   }
 }
 

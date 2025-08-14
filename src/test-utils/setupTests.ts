@@ -276,7 +276,7 @@ expect.extend({
   toHaveBeenCalledWithMatch(received: jest.Mock, expected: any) {
     const calls = received.mock.calls;
     const pass = calls.some((call) =>
-      call.some((arg) => {
+      call.some((arg: any) => {
         if (typeof expected === 'function') {
           return expected(arg);
         }

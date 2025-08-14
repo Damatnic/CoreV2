@@ -412,6 +412,51 @@ class MultilingualCrisisDetectionService {
   getSupportedLanguages(): string[] {
     return Array.from(this.crisisPatterns.keys());
   }
+
+  /**
+   * Detect crisis with language auto-detection
+   */
+  async detectCrisis(text: string, language?: string): Promise<{
+    riskLevel: string;
+    confidence: number;
+    triggers: string[];
+    culturalRecommendations: string[];
+    detectedLanguage: string;
+    languageConfidence: number;
+  }> {
+    const detectedLanguage = language || await this.detectLanguage(text);
+    const result = this.analyzeCrisisRisk(text, detectedLanguage);
+    
+    return {
+      riskLevel: result.riskLevel,
+      confidence: result.score / 10, // Normalize score to 0-1
+      triggers: result.detectedKeywords,
+      culturalRecommendations: [result.recommendedResponse],
+      detectedLanguage,
+      languageConfidence: 0.9 // Simplified for now
+    };
+  }
+
+  /**
+   * Simple language detection (mock implementation)
+   */
+  private async detectLanguage(text: string): Promise<string> {
+    // Simple language detection based on character patterns
+    if (/[\u4e00-\u9fff]/.test(text)) return 'zh';
+    if (/[\u0600-\u06ff]/.test(text)) return 'ar';
+    if (/[áéíóúñü]/.test(text.toLowerCase())) return 'es';
+    if (/[àâäéèêëîïôöùûüÿç]/.test(text.toLowerCase())) return 'fr';
+    return 'en';
+  }
+
+  /**
+   * Reset service state for testing
+   */
+  reset(): void {
+    this.initialized = false;
+    this.initializeCrisisPatterns();
+    this.initialized = true;
+  }
 }
 
 export const multilingualCrisisDetectionService = new MultilingualCrisisDetectionService();

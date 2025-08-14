@@ -493,6 +493,10 @@ export const ApiClient = {
             }
             return response.text;
         },
+        sendMessageToAI: async (messages: AIChatMessage[], systemInstruction: string): Promise<string> => {
+            // Alias for chat method to match test expectations
+            return ApiClient.ai.chat(messages, systemInstruction);
+        },
         resetAIChat: () => {
              _callApi('/ai/reset', { method: 'POST' });
         },

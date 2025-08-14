@@ -5,11 +5,12 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import App from './App';
+// Using Simple Auth version instead of Auth0
+import AppWithSimpleAuth from './AppWithSimpleAuth';
 import './index.css';
 
 // Import global styles
+import './styles/layout-fix-critical.css'; // CRITICAL: Must be first to fix layout issues
 import './styles/design-system.css';
 import './styles/accessibility.css';
 import './styles/mobile-responsive-fixes.css';
@@ -19,19 +20,19 @@ import './styles/safe-ui-system.css';
 // Import i18n configuration
 import './i18n';
 
-// Import Auth0 provider
-import { auth0Service } from './services/auth0Service';
+// Auth0 provider - not used with simple auth
+// import { auth0Service } from './services/auth0Service';
 
 // Import environment validator
 import { loadAndValidateEnv } from './utils/envValidator';
 
 // Import error tracking
-import { initializeErrorTracking } from './services/errorTrackingService';
+import { initializeErrorTracking } from './config/errorTracking';
 
 // Import service worker manager
-import { registerServiceWorker } from './services/serviceWorkerManager';
+import { registerServiceWorker } from './services/serviceWorkerConfig';
 
-// Import OpenTelemetry
+// Import OpenTelemetry (using stub implementation)
 import { openTelemetryService } from './services/openTelemetryService';
 
 // Import performance monitoring
@@ -62,7 +63,7 @@ if (process.env.NODE_ENV === 'production') {
   initializeErrorTracking();
 }
 
-// Initialize OpenTelemetry
+// Initialize OpenTelemetry (using stub)
 if (import.meta.env.VITE_OTEL_ENABLED === 'true') {
   openTelemetryService.initialize().catch(error => {
     console.error('Failed to initialize OpenTelemetry:', error);
@@ -72,10 +73,10 @@ if (import.meta.env.VITE_OTEL_ENABLED === 'true') {
 // Initialize performance monitoring
 performanceMonitoringService.initialize();
 
-// Initialize Auth0
-auth0Service.initialize().catch(error => {
-  console.error('Failed to initialize Auth0:', error);
-});
+// Skip Auth0 initialization - using simple auth instead
+// auth0Service.initialize().catch(error => {
+//   console.error('Failed to initialize Auth0:', error);
+// });
 
 // Get root element
 const rootElement = document.getElementById('root');
@@ -84,19 +85,17 @@ if (!rootElement) {
   throw new Error('Failed to find root element. Make sure index.html contains a div with id="root"');
 }
 
-// Create React root and render app
+// Create React root and render app with Simple Auth
 const root = ReactDOM.createRoot(rootElement);
 
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <AppWithSimpleAuth />
   </React.StrictMode>
 );
 
 // Register service worker for PWA support
-if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     registerServiceWorker();
   });
@@ -110,12 +109,12 @@ if (import.meta.hot) {
 // Performance monitoring
 if (process.env.NODE_ENV === 'production') {
   // Report Web Vitals
-  import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-    getCLS(console.log);
-    getFID(console.log);
-    getFCP(console.log);
-    getLCP(console.log);
-    getTTFB(console.log);
+  import('web-vitals').then(({ onCLS, onINP, onFCP, onLCP, onTTFB }) => {
+    onCLS(console.log);
+    onINP(console.log);
+    onFCP(console.log);
+    onLCP(console.log);
+    onTTFB(console.log);
   });
 }
 

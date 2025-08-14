@@ -929,6 +929,116 @@ class ScreenReaderService {
   }
 
   /**
+   * Announce form validation errors
+   */
+  public announceFormValidation(field: string, error: string | null): void {
+    if (error) {
+      this.announce({
+        message: `Validation error for ${field}: ${error}`,
+        priority: 'medium',
+        type: 'error',
+        context: 'form-validation'
+      });
+    } else {
+      this.announce({
+        message: `${field} is valid`,
+        priority: 'low',
+        type: 'success',
+        context: 'form-validation'
+      });
+    }
+  }
+
+  /**
+   * Announce focus change
+   */
+  public announceFocusChange(element: HTMLElement, context?: string): void {
+    const role = element.getAttribute('role') || element.tagName.toLowerCase();
+    const label = element.getAttribute('aria-label') || element.textContent || 'Unnamed element';
+    
+    this.announce({
+      message: `Focus moved to ${role}: ${label}`,
+      priority: 'low',
+      type: 'navigation',
+      context: context || 'focus-change'
+    });
+  }
+
+  /**
+   * Announce loading state
+   */
+  public announceLoadingState(isLoading: boolean, context?: string): void {
+    this.announce({
+      message: isLoading ? 'Loading content, please wait' : 'Content loaded',
+      priority: 'medium',
+      type: 'status',
+      context: context || 'loading'
+    });
+  }
+
+  /**
+   * Announce success message
+   */
+  public announceSuccess(message: string, context?: string): void {
+    this.announce({
+      message,
+      priority: 'medium',
+      type: 'success',
+      context: context || 'success'
+    });
+  }
+
+  /**
+   * Announce error message
+   */
+  public announceError(message: string, context?: string): void {
+    this.announce({
+      message,
+      priority: 'high',
+      type: 'error',
+      context: context || 'error'
+    });
+  }
+
+  /**
+   * Announce page change
+   */
+  public announcePageChange(pageName: string, context?: string): void {
+    this.announce({
+      message: `Navigated to ${pageName}`,
+      priority: 'medium',
+      type: 'navigation',
+      context: context || 'page-change'
+    });
+  }
+
+  /**
+   * Announce keyboard shortcuts
+   */
+  public announceKeyboardShortcuts(shortcuts: string[]): void {
+    const message = `Available keyboard shortcuts: ${shortcuts.join(', ')}`;
+    this.announce({
+      message,
+      priority: 'low',
+      type: 'status',
+      context: 'keyboard-shortcuts'
+    });
+  }
+
+  /**
+   * Announce crisis escalation
+   */
+  public announceCrisisEscalation(level: string, action: string): void {
+    this.announce({
+      message: `Crisis support activated. Level: ${level}. Action: ${action}`,
+      priority: 'emergency',
+      type: 'crisis',
+      context: 'crisis-escalation',
+      persistent: true
+    });
+  }
+
+  /**
    * Destroy service and clean up
    */
   public destroy(): void {
@@ -942,5 +1052,5 @@ class ScreenReaderService {
 }
 
 // Export singleton instance
+export default ScreenReaderService;
 export const screenReaderService = new ScreenReaderService();
-export default screenReaderService;

@@ -6,6 +6,7 @@ import { Card } from '../components/Card';
 import { ApiClient } from '../utils/ApiClient';
 import { useNotification } from '../contexts/NotificationContext';
 import { HeartIcon, PhoneIcon, ShieldIcon, SparkleIcon, BookmarkIcon  } from '../components/icons.dynamic';
+import { useAuth } from '../contexts/AuthContext';
 
 const defaultPlan: SafetyPlan = {
     triggers: '',
@@ -55,8 +56,10 @@ const warningSignsSuggestions = [
 ];
 
 export const SafetyPlanView: React.FC<{
-    userToken: string | null;
-}> = ({ userToken }) => {
+    userToken?: string | null;
+}> = ({ userToken: propUserToken }) => {
+    const { userToken: contextUserToken } = useAuth();
+    const userToken = propUserToken ?? contextUserToken;
     const [plan, setPlan] = useState<SafetyPlan>(defaultPlan);
     const [isEditing, setIsEditing] = useState(false);
     const [isLoading, setIsLoading] = useState(true);

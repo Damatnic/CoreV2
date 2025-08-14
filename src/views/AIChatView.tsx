@@ -448,4 +448,41 @@ export const AIChatView: React.FC<{
     );
 };
 
-export default AIChatView;
+// Route wrapper component for use in AppRoutes
+export const AIChatRoute: React.FC = () => {
+    const [session, setSession] = useState<AIChatSession>({
+        messages: [],
+        isTyping: false
+    });
+
+    const handleSendMessage = async (text: string) => {
+        // Implementation would go here
+        // For now, just add the message to session
+        const newMessage = {
+            id: `msg-${Date.now()}`,
+            sender: 'user' as const,
+            text,
+            timestamp: new Date().toISOString()
+        };
+        
+        setSession(prev => ({
+            ...prev,
+            messages: [...prev.messages, newMessage]
+        }));
+    };
+
+    const handleClose = () => {
+        // Navigate back or close - could use router navigation here
+        window.history.back();
+    };
+
+    return (
+        <AIChatView 
+            session={session}
+            onSendMessage={handleSendMessage}
+            onClose={handleClose}
+        />
+    );
+};
+
+export default AIChatRoute;

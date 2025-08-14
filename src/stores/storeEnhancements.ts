@@ -5,10 +5,8 @@
  * utilities for all Zustand stores in the application.
  */
 
-import { StateCreator, StoreMutatorIdentifier } from 'zustand';
-import { persist, createJSONStorage, PersistOptions } from 'zustand/middleware';
-import { devtools } from 'zustand/middleware';
-import { subscribeWithSelector } from 'zustand/middleware';
+import { StateCreator } from 'zustand';
+import { persist, createJSONStorage, PersistOptions, devtools, subscribeWithSelector } from 'zustand/middleware';
 
 /**
  * Standard error state interface for all stores
@@ -60,7 +58,7 @@ export interface EnhancedState extends ErrorState, LoadingState, OptimizationSta
  * Create standard error handling slice
  */
 export const createErrorSlice = <T extends ErrorState>(
-  set: (partial: Partial<T>) => void
+  set: (partial: Partial<T> | ((state: T) => Partial<T>)) => void
 ): ErrorState => ({
   error: null,
   errorCode: undefined,
@@ -89,7 +87,7 @@ export const createErrorSlice = <T extends ErrorState>(
  * Create standard loading slice
  */
 export const createLoadingSlice = <T extends LoadingState>(
-  set: (partial: Partial<T>) => void
+  set: (partial: Partial<T> | ((state: T) => Partial<T>)) => void
 ): LoadingState => ({
   isLoading: false,
   loadingMessage: undefined,
@@ -106,7 +104,7 @@ export const createLoadingSlice = <T extends LoadingState>(
  * Create optimization slice
  */
 export const createOptimizationSlice = <T extends OptimizationState>(
-  set: (partial: Partial<T>) => void
+  set: (partial: Partial<T> | ((state: T) => Partial<T>)) => void
 ): OptimizationState => ({
   lastUpdated: null,
   updateCount: 0,
@@ -117,6 +115,7 @@ export const createOptimizationSlice = <T extends OptimizationState>(
   } as Partial<T>),
   
   updateMetrics: () => set((state: any) => ({
+    ...state,
     lastUpdated: new Date(),
     updateCount: state.updateCount + 1,
     cacheValid: true
@@ -127,7 +126,7 @@ export const createOptimizationSlice = <T extends OptimizationState>(
  * Create enhanced state with all standard features
  */
 export const createEnhancedSlice = <T extends EnhancedState>(
-  set: (partial: Partial<T>) => void
+  set: (partial: Partial<T> | ((state: T) => Partial<T>)) => void
 ): Omit<EnhancedState, '_version' | '_hasHydrated' | 'setHasHydrated'> => ({
   ...createErrorSlice<T>(set),
   ...createLoadingSlice<T>(set),
@@ -170,7 +169,7 @@ export const createPersistOptions = <T extends EnhancedState>(
   return {
     name: `astral-core-${config.name}`,
     version: config.version || 1,
-    storage,
+    storage: storage as any,
     
     // Default partialize - exclude error and loading states
     partialize: config.partialize || ((state) => {
@@ -234,7 +233,7 @@ export const withRetry = async <T>(
 /**
  * Optimistic update wrapper
  */
-export const withOptimisticUpdate = <T, R>(
+export const withOptimisticUpdate = <R>(
   optimisticUpdate: () => void,
   actualUpdate: () => Promise<R>,
   rollback: () => void,
@@ -302,8 +301,8 @@ export const createEnhancedStore = <T extends EnhancedState>(
  * Cache management utilities
  */
 export class StoreCache<T> {
-  private cache: Map<string, { data: T; timestamp: number }> = new Map();
-  private ttl: number;
+  private readonly cache: Map<string, { data: T; timestamp: number }> = new Map();
+  private readonly ttl: number;
   
   constructor(ttlSeconds: number = 300) { // 5 minutes default
     this.ttl = ttlSeconds * 1000;
@@ -341,7 +340,7 @@ export class StoreCache<T> {
  * Performance monitoring for stores
  */
 export class StorePerformanceMonitor {
-  private metrics: Map<string, number[]> = new Map();
+  private readonly metrics: Map<string, number[]> = new Map();
   
   measureAction<T>(actionName: string, action: () => T): T {
     const start = performance.now();

@@ -156,7 +156,7 @@ export const ResponsiveNavigation: React.FC<ResponsiveNavigationProps> = React.m
             {isAuthenticated && (
               <button
                 className="crisis-quick-access"
-                onClick={() => handleSidebarNavigation('crisis')}
+                onClick={() => handleSidebarNavigation({ view: 'crisis' })}
                 aria-label="Crisis support"
               >
                 🆘

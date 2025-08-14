@@ -50,16 +50,26 @@ export const useAccessibilityAudit = (wcagLevel: WCAGLevel = WCAGLevel.AA) => {
 
 // Hook for real-time accessibility monitoring
 export const useAccessibilityMonitoring = (
-  options: {
+  enabledOrOptions?: boolean | {
     autoRefresh?: boolean;
     interval?: number; // in milliseconds
     wcagLevel?: WCAGLevel;
     onIssueDetected?: (issues: AccessibilityIssue[]) => void;
     onComplianceChange?: (isCompliant: boolean) => void;
-  } = {}
+  },
+  callback?: (result: AccessibilityAuditResult) => void
 ) => {
+  // Handle both the old signature (enabled, callback) and new signature (options)
+  const isOldSignature = typeof enabledOrOptions === 'boolean';
+  const enabled = isOldSignature ? enabledOrOptions : true;
+  const monitoringCallback = isOldSignature ? callback : undefined;
+  
+  const options = isOldSignature 
+    ? { autoRefresh: enabled }
+    : (enabledOrOptions || {});
+
   const {
-    autoRefresh = false,
+    autoRefresh = enabled,
     interval = 30000, // 30 seconds
     wcagLevel = WCAGLevel.AA,
     onIssueDetected,
@@ -98,26 +108,40 @@ export const useAccessibilityMonitoring = (
   }, [wcagLevel, onIssueDetected, onComplianceChange]);
 
   const startMonitoring = useCallback(() => {
-    if (autoRefresh && !isMonitoring) {
+    if (isOldSignature && monitoringCallback && enabled) {
+      // For old signature, use the audit system's monitoring directly
+      accessibilityAuditSystem.startMonitoring(monitoringCallback);
+    } else if (autoRefresh && !isMonitoring) {
+      // For new signature, use internal monitoring
       setIsMonitoring(true);
       intervalRef.current = setInterval(runAudit, interval);
     }
-  }, [autoRefresh, isMonitoring, interval, runAudit]);
+  }, [isOldSignature, monitoringCallback, enabled, autoRefresh, isMonitoring, interval, runAudit]);
 
   const stopMonitoring = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
+    if (isOldSignature) {
+      // For old signature, use the audit system's stop monitoring
+      accessibilityAuditSystem.stopMonitoring();
+    } else {
+      // For new signature, use internal monitoring
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      setIsMonitoring(false);
     }
-    setIsMonitoring(false);
-  }, []);
+  }, [isOldSignature]);
 
   useEffect(() => {
-    runAudit(); // Initial audit
-  }, [runAudit]);
+    if (!isOldSignature) {
+      runAudit(); // Initial audit for new signature only
+    }
+  }, [runAudit, isOldSignature]);
 
   useEffect(() => {
-    if (autoRefresh) {
+    if (isOldSignature && enabled) {
+      startMonitoring();
+    } else if (autoRefresh) {
       startMonitoring();
     } else {
       stopMonitoring();
@@ -126,7 +150,7 @@ export const useAccessibilityMonitoring = (
     return () => {
       stopMonitoring();
     };
-  }, [autoRefresh, startMonitoring, stopMonitoring]);
+  }, [isOldSignature, enabled, autoRefresh, startMonitoring, stopMonitoring]);
 
   return {
     auditResult,
@@ -278,7 +302,7 @@ export const useAccessibilityIssueManager = (auditResult: AccessibilityAuditResu
 };
 
 // Hook for accessibility alerts and notifications
-export const useAccessibilityAlerts = () => {
+export const useAccessibilityAlerts = (threshold?: number, enabled: boolean = true) => {
   const [alerts, setAlerts] = useState<{
     id: string;
     type: 'critical' | 'warning' | 'info';
@@ -286,6 +310,22 @@ export const useAccessibilityAlerts = () => {
     timestamp: number;
     issue?: AccessibilityIssue;
   }[]>([]);
+
+  // Setup alerts when threshold is provided
+  useEffect(() => {
+    if (threshold && enabled) {
+      const alertCallback = (score: number, _issues: AccessibilityIssue[]) => {
+        addAlert('critical', `Accessibility score (${score}) below threshold (${threshold})`);
+      };
+      accessibilityAuditSystem.setupAlerts(threshold, alertCallback);
+    }
+
+    return () => {
+      if (threshold) {
+        accessibilityAuditSystem.teardownAlerts();
+      }
+    };
+  }, [threshold, enabled]);
 
   const addAlert = useCallback((
     type: 'critical' | 'warning' | 'info',
@@ -417,6 +457,61 @@ export const useScreenReaderTest = () => {
   };
 };
 
+// Hook for keyboard support accessibility features
+export const useAccessibilityKeyboardSupport = (enabled: boolean = true) => {
+  const [keyboardNavigationEnabled, setKeyboardNavigationEnabled] = useState(true);
+  const [focusVisible] = useState(false);
+  const [tabOrder, setTabOrder] = useState<HTMLElement[]>([]);
+
+  // Setup keyboard support based on enabled parameter
+  useEffect(() => {
+    if (enabled) {
+      accessibilityAuditSystem.setupKeyboardSupport();
+      setKeyboardNavigationEnabled(true);
+    } else {
+      accessibilityAuditSystem.teardownKeyboardSupport();
+      setKeyboardNavigationEnabled(false);
+    }
+
+    return () => {
+      accessibilityAuditSystem.teardownKeyboardSupport();
+    };
+  }, [enabled]);
+
+  const enableKeyboardNavigation = useCallback(() => {
+    setKeyboardNavigationEnabled(true);
+  }, []);
+
+  const disableKeyboardNavigation = useCallback(() => {
+    setKeyboardNavigationEnabled(false);
+  }, []);
+
+  const updateTabOrder = useCallback(() => {
+    const focusableElements = Array.from(
+      document.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+    ).filter(el => !el.hasAttribute('disabled') && el.tabIndex !== -1);
+    
+    setTabOrder(focusableElements);
+  }, []);
+
+  useEffect(() => {
+    updateTabOrder();
+    window.addEventListener('resize', updateTabOrder);
+    return () => window.removeEventListener('resize', updateTabOrder);
+  }, [updateTabOrder]);
+
+  return {
+    keyboardNavigationEnabled,
+    focusVisible,
+    tabOrder,
+    enableKeyboardNavigation,
+    disableKeyboardNavigation,
+    updateTabOrder
+  };
+};
+
 export default {
   useAccessibilityAudit,
   useAccessibilityMonitoring,
@@ -424,5 +519,6 @@ export default {
   useAccessibilityIssueManager,
   useAccessibilityAlerts,
   useKeyboardNavigationTest,
-  useScreenReaderTest
+  useScreenReaderTest,
+  useAccessibilityKeyboardSupport
 };

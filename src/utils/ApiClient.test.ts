@@ -345,10 +345,12 @@ describe('ApiClient', () => {
   describe('Mood API', () => {
     test('should post mood check-in', async () => {
       const checkInData = {
-        mood: 7,
-        energy: 6,
-        anxiety: 3,
-        note: 'Feeling good today',
+        moodScore: 7,
+        energyLevel: 6,
+        anxietyLevel: 3,
+        sleepQuality: 4,
+        tags: ['happy', 'productive'],
+        notes: 'Feeling good today',
       };
       const mockCheckIn = {
         ...checkInData,
@@ -897,8 +899,8 @@ describe('ApiClient', () => {
   describe('AI API', () => {
     test('should handle chat request', async () => {
       const messages = [
-        { role: 'user' as const, content: 'Hello' },
-        { role: 'assistant' as const, content: 'Hi there!' },
+        { id: '1', sender: 'user' as const, text: 'Hello', timestamp: '2023-01-01T00:00:00Z' },
+        { id: '2', sender: 'ai' as const, text: 'Hi there!', timestamp: '2023-01-01T00:00:01Z' },
       ];
       const systemInstruction = 'Be helpful';
       const mockResponse = { text: 'How can I help you?' };

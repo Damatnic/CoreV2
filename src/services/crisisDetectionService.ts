@@ -679,6 +679,9 @@ class EnhancedCrisisDetectionService {
   }
 }
 
+// Create singleton instance
+class AstralCoreCrisisDetectionService extends EnhancedCrisisDetectionService {}
+
 // Singleton instance for Astral Core
 export const astralCoreCrisisDetection = new AstralCoreCrisisDetectionService();
 export const crisisDetectionService = astralCoreCrisisDetection; // Backward compatibility

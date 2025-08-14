@@ -6,7 +6,7 @@
 import * as Sentry from '@sentry/react';
 import apiService from './apiService';
 import notificationService from './notificationService';
-
+import { ENV } from '../utils/envConfig';
 export type ErrorSeverity = 'low' | 'medium' | 'high' | 'critical';
 export type ErrorCategory = 'network' | 'auth' | 'validation' | 'system' | 'crisis' | 'user' | 'unknown';
 
@@ -73,22 +73,14 @@ class ErrorHandlingService {
    * Initialize Sentry error tracking
    */
   private initializeSentry() {
-    const sentryDsn = import.meta.env.VITE_SENTRY_DSN;
+    const sentryDsn = ENV.SENTRY_DSN;
     
     if (sentryDsn && !this.isDevelopment) {
       Sentry.init({
         dsn: sentryDsn,
-        environment: import.meta.env.VITE_ENV || 'production',
-        integrations: [
-          new Sentry.BrowserTracing(),
-          new Sentry.Replay({
-            maskAllText: true, // HIPAA compliance - mask all text
-            blockAllMedia: true, // HIPAA compliance - block media
-          })
-        ],
+        environment: ENV.ENV || 'production',
+        integrations: [],
         tracesSampleRate: 0.1,
-        replaysSessionSampleRate: 0.1,
-        replaysOnErrorSampleRate: 1.0,
         beforeSend: (event, hint) => {
           // Sanitize event for HIPAA compliance
           return this.sanitizeErrorEvent(event, hint);
@@ -738,7 +730,7 @@ class ErrorHandlingService {
   /**
    * Create error boundary wrapper
    */
-  createErrorBoundary(fallback: React.ComponentType<{ error: Error; resetError: () => void }>) {
+  createErrorBoundary(_fallback: React.ComponentType<{ error: Error; resetError: () => void }>) {
     return Sentry.ErrorBoundary;
   }
 

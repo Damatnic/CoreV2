@@ -218,7 +218,7 @@ describe('useServiceWorker Hook', () => {
     
     const { result } = renderHook(() => useServiceWorker(), { wrapper: Wrapper });
     
-    let hasUpdate: boolean;
+    let hasUpdate: boolean = false;
     await act(async () => {
       hasUpdate = await result.current.checkForUpdates();
     });
@@ -233,7 +233,7 @@ describe('useServiceWorker Hook', () => {
     
     const { result } = renderHook(() => useServiceWorker(), { wrapper: Wrapper });
     
-    let hasUpdate: boolean;
+    let hasUpdate: boolean = false;
     await act(async () => {
       hasUpdate = await result.current.checkForUpdates();
     });
@@ -248,7 +248,7 @@ describe('useServiceWorker Hook', () => {
     
     const { result } = renderHook(() => useServiceWorker(), { wrapper: Wrapper });
     
-    let success: boolean;
+    let success: boolean = false;
     await act(async () => {
       success = await result.current.clearCache();
     });
@@ -265,7 +265,7 @@ describe('useServiceWorker Hook', () => {
     
     const { result } = renderHook(() => useServiceWorker(), { wrapper: Wrapper });
     
-    let success: boolean;
+    let success: boolean = false;
     await act(async () => {
       success = await result.current.clearCache();
     });
@@ -280,7 +280,7 @@ describe('useServiceWorker Hook', () => {
     
     const { result } = renderHook(() => useServiceWorker(), { wrapper: Wrapper });
     
-    let success: boolean;
+    let success: boolean = false;
     await act(async () => {
       success = await result.current.cacheCrisisResource('/crisis-resources.json');
     });
@@ -295,7 +295,7 @@ describe('useServiceWorker Hook', () => {
     
     const { result } = renderHook(() => useServiceWorker(), { wrapper: Wrapper });
     
-    let success: boolean;
+    let success: boolean = false;
     await act(async () => {
       success = await result.current.cacheCrisisResource('/crisis-resources.json');
     });
@@ -471,7 +471,7 @@ describe('useCacheManager Hook', () => {
     
     const { result } = renderHook(() => useCacheManager(), { wrapper: Wrapper });
     
-    let success: boolean;
+    let success: boolean = false;
     await act(async () => {
       success = await result.current.clearCache();
     });
@@ -486,7 +486,7 @@ describe('useCacheManager Hook', () => {
     
     const { result } = renderHook(() => useCacheManager(), { wrapper: Wrapper });
     
-    let success: boolean;
+    let success: boolean = false;
     await act(async () => {
       success = await result.current.clearCache();
     });
@@ -502,7 +502,7 @@ describe('useCacheManager Hook', () => {
     
     const { result } = renderHook(() => useCacheManager(), { wrapper: Wrapper });
     
-    let success: boolean;
+    let success: boolean = false;
     await act(async () => {
       success = await result.current.cacheCrisisResource('/test-resource.json');
     });
@@ -517,7 +517,7 @@ describe('useCacheManager Hook', () => {
     
     const { result } = renderHook(() => useCacheManager(), { wrapper: Wrapper });
     
-    let success: boolean;
+    let success: boolean = false;
     await act(async () => {
       success = await result.current.cacheCrisisResource('/test-resource.json');
     });

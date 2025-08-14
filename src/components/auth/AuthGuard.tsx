@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { auth0Service, UserRole } from '../../services/auth0Service';
 import { User } from '../../types';
+import { LoadingSpinner } from '../LoadingSpinner';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -29,7 +30,6 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
   const [hasAccess, setHasAccess] = useState(false);
   const location = useLocation();
 
@@ -38,7 +38,6 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
     
     // Subscribe to auth changes
     const unsubscribe = auth0Service.onAuthStateChange((user) => {
-      setUser(user);
       setIsAuthenticated(!!user);
       checkAccess(user);
     });
@@ -56,7 +55,6 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
       
       if (authenticated) {
         const currentUser = await auth0Service.getCurrentUser();
-        setUser(currentUser);
         await checkAccess(currentUser);
       } else {
         setHasAccess(!requireAuth);
@@ -239,13 +237,6 @@ export const CanAccess: React.FC<{
 
   return <>{hasAccess ? children : fallback}</>;
 };
-
-// Loading spinner component
-const LoadingSpinner: React.FC = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-  </div>
-);
 
 // Unauthorized page component
 const UnauthorizedPage: React.FC = () => (

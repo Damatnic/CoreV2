@@ -97,4 +97,5 @@ class CulturalContextService {
   }
 }
 
+export default CulturalContextService;
 export const culturalContextService = new CulturalContextService();

@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { CulturalAssessmentService, culturalAssessmentService } from '../culturalAssessmentService';
+import CulturalAssessmentService, { culturalAssessmentService } from '../culturalAssessmentService';
 import { culturalContextService } from '../culturalContextService';
 import { privacyPreservingAnalyticsService } from '../privacyPreservingAnalyticsService';
 
@@ -41,9 +41,10 @@ describe('CulturalAssessmentService', () => {
 
     mockPrivacyAnalyticsService.recordInterventionOutcome.mockResolvedValue(undefined);
     mockPrivacyAnalyticsService.generateEffectivenessReport.mockResolvedValue({
-      summary: { effectiveness: 0.85 },
+      summary: "effectiveness: 0.85",
       culturalInsights: ['Western culture shows direct communication patterns'],
       recommendations: ['Consider cultural context in assessments'],
+      limitations: ['Limited cross-cultural validation data']
     });
   });
 
@@ -241,24 +242,13 @@ describe('CulturalAssessmentService', () => {
 
     test('should calculate adjusted PHQ-9 severity thresholds', () => {
       const severity = (service as any).calculatePhq9Severity(10, 0.7); // High stigma
-      const adjustedThresholds = {
-        minimal: 4 + (0.7 * 2), // 5.4
-        mild: 9 + (0.7 * 2), // 10.4
-        moderate: 14 + (0.7 * 2), // 15.4
-        moderatelySevere: 19 + (0.7 * 2) // 20.4
-      };
-      
+      // Adjusted thresholds: minimal: 5.4, mild: 10.4, moderate: 15.4, moderatelySevere: 20.4
       expect(severity).toBe('mild'); // Score 10 falls in mild range with adjustment
     });
 
     test('should calculate adjusted GAD-7 severity thresholds', () => {
       const severity = (service as any).calculateGad7Severity(8, 0.5); // Medium stigma
-      const adjustedThresholds = {
-        minimal: 4 + (0.5 * 1), // 4.5
-        mild: 9 + (0.5 * 1), // 9.5
-        moderate: 14 + (0.5 * 1) // 14.5
-      };
-      
+      // Adjusted thresholds: minimal: 4.5, mild: 9.5, moderate: 14.5
       expect(severity).toBe('mild'); // Score 8 falls in mild range with adjustment
     });
   });
@@ -419,19 +409,20 @@ describe('CulturalAssessmentService', () => {
 
     test('should filter analytics by cultural context', async () => {
       mockPrivacyAnalyticsService.generateEffectivenessReport.mockResolvedValue({
-        summary: { effectiveness: 0.9 },
+        summary: "effectiveness: 0.9",
         culturalInsights: [
           'Western culture shows direct communication',
           'Hispanic culture prefers family involvement',
           'Western individuals seek professional help'
         ],
         recommendations: ['Test recommendation'],
+        limitations: ['Sample size limitations for cultural analysis']
       });
 
       const analytics = await service.getCulturalAssessmentAnalytics('Western');
       
       expect(analytics.culturalInsights).toHaveLength(2); // Only Western-related insights
-      expect(analytics.culturalInsights.every(insight => 
+      expect(analytics.culturalInsights.every((insight: string) => 
         insight.toLowerCase().includes('western')
       )).toBe(true);
     });

@@ -134,8 +134,8 @@ describe('imageOptimization', () => {
 
       test('should accept custom config', () => {
         const customConfig: Partial<ImageOptimizationConfig> = {
-          lazyLoadingOffset: 200,
-          quality: { webp: 90, jpeg: 85, png: 90 },
+          lazyLoadingOffset: 100,
+          quality: { webp: 85, jpeg: 80, png: 95 },
         };
         
         const customOptimizer = new ImageOptimizer(customConfig);
@@ -631,12 +631,12 @@ describe('imageOptimization', () => {
   describe('Error Handling', () => {
     test('should handle invalid URLs gracefully', () => {
       expect(() => {
-        optimizer.generateOptimizedImages('not-a-url', { alt: 'Test' });
+        imageOptimizer.generateOptimizedImages('not-a-url', { alt: 'Test' });
       }).not.toThrow();
     });
 
     test('should handle empty alt text', () => {
-      const result = optimizer.generateOptimizedImages('https://example.com/test.jpg', {
+      const result = imageOptimizer.generateOptimizedImages('https://example.com/test.jpg', {
         alt: '',
       });
 
@@ -650,7 +650,7 @@ describe('imageOptimization', () => {
       } as any;
 
       expect(() => {
-        (optimizer as any).loadOptimizedImage(mockImg);
+        (imageOptimizer as any).loadOptimizedImage(mockImg);
       }).not.toThrow();
     });
 
@@ -661,7 +661,7 @@ describe('imageOptimization', () => {
       } as any;
 
       expect(() => {
-        (optimizer as any).loadOptimizedImage(mockImg);
+        (imageOptimizer as any).loadOptimizedImage(mockImg);
       }).not.toThrow();
     });
   });
@@ -672,7 +672,7 @@ describe('imageOptimization', () => {
       
       // Generate same image multiple times
       for (let i = 0; i < 100; i++) {
-        optimizer.generateOptimizedImages('https://example.com/same-image.jpg', {
+        imageOptimizer.generateOptimizedImages('https://example.com/same-image.jpg', {
           alt: 'Test image',
         });
       }
@@ -689,7 +689,7 @@ describe('imageOptimization', () => {
       
       const ids = new Set();
       for (let i = 0; i < 1000; i++) {
-        const id = (optimizer as any).generateImageId(`https://example.com/image-${i}.jpg`);
+        const id = (imageOptimizer as any).generateImageId(`https://example.com/image-${i}.jpg`);
         ids.add(id);
       }
       
@@ -701,19 +701,19 @@ describe('imageOptimization', () => {
     });
 
     test('should not leak memory with cache', () => {
-      const initialCacheSize = (optimizer as any).cache.size;
+      const initialCacheSize = (imageOptimizer as any).cache.size;
       
       // Generate many images
       for (let i = 0; i < 1000; i++) {
-        optimizer.generateOptimizedImages(`https://example.com/image-${i}.jpg`, {
+        imageOptimizer.generateOptimizedImages(`https://example.com/image-${i}.jpg`, {
           alt: 'Test image',
         });
       }
       
-      expect((optimizer as any).cache.size).toBe(initialCacheSize + 1000);
+      expect((imageOptimizer as any).cache.size).toBe(initialCacheSize + 1000);
       
-      optimizer.clearCache();
-      expect((optimizer as any).cache.size).toBe(0);
+      imageOptimizer.clearCache();
+      expect((imageOptimizer as any).cache.size).toBe(0);
     });
   });
 
@@ -723,8 +723,8 @@ describe('imageOptimization', () => {
         if (tagName === 'canvas') {
           return null;
         }
-        return mockCanvas;
-      });
+        return document.createElement(tagName);
+      }) as any;
 
       expect(() => {
         new ImageOptimizer();
@@ -740,7 +740,7 @@ describe('imageOptimization', () => {
         return 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//2Q==';
       });
 
-      const supportsWebP = (optimizer as any).supportsWebP();
+      const supportsWebP = (imageOptimizer as any).supportsWebP();
       expect(supportsWebP).toBe(true);
 
       // Mock no WebP support
@@ -748,7 +748,7 @@ describe('imageOptimization', () => {
         'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//2Q=='
       );
 
-      const doesNotSupportWebP = (optimizer as any).supportsWebP();
+      const doesNotSupportWebP = (imageOptimizer as any).supportsWebP();
       expect(doesNotSupportWebP).toBe(false);
     });
   });

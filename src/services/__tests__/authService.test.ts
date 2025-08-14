@@ -352,7 +352,7 @@ describe('authService', () => {
 
     it('should work with async updater function', async () => {
       let updateCompleted = false;
-      const asyncUpdater = jest.fn().mockImplementation(async (profile: Helper) => {
+      const asyncUpdater = jest.fn().mockImplementation(async () => {
         await new Promise(resolve => setTimeout(resolve, 10));
         updateCompleted = true;
       });

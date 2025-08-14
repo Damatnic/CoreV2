@@ -6,7 +6,7 @@
  * breathing guides, and real-time connection management.
  */
 
-import { getWebSocketService } from './websocketService';
+import { getWebSocketService } from './webSocketService';
 import { notificationService } from './notificationService';
 import { getSecureStorage } from './secureStorageService';
 

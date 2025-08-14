@@ -15,7 +15,7 @@ export interface ErrorContext {
   errorType: 'system' | 'user-action' | 'network' | 'security' | 'crisis';
   severity: 'low' | 'medium' | 'high' | 'critical';
   userType?: 'seeker' | 'helper' | 'admin';
-  feature?: 'chat' | 'crisis-detection' | 'safety-plan' | 'mood-tracking' | 'community';
+  feature?: 'chat' | 'crisis-detection' | 'safety-plan' | 'mood-tracking' | 'community' | 'mood-tracker' | 'assessment' | 'profile' | 'dashboard' | 'api' | 'moderation';
   privacyLevel: 'public' | 'private' | 'sensitive';
 }
 

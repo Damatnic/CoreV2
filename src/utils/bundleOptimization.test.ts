@@ -438,7 +438,7 @@ describe('bundleOptimization', () => {
         const loadChunk = (ChunkLoadingOptimizer as any).loadChunk;
         
         // Mock setTimeout to simulate failure
-        jest.spyOn(global, 'setTimeout').mockImplementationOnce((callback: any) => {
+        jest.spyOn(global, 'setTimeout').mockImplementationOnce(() => {
           // Simulate error by throwing
           setTimeout(() => {
             try {

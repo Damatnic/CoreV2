@@ -6,21 +6,21 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { EmergencyContactsWidget } from '../EmergencyContactsWidget';
+import { EmergencyContactsWidget, EmergencyContactWidget } from '../EmergencyContactsWidget';
 import { AuthContext } from '../../../contexts/AuthContext';
 
 // Mock auth context
 const mockAuthContext = {
+  isAuthenticated: true,
   user: { sub: 'user123' },
-  isAnonymous: false,
+  helperProfile: null,
+  isNewUser: false,
+  isLoading: false,
   login: jest.fn(),
   logout: jest.fn(),
-  authState: {
-    user: { sub: 'user123' },
-    isAnonymous: false,
-    helperProfile: null,
-    userToken: 'token123'
-  }
+  reloadProfile: jest.fn(),
+  updateHelperProfile: jest.fn(),
+  userToken: 'token123'
 };
 
 const AuthWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -30,12 +30,12 @@ const AuthWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 // Mock contacts data
-const mockContacts = [
+const mockContacts: EmergencyContactWidget[] = [
   {
     id: '1',
     name: 'Crisis Hotline',
     phone: '988',
-    type: 'hotline',
+    type: 'hotline' as const,
     available: '24/7',
     priority: 1
   },
@@ -43,7 +43,7 @@ const mockContacts = [
     id: '2',
     name: 'Therapist - Dr. Smith',
     phone: '555-0100',
-    type: 'professional',
+    type: 'professional' as const,
     available: 'Mon-Fri 9-5',
     priority: 2
   },
@@ -51,7 +51,7 @@ const mockContacts = [
     id: '3',
     name: 'Best Friend - Sarah',
     phone: '555-0200',
-    type: 'personal',
+    type: 'personal' as const,
     available: 'Anytime',
     priority: 3
   }

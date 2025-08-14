@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { CulturalContextService, culturalContextService } from '../culturalContextService';
+import CulturalContextService, { culturalContextService } from '../culturalContextService';
 import type { CulturalContext } from '../culturalContextService';
 
 describe('CulturalContextService', () => {

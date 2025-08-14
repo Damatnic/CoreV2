@@ -6,13 +6,24 @@ interface BreathingExerciseOverlayProps {
   onClose: () => void;
   technique?: 'box' | '478' | 'belly' | 'guided';
   autoStart?: boolean;
+  defaultCycles?: number;
+  customExercise?: {
+    name: string;
+    inhale: number;
+    hold: number;
+    exhale: number;
+  };
+  onComplete?: (stats: { duration: number; cycles: number; exercise: string }) => void;
 }
 
 export const BreathingExerciseOverlay: React.FC<BreathingExerciseOverlayProps> = ({
   isOpen,
   onClose,
   technique = 'box',
-  autoStart = true
+  autoStart = true,
+  defaultCycles = 3,
+  customExercise,
+  onComplete
 }) => {
   const [phase, setPhase] = useState<'inhale' | 'hold' | 'exhale' | 'pause'>('inhale');
   const [seconds, setSeconds] = useState(0);
@@ -28,7 +39,9 @@ export const BreathingExerciseOverlay: React.FC<BreathingExerciseOverlayProps> =
     guided: { inhale: 4, hold: 2, exhale: 6, pause: 2 }, // General guided
   };
 
-  const pattern = patterns[technique];
+  const pattern = customExercise 
+    ? { inhale: customExercise.inhale, hold: customExercise.hold, exhale: customExercise.exhale, pause: 0 }
+    : patterns[technique];
 
   const getPhaseMessage = () => {
     switch(phase) {
@@ -111,21 +124,43 @@ export const BreathingExerciseOverlay: React.FC<BreathingExerciseOverlayProps> =
           setPhase('exhale');
           setSeconds(pattern.exhale);
           break;
-        case 'exhale':
+        case 'exhale': {
           if (pattern.pause > 0) {
             setPhase('pause');
             setSeconds(pattern.pause);
           } else {
             setPhase('inhale');
             setSeconds(pattern.inhale);
-            setCycles(cycles + 1);
+            const newCycles = cycles + 1;
+            setCycles(newCycles);
+            
+            // Check if we've completed the target cycles
+            if (newCycles >= defaultCycles && onComplete) {
+              onComplete({ 
+                duration: newCycles * (pattern.inhale + pattern.hold + pattern.exhale + pattern.pause), 
+                cycles: newCycles, 
+                exercise: customExercise?.name || technique 
+              });
+            }
           }
           break;
-        case 'pause':
+        }
+        case 'pause': {
           setPhase('inhale');
           setSeconds(pattern.inhale);
-          setCycles(cycles + 1);
+          const newCycles = cycles + 1;
+          setCycles(newCycles);
+          
+          // Check if we've completed the target cycles
+          if (newCycles >= defaultCycles && onComplete) {
+            onComplete({ 
+              duration: newCycles * (pattern.inhale + pattern.hold + pattern.exhale + pattern.pause), 
+              cycles: newCycles, 
+              exercise: customExercise?.name || technique 
+            });
+          }
           break;
+        }
       }
     };
 

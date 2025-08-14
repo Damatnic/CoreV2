@@ -9,252 +9,104 @@ import React, { useState } from 'react';
 import { useServiceWorker } from '../hooks/useServiceWorker';
 import './ServiceWorkerUpdate.css';
 
-interface UpdateNotificationProps {
-  onDismiss?: () => void;
-  autoShow?: boolean;
-  className?: string;
-}
-
-export const UpdateNotification: React.FC<UpdateNotificationProps> = ({
-  onDismiss,
-  autoShow = true,
-  className = ''
-}) => {
-  const { updateAvailable, skipWaiting, forceReload } = useServiceWorker();
+const ServiceWorkerUpdate: React.FC = () => {
+  const {
+    updateAvailable,
+    isOfflineReady,
+    skipWaiting,
+    cacheStatus
+  } = useServiceWorker();
+  
+  const [showDetails, setShowDetails] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(false);
 
-  // Don't show if no update available, auto-show is disabled, or user dismissed
-  if (!updateAvailable || !autoShow || isDismissed) {
+  if (!updateAvailable && !isOfflineReady) {
     return null;
   }
 
   const handleUpdate = async () => {
-    try {
-      setIsUpdating(true);
-      await skipWaiting();
-    } catch (error) {
-      console.error('Failed to update:', error);
-      // Fallback to force reload
-      forceReload();
-    }
-  };
-
-  const handleDismiss = () => {
-    setIsDismissed(true);
-    onDismiss?.();
+    setIsUpdating(true);
+    await skipWaiting();
+    // The page will reload automatically
   };
 
   return (
-    <div className={`update-notification ${className}`}>
-      <div className="update-content">
-        <div className="update-icon">🔄</div>
-        <div className="update-text">
-          <div className="update-title">New Version Available</div>
-          <div className="update-subtitle">
-            A new version of Astral Core is ready with improvements and bug fixes.
+    <div className="sw-update-container">
+      <div className="sw-update-header">
+        <div className="sw-update-title">
+          <svg className="sw-update-icon" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+          </svg>
+          {updateAvailable ? 'Update Available' : 'Ready for Offline'}
+        </div>
+        <button 
+          className="sw-update-btn-secondary"
+          onClick={() => setShowDetails(!showDetails)}
+          style={{ padding: '4px 8px', fontSize: '12px' }}
+        >
+          {showDetails ? 'Hide' : 'Details'}
+        </button>
+      </div>
+
+      <div className="sw-update-message">
+        {updateAvailable 
+          ? 'A new version of Astral Core is available with improvements and bug fixes.'
+          : 'Astral Core is now ready to work offline.'}
+      </div>
+
+      <div className="sw-update-actions">
+        {updateAvailable ? (
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button 
+              className="sw-update-btn sw-update-btn-primary"
+              onClick={handleUpdate}
+              disabled={isUpdating}
+            >
+              {isUpdating ? 'Updating...' : 'Update Now'}
+            </button>
+            <button 
+              className="sw-update-btn sw-update-btn-secondary"
+              onClick={() => window.location.reload()}
+            >
+              Later
+            </button>
           </div>
-        </div>
-        <div className="update-actions">
-          <button
-            type="button"
-            className="update-btn primary"
-            onClick={handleUpdate}
-            disabled={isUpdating}
+        ) : isOfflineReady ? (
+          <button 
+            className="sw-update-btn sw-update-btn-primary"
+            onClick={() => window.location.reload()}
           >
-            {isUpdating ? 'Updating...' : 'Update Now'}
+            Got it
           </button>
-          <button
-            type="button"
-            className="update-btn secondary"
-            onClick={handleDismiss}
-          >
-            Later
-          </button>
-        </div>
+        ) : null}
       </div>
-    </div>
-  );
-};
 
-/**
- * Service Worker Status Component
- * Shows detailed service worker and cache status
- */
-interface ServiceWorkerStatusProps {
-  showDetails?: boolean;
-  className?: string;
-}
-
-export const ServiceWorkerStatus: React.FC<ServiceWorkerStatusProps> = ({
-  showDetails = false,
-  className = ''
-}) => {
-  const { 
-    isOnline, 
-    isOfflineReady, 
-    cacheStatus, 
-    checkForUpdates,
-    clearCache 
-  } = useServiceWorker();
-  
-  const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
-  const [isClearingCache, setIsClearingCache] = useState(false);
-
-  const handleCheckUpdates = async () => {
-    try {
-      setIsCheckingUpdates(true);
-      await checkForUpdates();
-    } catch (error) {
-      console.error('Failed to check for updates:', error);
-    } finally {
-      setIsCheckingUpdates(false);
-    }
-  };
-
-  const handleClearCache = async () => {
-    try {
-      setIsClearingCache(true);
-      const success = await clearCache();
-      if (success) {
-        alert('Cache cleared successfully. The page will refresh.');
-        window.location.reload();
-      } else {
-        alert('Failed to clear cache. Please try again.');
-      }
-    } catch (error) {
-      console.error('Failed to clear cache:', error);
-      alert('Failed to clear cache. Please try again.');
-    } finally {
-      setIsClearingCache(false);
-    }
-  };
-
-  return (
-    <div className={`sw-status ${className}`}>
-      <div className="status-header">
-        <h4>App Status</h4>
-      </div>
-      
-      <div className="status-grid">
-        <div className="status-item">
-          <span className="status-label">Connection:</span>
-          <span className={`status-value ${isOnline ? 'online' : 'offline'}`}>
-            {isOnline ? '🟢 Online' : '🔴 Offline'}
-          </span>
-        </div>
-        
-        <div className="status-item">
-          <span className="status-label">Offline Ready:</span>
-          <span className={`status-value ${isOfflineReady ? 'ready' : 'not-ready'}`}>
-            {isOfflineReady ? '✅ Yes' : '⚠️ Limited'}
-          </span>
-        </div>
-        
-        <div className="status-item">
-          <span className="status-label">Service Worker:</span>
-          <span className={`status-value ${cacheStatus?.swRegistered ? 'active' : 'inactive'}`}>
-            {cacheStatus?.swRegistered ? '✅ Active' : '❌ Inactive'}
-          </span>
-        </div>
-        
-        {showDetails && cacheStatus && (
-          <>
-            <div className="status-item">
-              <span className="status-label">Cache Version:</span>
-              <span className="status-value">
-                {cacheStatus.cacheVersion || 'Unknown'}
-              </span>
-            </div>
-            
-            <div className="status-item">
-              <span className="status-label">Update Available:</span>
-              <span className={`status-value ${cacheStatus.updateAvailable ? 'available' : 'current'}`}>
-                {cacheStatus.updateAvailable ? '🔄 Yes' : '✅ Current'}
-              </span>
-            </div>
-          </>
-        )}
-      </div>
-      
-      {showDetails && (
-        <div className="status-actions">
-          <button
-            type="button"
-            className="status-btn"
-            onClick={handleCheckUpdates}
-            disabled={isCheckingUpdates}
-          >
-            {isCheckingUpdates ? 'Checking...' : 'Check for Updates'}
-          </button>
-          
-          <button
-            type="button"
-            className="status-btn secondary"
-            onClick={handleClearCache}
-            disabled={isClearingCache}
-          >
-            {isClearingCache ? 'Clearing...' : 'Clear Cache'}
-          </button>
+      {showDetails && cacheStatus && (
+        <div className="sw-update-details">
+          <div className="status-item">
+            <span className="status-label">Cache Version:</span>
+            <span className="status-value">{cacheStatus.cacheVersion || 'N/A'}</span>
+          </div>
+          <div className="status-item">
+            <span className="status-label">Cache Ready:</span>
+            <span className="status-value">{cacheStatus.staticResources ? '✅' : '⏳'}</span>
+          </div>
+          <div className="status-item">
+            <span className="status-label">Service Worker:</span>
+            <span className="status-value">
+              {cacheStatus.swRegistered ? '✅ Active' : '❌ Inactive'}
+            </span>
+          </div>
+          <div className="status-item">
+            <span className="status-label">Offline Ready:</span>
+            <span className="status-value">
+              {isOfflineReady ? '✅ Yes' : '⚠️ Limited'}
+            </span>
+          </div>
         </div>
       )}
     </div>
   );
 };
 
-/**
- * Crisis Cache Status
- * Shows status of crisis resource caching
- */
-interface CrisisCacheStatusProps {
-  className?: string;
-}
-
-export const CrisisCacheStatus: React.FC<CrisisCacheStatusProps> = ({
-  className = ''
-}) => {
-  const { precacheCrisisResources } = useServiceWorker();
-  const [isPrecaching, setIsPrecaching] = useState(false);
-
-  const handlePrecacheResources = async () => {
-    try {
-      setIsPrecaching(true);
-      await precacheCrisisResources();
-      alert('Crisis resources cached successfully for offline access.');
-    } catch (error) {
-      console.error('Failed to cache crisis resources:', error);
-      alert('Failed to cache crisis resources. Please try again.');
-    } finally {
-      setIsPrecaching(false);
-    }
-  };
-
-  return (
-    <div className={`crisis-cache-status ${className}`}>
-      <div className="cache-header">
-        <h4>🚨 Crisis Resource Caching</h4>
-        <p>Ensure critical resources are available offline</p>
-      </div>
-      
-      <div className="cache-actions">
-        <button
-          type="button"
-          className="cache-btn primary"
-          onClick={handlePrecacheResources}
-          disabled={isPrecaching}
-        >
-          {isPrecaching ? 'Caching Resources...' : 'Cache Crisis Resources'}
-        </button>
-      </div>
-      
-      <div className="cache-note">
-        <small>
-          This will download and cache your safety plan, emergency contacts, 
-          and crisis intervention resources for offline access.
-        </small>
-      </div>
-    </div>
-  );
-};
-
-export default UpdateNotification;
+export default ServiceWorkerUpdate;

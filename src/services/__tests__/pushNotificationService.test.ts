@@ -1,4 +1,4 @@
-import { PushNotificationService } from '../pushNotificationService';
+import { pushNotificationService } from '../pushNotificationService';
 
 // Mock service worker registration
 const mockServiceWorkerRegistration = {
@@ -27,10 +27,10 @@ Object.defineProperty(window, 'Notification', {
 });
 
 describe('PushNotificationService', () => {
-  let service: PushNotificationService;
+  let service: typeof pushNotificationService;
 
   beforeEach(() => {
-    service = new PushNotificationService();
+    service = pushNotificationService;
     jest.clearAllMocks();
   });
 
@@ -152,8 +152,7 @@ describe('PushNotificationService', () => {
     it('should handle service worker unavailability', async () => {
       delete (navigator as any).serviceWorker;
 
-      const newService = new PushNotificationService();
-      const result = await newService.initialize();
+      const result = await pushNotificationService.initialize();
 
       expect(result.supported).toBe(false);
     });

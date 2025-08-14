@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNotification } from '../contexts/NotificationContext';
 import { ViewHeader } from '../components/ViewHeader';
 import { Card } from '../components/Card';
@@ -12,6 +12,7 @@ import { MoodTracker } from '../components/MoodTracker';
 import { WellnessInsights } from '../components/WellnessInsights';
 import { EnhancedMoodChart } from '../components/EnhancedMoodChart';
 import { BreathingWidget } from '../components/BreathingWidget';
+import { backendService } from '../services/backendService';
 
 const MOOD_EMOJIS = ['😞', '🙁', '😐', '🙂', '😊'];
 const MOOD_TAGS = ['Grateful', 'Anxious', 'Tired', 'Hopeful', 'Stressed', 'Calm', 'Lonely', 'Productive'];
@@ -43,6 +44,20 @@ const CheckInTab: React.FC = () => {
     const [energyLevel, setEnergyLevel] = useState(3);
     const [tags, setTags] = useState<string[]>([]);
     const [notes, setNotes] = useState('');
+    
+    // Load mood history from backend on mount
+    useEffect(() => {
+        const loadMoodHistory = async () => {
+            try {
+                const data = await backendService.mood.getMoodHistory();
+                console.log('Loaded mood history from backend:', data);
+                // In production, you would update the store with this data
+            } catch (error) {
+                console.error('Failed to load mood history:', error);
+            }
+        };
+        loadMoodHistory();
+    }, []);
 
     const chartData = useMemo(() => {
         const days = chartPeriod === '7days' ? 7 : chartPeriod === '30days' ? 30 : 90;
@@ -112,7 +127,26 @@ const CheckInTab: React.FC = () => {
                 tags,
                 notes: notes.trim(),
             };
+            
+            // Save to local store (for offline support)
             await postCheckIn(checkInData);
+            
+            // Also save to backend if available
+            try {
+                const moodLabels = ['Very Bad', 'Bad', 'Neutral', 'Good', 'Very Good'];
+                await backendService.mood.saveMoodEntry({
+                    mood: moodLabels[moodScore - 1],
+                    score: moodScore,
+                    notes: notes.trim(),
+                    triggers: tags.filter(t => ['Anxious', 'Stressed', 'Lonely'].includes(t)),
+                    activities: tags.filter(t => ['Grateful', 'Hopeful', 'Calm', 'Productive'].includes(t))
+                });
+                console.log('Mood saved to backend successfully');
+            } catch (backendError) {
+                console.error('Failed to save to backend (will retry later):', backendError);
+                // Don't show error to user - local save was successful
+            }
+            
             addToast('Your wellness check-in has been saved!', 'success');
             resetForm();
         } catch (error: any) {
@@ -145,7 +179,7 @@ const CheckInTab: React.FC = () => {
                             {MOOD_EMOJIS.map((emoji, index) => (
                                 <button
                                     key={index}
-                                    className={`mood-emoji-btn ${moodScore === index + 1 ? 'selected' : ''}`}
+                                    className={moodScore === index + 1 ? 'mood-emoji-btn selected' : 'mood-emoji-btn'}
                                     onClick={() => setMoodScore(index + 1)}
                                     aria-label={`Mood score ${index + 1}`}
                                 >
@@ -206,7 +240,7 @@ const HabitsTab: React.FC = () => {
                 {trackedHabits.length > 0 ? (
                     <ul className="habit-list">
                         {trackedHabits.map(habit => (
-                            <li key={habit.habitId} className={`habit-item ${habit.isCompletedToday ? 'completed' : ''}`}>
+                            <li key={habit.habitId} className={habit.isCompletedToday ? 'habit-item completed' : 'habit-item'}>
                                 <div className="habit-info">
                                     <h4>{predefinedHabits.find(h => h.id === habit.habitId)?.name}</h4>
                                     <p>{predefinedHabits.find(h => h.id === habit.habitId)?.description}</p>

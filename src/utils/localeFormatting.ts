@@ -8,7 +8,6 @@
  */
 
 import i18n from '../i18n';
-import { getCulturalContext } from '../i18n';
 
 // Supported locales with their specific configurations
 const localeConfigs = {
@@ -93,7 +92,9 @@ const localeConfigs = {
 function getLocaleConfig(locale?: string) {
   const currentLocale = locale || i18n.language || 'en';
   const baseLocale = currentLocale.split('-')[0];
-  return localeConfigs[currentLocale] || localeConfigs[baseLocale] || localeConfigs['en'];
+  return localeConfigs[currentLocale as keyof typeof localeConfigs] || 
+         localeConfigs[baseLocale as keyof typeof localeConfigs] || 
+         localeConfigs['en'];
 }
 
 /**
@@ -108,12 +109,14 @@ export function formatDate(
   const currentLocale = locale || i18n.language || 'en';
   
   // Use Intl.DateTimeFormat for proper locale formatting
-  const options: Intl.DateTimeFormatOptions = {
+  const formatOptions: Record<string, Intl.DateTimeFormatOptions> = {
     short: { year: '2-digit', month: '2-digit', day: '2-digit' },
     medium: { year: 'numeric', month: 'short', day: 'numeric' },
     long: { year: 'numeric', month: 'long', day: 'numeric' },
     full: { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
-  }[format];
+  };
+  
+  const options: Intl.DateTimeFormatOptions = formatOptions[format];
   
   // Special handling for Arabic to use Islamic calendar if preferred
   if (currentLocale === 'ar' && getLocaleConfig(currentLocale).calendar === 'islamic-umalqura') {
@@ -135,7 +138,7 @@ export function formatTime(
   const currentLocale = locale || i18n.language || 'en';
   const config = getLocaleConfig(currentLocale);
   
-  const options: Intl.DateTimeFormatOptions = {
+  const timeFormatOptions: Record<string, Intl.DateTimeFormatOptions> = {
     short: { 
       hour: 'numeric', 
       minute: '2-digit',
@@ -154,7 +157,9 @@ export function formatTime(
       timeZoneName: 'short',
       hour12: config.timeFormat === '12h'
     }
-  }[format];
+  };
+  
+  const options = timeFormatOptions[format];
   
   return new Intl.DateTimeFormat(currentLocale, options).format(d);
 }
@@ -244,7 +249,7 @@ export function formatNumber(
   };
   
   // Special handling for Arabic numerals
-  if (currentLocale === 'ar' && config.numerals === 'arab') {
+  if (currentLocale === 'ar' && 'numerals' in config && config.numerals === 'arab') {
     formatOptions.numberingSystem = 'arab';
   }
   
@@ -402,8 +407,12 @@ export function formatDuration(
     }
     
     // Join with appropriate conjunction
-    const listFormatter = new Intl.ListFormat(currentLocale, { style: 'long', type: 'conjunction' });
-    return listFormatter.format(parts);
+    if ('ListFormat' in Intl) {
+      const listFormatter = new (Intl as any).ListFormat(currentLocale, { style: 'long', type: 'conjunction' });
+      return listFormatter.format(parts);
+    } else {
+      return parts.join(', ');
+    }
   }
 }
 
@@ -419,8 +428,12 @@ export function formatList(
   const currentLocale = locale || i18n.language || 'en';
   
   try {
-    const formatter = new Intl.ListFormat(currentLocale, { style, type });
-    return formatter.format(items);
+    if ('ListFormat' in Intl) {
+      const formatter = new (Intl as any).ListFormat(currentLocale, { style, type });
+      return formatter.format(items);
+    } else {
+      throw new Error('ListFormat not supported');
+    }
   } catch (error) {
     // Fallback for unsupported locales
     if (type === 'conjunction') {
@@ -442,7 +455,8 @@ export function formatName(
   locale?: string
 ): string {
   const currentLocale = locale || i18n.language || 'en';
-  const culturalContext = getCulturalContext(currentLocale);
+  // Cultural formatting considerations
+  // getCulturalContext(currentLocale); // Cultural context for number formatting
   
   // Different name order for different cultures
   switch (currentLocale) {

@@ -2,8 +2,6 @@
  * @jest-environment jsdom
  */
 
-import React from 'react';
-import { render, act } from '@testing-library/react';
 import {
   THERAPEUTIC_THEMES,
   TherapeuticTheme,
@@ -342,18 +340,15 @@ describe('AdvancedThemingSystem', () => {
     test('should have valid hex colors', () => {
       const hexColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
       
+      const validateHexColor = (color: any) => {
+        if (typeof color === 'string' && !color.startsWith('rgba')) {
+          expect(color).toMatch(hexColorRegex);
+        }
+      };
+      
       Object.values(THERAPEUTIC_THEMES).forEach(theme => {
-        Object.values(theme.colors.light).forEach(color => {
-          if (typeof color === 'string' && !color.startsWith('rgba')) {
-            expect(color).toMatch(hexColorRegex);
-          }
-        });
-        
-        Object.values(theme.colors.dark).forEach(color => {
-          if (typeof color === 'string' && !color.startsWith('rgba')) {
-            expect(color).toMatch(hexColorRegex);
-          }
-        });
+        Object.values(theme.colors.light).forEach(validateHexColor);
+        Object.values(theme.colors.dark).forEach(validateHexColor);
       });
     });
 

@@ -45,9 +45,19 @@ describe('culturalAssessmentUtils', () => {
         id: 'phq9_1_cultural',
         text: 'Standard question text',
         culturalAdaptations: {
-          'Asian': { text: 'Asian-adapted question text' },
-          'Western': { text: 'Western question text' },
+          'Asian': { 
+            text: 'Asian-adapted question text',
+            culturalContext: 'Asian cultural context',
+            expressionPatterns: ['adapted', 'cultural']
+          },
+          'Western': { 
+            text: 'Western question text',
+            culturalContext: 'Western cultural context',
+            expressionPatterns: ['standard', 'western']
+          },
         },
+        sensitivityLevel: 'medium' as const,
+        stigmaConsiderations: ['cultural sensitivity', 'stigma awareness'],
         options: [
           { text: 'Not at all', value: 0 },
           { text: 'Several days', value: 1 },
@@ -59,9 +69,19 @@ describe('culturalAssessmentUtils', () => {
         id: 'phq9_2_cultural',
         text: 'Another standard question',
         culturalAdaptations: {
-          'Asian': { text: 'Asian-adapted question 2' },
-          'Western': { text: 'Western question 2' },
+          'Asian': { 
+            text: 'Asian-adapted question 2',
+            culturalContext: 'Asian cultural context',
+            expressionPatterns: ['adapted', 'cultural']
+          },
+          'Western': { 
+            text: 'Western question 2',
+            culturalContext: 'Western cultural context', 
+            expressionPatterns: ['standard', 'western']
+          },
         },
+        sensitivityLevel: 'medium' as const,
+        stigmaConsiderations: ['cultural sensitivity', 'stigma awareness'],
         options: [
           { text: 'Not at all', value: 0 },
           { text: 'Several days', value: 1 },
@@ -151,9 +171,19 @@ describe('culturalAssessmentUtils', () => {
         id: 'gad7_1_cultural',
         text: 'Standard GAD-7 question',
         culturalAdaptations: {
-          'Latino': { text: 'Latino-adapted GAD-7 question' },
-          'Western': { text: 'Western GAD-7 question' },
+          'Latino': { 
+            text: 'Latino-adapted GAD-7 question',
+            culturalContext: 'Latino cultural context',
+            expressionPatterns: ['adapted', 'latino']
+          },
+          'Western': { 
+            text: 'Western GAD-7 question',
+            culturalContext: 'Western cultural context',
+            expressionPatterns: ['standard', 'western']
+          },
         },
+        sensitivityLevel: 'medium' as const,
+        stigmaConsiderations: ['cultural sensitivity', 'stigma awareness'],
         options: [
           { text: 'Not at all', value: 0 },
           { text: 'Several days', value: 1 },
@@ -205,6 +235,11 @@ describe('culturalAssessmentUtils', () => {
         cultural: ['Consider family therapy', 'Explore traditional healing'],
         resources: ['Asian Mental Health Collective', 'Crisis Line'],
         familyGuidance: 'Involve family in treatment decisions',
+      },
+      privacyMetadata: {
+        culturallyAdjusted: true,
+        biasReductionApplied: true,
+        culturalConfidenceScore: 0.8,
       },
     };
 
@@ -327,6 +362,11 @@ describe('culturalAssessmentUtils', () => {
         cultural: ['Explore faith-based support', 'Community involvement'],
         resources: ['Latino Mental Health Resources'],
       },
+      privacyMetadata: {
+        culturallyAdjusted: true,
+        biasReductionApplied: true,
+        culturalConfidenceScore: 0.9,
+      },
     };
 
     it('should return cultural GAD-7 assessment result', async () => {
@@ -358,9 +398,19 @@ describe('culturalAssessmentUtils', () => {
       id: 'assessment-123',
       userToken: 'user-token',
       type: 'phq-9' as const,
-      scores: [1, 2, 1, 2, 1, 2, 1, 1, 0],
+      score: 12,
+      answers: [1, 2, 1, 2, 1, 2, 1, 1, 0],
       timestamp: '2024-01-15T10:00:00Z',
       culturalContext: 'Asian',
+      languageCode: 'en',
+      culturalAdaptationsUsed: ['cultural-bias-reduction', 'expression-pattern-analysis'],
+      culturalFactors: {
+        expressionStyle: 'indirect' as const,
+        stigmaLevel: 0.7,
+        familyInvolvement: 'family-inclusive' as const,
+        helpSeekingStyle: 'traditional' as const,
+      },
+      privacyPreserved: true,
     };
 
     it('should submit cultural assessment with all parameters', async () => {

@@ -1,18 +1,4 @@
 import { DemoDataService, demoDataService } from '../demoDataService';
-import { 
-    Dilemma,
-    Helper,
-    JournalEntry,
-    MoodCheckIn,
-    Assessment,
-    Reflection,
-    ForumThread,
-    ChatSession,
-    AIChatSession,
-    HelpSession,
-    ModerationAction,
-    CommunityStats
-} from '../../types';
 
 // Mock localStorage
 const mockLocalStorage = {
@@ -333,18 +319,18 @@ describe('DemoDataService', () => {
       it('should return community statistics', () => {
         const stats = service.getAdminCommunityStats();
 
-        expect(stats).toHaveProperty('totalUsers');
-        expect(stats).toHaveProperty('activeUsers');
+        expect(stats).toHaveProperty('activeDilemmas');
         expect(stats).toHaveProperty('totalHelpers');
-        expect(stats).toHaveProperty('totalDilemmas');
-        expect(stats).toHaveProperty('resolvedDilemmas');
-        expect(stats).toHaveProperty('totalReflections');
+        expect(stats).toHaveProperty('avgTimeToFirstSupport');
+        expect(stats).toHaveProperty('mostCommonCategory');
         
-        expect(typeof stats.totalUsers).toBe('number');
-        expect(typeof stats.activeUsers).toBe('number');
+        expect(typeof stats.activeDilemmas).toBe('number');
         expect(typeof stats.totalHelpers).toBe('number');
-        expect(stats.totalUsers).toBeGreaterThan(0);
-        expect(stats.activeUsers).toBeLessThanOrEqual(stats.totalUsers);
+        expect(typeof stats.avgTimeToFirstSupport).toBe('string');
+        expect(typeof stats.mostCommonCategory).toBe('string');
+        
+        expect(stats.activeDilemmas).toBeGreaterThan(0);
+        expect(stats.totalHelpers).toBeGreaterThan(0);
       });
     });
 
@@ -388,13 +374,14 @@ describe('DemoDataService', () => {
         threads.forEach(thread => {
           expect(thread).toHaveProperty('id');
           expect(thread).toHaveProperty('title');
-          expect(thread).toHaveProperty('category');
-          expect(thread).toHaveProperty('userToken');
+          expect(thread).toHaveProperty('authorId');
+          expect(thread).toHaveProperty('authorName');
           expect(thread).toHaveProperty('timestamp');
-          expect(thread).toHaveProperty('replies');
+          expect(thread).toHaveProperty('postCount');
+          expect(thread).toHaveProperty('lastReply');
           
-          expect(typeof thread.replies).toBe('number');
-          expect(thread.replies).toBeGreaterThanOrEqual(0);
+          expect(typeof thread.postCount).toBe('number');
+          expect(thread.postCount).toBeGreaterThanOrEqual(0);
         });
       });
     });

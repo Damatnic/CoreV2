@@ -124,6 +124,7 @@ describe('VideoThumbnailGenerator', () => {
         generatePlaceholder: false,
       };
 
+      // const videoPromise = generator.generateThumbnails(mockVideoSrc, options);
       const videoPromise = generator.generateThumbnails(mockVideoSrc, options);
       
       const createdVideo = (document.createElement as jest.Mock).mock.results[2].value;
@@ -151,7 +152,7 @@ describe('VideoThumbnailGenerator', () => {
     });
 
     it('should set correct video currentTime based on frameTime and duration', async () => {
-      const videoPromise = generator.generateThumbnails(mockVideoSrc, { frameTime: 150 });
+      // const videoPromise = generator.generateThumbnails(mockVideoSrc, { frameTime: 150 });
       
       const createdVideo = (document.createElement as jest.Mock).mock.results[4].value;
       createdVideo.duration = 100; // Duration less than frameTime
@@ -442,7 +443,7 @@ describe('VideoThumbnailGenerator', () => {
     });
 
     it('should generate fallback thumbnail with custom parameters', () => {
-      const result = generator.generateFallbackThumbnail(320, 180, 'Custom Text');
+      // const result = generator.generateFallbackThumbnail(320, 180, 'Custom Text');
       
       expect(mockCanvas.width).toBe(320);
       expect(mockCanvas.height).toBe(180);
@@ -481,7 +482,7 @@ describe('VideoThumbnailGenerator', () => {
     });
 
     it('should handle very small thumbnail dimensions', () => {
-      const result = generator.generateFallbackThumbnail(1, 1, 'X');
+      // const result = generator.generateFallbackThumbnail(1, 1, 'X');
       
       expect(mockCanvas.width).toBe(1);
       expect(mockCanvas.height).toBe(1);
@@ -494,7 +495,7 @@ describe('VideoThumbnailGenerator', () => {
     });
 
     it('should handle video with zero duration', async () => {
-      const videoPromise = generator.generateThumbnails('test.mp4', { frameTime: 30 });
+      // const videoPromise = generator.generateThumbnails('test.mp4', { frameTime: 30 });
       
       const createdVideo = (document.createElement as jest.Mock).mock.results.slice(-1)[0].value;
       createdVideo.duration = 0;

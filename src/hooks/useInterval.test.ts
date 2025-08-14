@@ -100,10 +100,10 @@ describe('useInterval Hook', () => {
     const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
     
     const { rerender } = renderHook(
-      ({ delay }) => useInterval(mockCallback, delay),
+      ({ delay }: { delay: number | null }) => useInterval(mockCallback, delay),
       {
         wrapper: Wrapper,
-        initialProps: { delay: 1000 }
+        initialProps: { delay: 1000 as number | null }
       }
     );
     
@@ -260,15 +260,15 @@ describe('useInterval Hook', () => {
     const mockCallback = jest.fn();
     
     const { rerender } = renderHook(
-      ({ callback }) => useInterval(callback, 1000),
+      ({ callback }: { callback: jest.Mock | null }) => useInterval(callback as (() => void), 1000),
       {
         wrapper: Wrapper,
-        initialProps: { callback: mockCallback }
+        initialProps: { callback: mockCallback as jest.Mock | null }
       }
     );
     
     // Set callback to null
-    rerender({ callback: null });
+    rerender({ callback: null } as { callback: jest.Mock | null });
     
     // Trigger interval - should not call anything
     act(() => {
@@ -296,7 +296,7 @@ describe('useInterval Hook', () => {
     let callCount = 0;
     
     const { rerender } = renderHook(
-      ({ id }) => {
+      ({ id: _id }) => {
         const callback = () => { callCount += 1; };
         useInterval(callback, 100);
       },

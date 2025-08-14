@@ -1,5 +1,4 @@
-import React from 'react';
-import { render, screen, waitFor, act } from '../../test-utils';
+import { render, screen, act } from '../../test-utils';
 import { Toast, ToastContainer } from '../Toast';
 import { Toast as ToastType } from '../../types';
 
@@ -171,7 +170,7 @@ describe('Toast', () => {
       const { container } = render(<ToastContainer />);
       
       expect(container.firstChild).toHaveClass('toast-container');
-      expect(container.firstChild?.children).toHaveLength(0);
+      expect((container.firstChild as HTMLElement)?.children).toHaveLength(0);
     });
 
     it('should render single toast', () => {

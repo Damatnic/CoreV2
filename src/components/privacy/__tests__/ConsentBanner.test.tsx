@@ -1,7 +1,5 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '../../../test-utils';
 import ConsentBanner from '../ConsentBanner';
-import { mockAnalyticsService } from '../../../test-utils';
 
 // Mock the analytics service
 jest.mock('../../../services/analyticsService', () => ({

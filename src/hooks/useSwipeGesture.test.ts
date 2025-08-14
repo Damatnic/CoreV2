@@ -384,7 +384,7 @@ describe('useSwipeRef Hook', () => {
     const addEventListenerSpy = jest.spyOn(element, 'addEventListener');
 
     act(() => {
-      result.current.ref.current = element;
+      (result.current.ref as any).current = element;
     });
 
     // Trigger useEffect by re-rendering
@@ -421,7 +421,7 @@ describe('usePullToRefresh Hook', () => {
     Object.defineProperty(element, 'scrollTop', { value: 0, writable: true });
 
     act(() => {
-      result.current.ref.current = element;
+      (result.current.ref as any).current = element;
     });
 
     // Simulate touch start at top
@@ -449,7 +449,7 @@ describe('usePullToRefresh Hook', () => {
     Object.defineProperty(element, 'scrollTop', { value: 100, writable: true });
 
     act(() => {
-      result.current.ref.current = element;
+      (result.current.ref as any).current = element;
     });
 
     // Simulate touch start when scrolled
@@ -469,7 +469,7 @@ describe('usePullToRefresh Hook', () => {
     Object.defineProperty(element, 'scrollTop', { value: 0, writable: true });
 
     act(() => {
-      result.current.ref.current = element;
+      (result.current.ref as any).current = element;
     });
 
     // Start pull
@@ -501,7 +501,7 @@ describe('usePullToRefresh Hook', () => {
     Object.defineProperty(element, 'scrollTop', { value: 0, writable: true });
 
     act(() => {
-      result.current.ref.current = element;
+      (result.current.ref as any).current = element;
     });
 
     // Start pull
@@ -535,7 +535,7 @@ describe('usePullToRefresh Hook', () => {
     Object.defineProperty(element, 'scrollTop', { value: 0, writable: true });
 
     act(() => {
-      result.current.ref.current = element;
+      (result.current.ref as any).current = element;
     });
 
     // Start and complete pull gesture
@@ -567,7 +567,7 @@ describe('usePullToRefresh Hook', () => {
     Object.defineProperty(element, 'scrollTop', { value: 0, writable: true });
 
     act(() => {
-      result.current.ref.current = element;
+      (result.current.ref as any).current = element;
     });
 
     // Try to start pull
@@ -587,7 +587,7 @@ describe('usePullToRefresh Hook', () => {
     Object.defineProperty(element, 'scrollTop', { value: 0, writable: true });
 
     act(() => {
-      result.current.ref.current = element;
+      (result.current.ref as any).current = element;
     });
 
     // Start pull

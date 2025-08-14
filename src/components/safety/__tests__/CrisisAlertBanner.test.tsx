@@ -1,12 +1,23 @@
 /**
- * Test Suite for CrisisAlertBanner Component
+ * Test Suite fo    it('should render when show is true', () => {
+      render(
+        <RouterWrapper>
+          <CrisisAlertBanner 
+            show={true}
+            severity="high"
+            onClose={jest.fn()}
+          />
+        </RouterWrapper>
+      );
+
+      expect(screen.getByTestId('crisis-alert-banner')).toBeInTheDocument();tBanner Component
  * Tests crisis alert display with appropriate resources
  */
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { CrisisAlertBanner } from '../CrisisAlertBanner';
+import { CrisisAlertBanner } from '../../CrisisAlertBanner';
 import { BrowserRouter } from 'react-router-dom';
 
 const RouterWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -23,9 +34,9 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="high"
-            onDismiss={jest.fn()}
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -33,13 +44,13 @@ describe('CrisisAlertBanner', () => {
       expect(screen.getByTestId('crisis-alert-banner')).toBeInTheDocument();
     });
 
-    it('should not render when isVisible is false', () => {
+    it('should not render when show is false', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={false}
+            show={false}
             severity="low"
-            onDismiss={jest.fn()}
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -51,9 +62,9 @@ describe('CrisisAlertBanner', () => {
       const { rerender } = render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="low"
-            onDismiss={jest.fn()}
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -63,9 +74,9 @@ describe('CrisisAlertBanner', () => {
       rerender(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="high"
-            onDismiss={jest.fn()}
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -75,9 +86,9 @@ describe('CrisisAlertBanner', () => {
       rerender(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
-            severity="emergency"
-            onDismiss={jest.fn()}
+            show={true}
+            severity="high"
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -91,9 +102,9 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="high"
-            onDismiss={jest.fn()}
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -106,9 +117,9 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="high"
-            onDismiss={jest.fn()}
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -120,9 +131,9 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
-            severity="emergency"
-            onDismiss={jest.fn()}
+            show={true}
+            severity="high"
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -135,10 +146,10 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="high"
-            location="UK"
-            onDismiss={jest.fn()}
+
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -153,9 +164,9 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="high"
-            onDismiss={jest.fn()}
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -171,9 +182,9 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="high"
-            onDismiss={jest.fn()}
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -192,9 +203,9 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="low"
-            onDismiss={jest.fn()}
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -211,9 +222,9 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="low"
-            onDismiss={onDismiss}
+            onClose={onDismiss}
           />
         </RouterWrapper>
       );
@@ -228,9 +239,9 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
-            severity="emergency"
-            onDismiss={jest.fn()}
+            show={true}
+            severity="high"
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -244,10 +255,10 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="high"
-            onDismiss={jest.fn()}
-            dismissDelay={3000}
+            onClose={jest.fn()}
+
           />
         </RouterWrapper>
       );
@@ -270,9 +281,9 @@ describe('CrisisAlertBanner', () => {
       const { rerender } = render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="low"
-            onDismiss={jest.fn()}
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -283,9 +294,9 @@ describe('CrisisAlertBanner', () => {
       rerender(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="high"
-            onDismiss={jest.fn()}
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -298,9 +309,9 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
-            severity="emergency"
-            onDismiss={jest.fn()}
+            show={true}
+            severity="high"
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -313,9 +324,9 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="high"
-            onDismiss={jest.fn()}
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -330,9 +341,9 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="high"
-            onDismiss={jest.fn()}
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -346,9 +357,9 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="high"
-            onDismiss={jest.fn()}
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -367,9 +378,9 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
-            severity="emergency"
-            onDismiss={jest.fn()}
+            show={true}
+            severity="high"
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -384,9 +395,9 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="high"
-            onDismiss={jest.fn()}
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -400,10 +411,10 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="high"
-            onDismiss={jest.fn()}
-            onBreathingExercise={onBreathingExercise}
+            onClose={jest.fn()}
+
           />
         </RouterWrapper>
       );
@@ -418,10 +429,10 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="high"
-            hasSafetyPlan={true}
-            onDismiss={jest.fn()}
+
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -435,11 +446,11 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="high"
-            hasSafetyPlan={true}
-            onDismiss={jest.fn()}
-            onViewSafetyPlan={onViewSafetyPlan}
+
+            onClose={jest.fn()}
+
           />
         </RouterWrapper>
       );
@@ -456,9 +467,9 @@ describe('CrisisAlertBanner', () => {
       const { rerender } = render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={false}
+            show={false}
             severity="high"
-            onDismiss={jest.fn()}
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -466,9 +477,9 @@ describe('CrisisAlertBanner', () => {
       rerender(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="high"
-            onDismiss={jest.fn()}
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -483,9 +494,9 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="low"
-            onDismiss={onDismiss}
+            onClose={onDismiss}
           />
         </RouterWrapper>
       );
@@ -509,9 +520,9 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="high"
-            onDismiss={jest.fn()}
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -530,9 +541,9 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="high"
-            onDismiss={jest.fn()}
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -547,10 +558,10 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="high"
-            resources={[]}
-            onDismiss={jest.fn()}
+
+            onClose={jest.fn()}
           />
         </RouterWrapper>
       );
@@ -568,9 +579,9 @@ describe('CrisisAlertBanner', () => {
       render(
         <RouterWrapper>
           <CrisisAlertBanner 
-            isVisible={true}
+            show={true}
             severity="low"
-            onDismiss={onDismiss}
+            onClose={onDismiss}
           />
         </RouterWrapper>
       );

@@ -2,30 +2,30 @@
  * @jest-environment jsdom
  */
 
-import { CulturalFamilySupportService, culturalFamilySupportService } from '../culturalFamilySupportService';
-import type { 
-  FamilyMember, 
-  FamilySupport, 
-  CrisisNotification, 
-  CulturalGuidance 
-} from '../culturalFamilySupportService';
-
-// Mock dependencies
-const mockEnhancedOfflineService = {
-  addToSyncQueue: jest.fn(),
-};
-
-const mockPrivacyAnalyticsService = {
-  recordInterventionOutcome: jest.fn(),
-};
-
+// Mock dependencies must be defined before imports
 jest.mock('../enhancedOfflineService', () => ({
-  enhancedOfflineService: mockEnhancedOfflineService,
+  enhancedOfflineService: {
+    addToSyncQueue: jest.fn(),
+  },
 }));
 
 jest.mock('../privacyPreservingAnalyticsService', () => ({
-  privacyPreservingAnalyticsService: mockPrivacyAnalyticsService,
+  privacyPreservingAnalyticsService: {
+    recordInterventionOutcome: jest.fn(),
+  },
 }));
+
+import CulturalFamilySupportService, { culturalFamilySupportService } from '../culturalFamilySupportService';
+import { enhancedOfflineService } from '../enhancedOfflineService';
+import { privacyPreservingAnalyticsService } from '../privacyPreservingAnalyticsService';
+import type { 
+  FamilyMember, 
+  FamilySupport
+} from '../culturalFamilySupportService';
+
+// Get mocked instances
+const mockEnhancedOfflineService = enhancedOfflineService as jest.Mocked<typeof enhancedOfflineService>;
+const mockPrivacyAnalyticsService = privacyPreservingAnalyticsService as jest.Mocked<typeof privacyPreservingAnalyticsService>;
 
 // Mock console methods
 const originalConsoleLog = console.log;
@@ -290,7 +290,7 @@ describe('CulturalFamilySupportService', () => {
           emergencyOnly: false,
         },
         culturalConsiderations: {
-          preferredCommunicationStyle: 'direct',
+          preferredCommunicationStyle: 'formal',
           genderConsiderations: 'no_restrictions',
         },
       };
@@ -665,7 +665,7 @@ describe('CulturalFamilySupportService', () => {
     });
 
     test('should not send notification if no family support exists', async () => {
-      await service.sendCrisisNotification('nonexistent-user', 'critical', {
+      await service.sendCrisisNotification('nonexistent-user', 'high_risk', {
         message: 'Crisis',
         severity: 10,
         timestamp: new Date().toISOString(),

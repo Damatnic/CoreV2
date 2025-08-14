@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import {
   useScrollAnimation,
   useStaggeredAnimation,
@@ -80,7 +80,10 @@ describe('useScrollAnimation Hook', () => {
     
     // Mock element ref
     const mockElement = document.createElement('div');
-    result.current.elementRef.current = mockElement;
+    Object.defineProperty(result.current.elementRef, 'current', {
+      writable: true,
+      value: mockElement
+    });
 
     // Simulate intersection
     act(() => {

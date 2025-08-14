@@ -775,4 +775,5 @@ class CulturalFamilySupportService {
   }
 }
 
+export default CulturalFamilySupportService;
 export const culturalFamilySupportService = new CulturalFamilySupportService();

@@ -65,8 +65,8 @@ describe('DataMigrationService', () => {
   describe('performMigration', () => {
     it('should perform complete migration successfully', async () => {
       mockLocalStorage.length = 3;
-      mockLocalStorage.getItem.mockImplementation((key) => {
-        const data = {
+      mockLocalStorage.getItem.mockImplementation((key: string) => {
+        const data: Record<string, string> = {
           'userProfile': JSON.stringify({ name: 'Test User' }),
           'mood_analyses': JSON.stringify([{ mood: 'happy' }]),
           'safetyPlan': JSON.stringify({ steps: ['call friend'] }),

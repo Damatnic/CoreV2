@@ -143,7 +143,7 @@ class AstralCoreCrisisResourceCache {
 
       console.log('Astral Core Crisis Cache: Initialized successfully');
     } catch (error) {
-      astralCoreErrorService.handle(error, {
+      astralCoreErrorService.handle(error as Error, {
         notify: false,
         log: true,
       });
@@ -456,7 +456,7 @@ class AstralCoreCrisisResourceCache {
       const resource = await apiClient.get<CrisisResource>(`/crisis/resources/${id}`);
       return resource;
     } catch (error) {
-      astralCoreErrorService.handle(error, {
+      astralCoreErrorService.handle(error as Error, {
         notify: false,
         log: true,
       });
@@ -653,7 +653,7 @@ class AstralCoreCrisisResourceCache {
 
       console.log(`Astral Core Crisis Cache: Imported ${resources.length} resources`);
     } catch (error) {
-      astralCoreErrorService.handle(error, {
+      astralCoreErrorService.handle(error as Error, {
         notify: true,
         log: true,
       });

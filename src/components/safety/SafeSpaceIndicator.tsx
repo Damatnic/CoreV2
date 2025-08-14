@@ -5,12 +5,18 @@ interface SafeSpaceIndicatorProps {
   isPrivateMode?: boolean;
   userName?: string;
   sessionType?: 'anonymous' | 'private' | 'public';
+  className?: string;
+  theme?: string;
+  children?: React.ReactNode;
 }
 
 export const SafeSpaceIndicator: React.FC<SafeSpaceIndicatorProps> = ({
   isPrivateMode = false,
   userName,
-  sessionType = 'public'
+  sessionType = 'public',
+  className = '',
+  theme = '',
+  children
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [breathingPhase, setBreathingPhase] = useState<'inhale' | 'hold' | 'exhale'>('inhale');
@@ -51,9 +57,24 @@ export const SafeSpaceIndicator: React.FC<SafeSpaceIndicatorProps> = ({
     }
   };
 
+  const getBreathingDotColor = () => {
+    if (breathingPhase === 'inhale') return 'var(--safe-success)';
+    if (breathingPhase === 'hold') return 'var(--safe-warning)';
+    return 'var(--safe-info)';
+  };
+
+  const getClassNames = () => {
+    const classes = ['safe-space-indicator'];
+    if (isVisible) classes.push('visible');
+    if (className) classes.push(className);
+    if (theme) classes.push(`theme-${theme}`);
+    return classes.join(' ');
+  };
+
   return (
     <div 
-      className={`safe-space-indicator ${isVisible ? 'visible' : ''}`}
+      className={getClassNames()}
+      data-testid="safe-space-indicator"
       style={{
         position: 'fixed',
         top: '20px',
@@ -79,9 +100,7 @@ export const SafeSpaceIndicator: React.FC<SafeSpaceIndicatorProps> = ({
           width: '8px',
           height: '8px',
           borderRadius: '50%',
-          background: breathingPhase === 'inhale' ? 'var(--safe-success)' : 
-                     breathingPhase === 'hold' ? 'var(--safe-warning)' : 
-                     'var(--safe-info)',
+          background: getBreathingDotColor(),
           animation: 'safe-breathe 12s ease-in-out infinite',
           boxShadow: '0 0 10px currentColor',
         }}
@@ -137,6 +156,8 @@ export const SafeSpaceIndicator: React.FC<SafeSpaceIndicatorProps> = ({
           <path d="M12 1v6m0 6v6m4.22-13.22l4.24 4.24M1.54 1.54l4.24 4.24M20.46 20.46l-4.24-4.24M1.54 20.46l4.24-4.24" />
         </svg>
       </button>
+      
+      {children && <div style={{ marginLeft: '8px' }}>{children}</div>}
     </div>
   );
 };

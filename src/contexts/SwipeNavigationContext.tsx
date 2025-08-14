@@ -103,6 +103,9 @@ export const SwipeNavigationProvider: React.FC<SwipeNavigationProviderProps> = (
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isSidebarOpen, closeSidebar]);
 
+  // Style objects for esbuild compatibility
+  const overlayButtonStyle: React.CSSProperties = { border: 'none', padding: 0, background: 'transparent' };
+
   // Close sidebar when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -145,24 +148,33 @@ export const SwipeNavigationProvider: React.FC<SwipeNavigationProviderProps> = (
     unregisterSwipeArea,
   ]);
 
+  // Compute classNames outside JSX for esbuild compatibility
+  const overlayClassName = 'sidebar-overlay' + (isSidebarOpen ? ' swipe-active' : '');
+  const panelClassName = 'sidebar-panel' + (isSidebarOpen ? ' swipe-active' : '');
+  
+  // Handler function for keydown
+  const handleOverlayKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      closeSidebar();
+    }
+  };
+
   return (
     <SwipeNavigationContext.Provider value={contextValue}>
       <div ref={globalSwipeRef} className="swipe-navigation-container">
         {children}
         
-        {/* Sidebar Overlay */}
         <button 
-          className={`sidebar-overlay ${isSidebarOpen ? 'swipe-active' : ''}`}
+          className={overlayClassName}
           onClick={closeSidebar}
-          onKeyDown={(e) => e.key === 'Enter' && closeSidebar()}
+          onKeyDown={handleOverlayKeyDown}
           aria-hidden={!isSidebarOpen}
           aria-label="Close navigation menu"
-          style={{ border: 'none', padding: 0, background: 'transparent' }}
+          style={overlayButtonStyle}
         />
         
-        {/* Mobile Sidebar Panel */}
         <nav 
-          className={`sidebar-panel ${isSidebarOpen ? 'swipe-active' : ''}`}
+          className={panelClassName}
           aria-label="Navigation menu"
           aria-hidden={!isSidebarOpen}
         >
@@ -176,9 +188,7 @@ export const SwipeNavigationProvider: React.FC<SwipeNavigationProviderProps> = (
               ✕
             </button>
           </div>
-          <div className="sidebar-content">
-            {/* Sidebar content will be injected here */}
-          </div>
+          <div className="sidebar-content"></div>
         </nav>
       </div>
     </SwipeNavigationContext.Provider>

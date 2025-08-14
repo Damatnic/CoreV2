@@ -5,9 +5,9 @@
  * intervention protocols based on crisis severity and user needs.
  */
 
-import { crisisDetectionService, type CrisisAnalysisResult } from './crisisDetectionService';
-import { enhancedCrisisKeywordDetectionService, type EnhancedCrisisDetectionResult } from './enhancedCrisisKeywordDetectionService';
-import { astralCoreNotificationService } from './astralCoreNotificationService';
+import { type CrisisAnalysisResult } from './crisisDetectionService';
+import { type EnhancedCrisisDetectionResult } from './enhancedCrisisKeywordDetectionService';
+import { astralCoreNotificationService, NotificationPriority } from './astralCoreNotificationService';
 import { astralCoreWebSocketService } from './astralCoreWebSocketService';
 
 export interface InterventionWorkflow {
@@ -100,12 +100,12 @@ export interface WorkflowTrigger {
   source: 'user-report' | 'ai-detection' | 'peer-report' | 'helper-escalation' | 'automated';
   confidence: number;
   urgency: 'immediate' | 'urgent' | 'moderate' | 'low';
-  data: CrisisAnalysisResult | EnhancedCrisisDetectionResult | any;
+  data: CrisisAnalysisResult | EnhancedCrisisDetectionResult;
 }
 
 class CrisisInterventionWorkflowService {
-  private activeWorkflows: Map<string, InterventionWorkflow> = new Map();
-  private workflowTemplates: Map<string, InterventionWorkflow> = new Map();
+  private readonly activeWorkflows: Map<string, InterventionWorkflow> = new Map();
+  private readonly workflowTemplates: Map<string, InterventionWorkflow> = new Map();
   
   constructor() {
     this.initializeWorkflowTemplates();
@@ -483,8 +483,8 @@ class CrisisInterventionWorkflowService {
     );
     workflow.interventionSteps.push(...newSteps);
 
-    // Update workflow
-    workflow.severityLevel = newSeverity;
+    // Update workflow - cast to valid severity level
+    workflow.severityLevel = newSeverity as 'low' | 'medium' | 'high' | 'critical' | 'emergency';
     workflow.status = 'escalated';
     
     // Add escalation outcome
@@ -600,11 +600,10 @@ class CrisisInterventionWorkflowService {
     // Send notifications to appropriate contacts
     if (workflow.severityLevel === 'emergency') {
       // Emergency contact protocol
-      await astralCoreNotificationService.sendNotification(workflow.userId, {
+      await astralCoreNotificationService.show({
         title: 'Emergency Support Activated',
         body: 'Emergency services have been notified. Help is on the way.',
-        priority: 'urgent',
-        actionUrl: '/crisis/status'
+        priority: NotificationPriority.URGENT
       });
     }
   }
@@ -616,11 +615,10 @@ class CrisisInterventionWorkflowService {
     );
     
     // Send resource notification
-    await astralCoreNotificationService.sendNotification(workflow.userId, {
+    await astralCoreNotificationService.show({
       title: 'Crisis Resources Available',
       body: `${resources.length} crisis resources are available to help you.`,
-      priority: 'high',
-      actionUrl: '/crisis/resources'
+      priority: NotificationPriority.HIGH
     });
   }
 
@@ -629,14 +627,11 @@ class CrisisInterventionWorkflowService {
     console.log('[Crisis Workflow] Escalation executed for workflow:', workflow.id);
     
     // Notify crisis team via WebSocket
-    astralCoreWebSocketService.send({
-      type: 'crisis-escalation',
-      data: {
-        workflowId: workflow.id,
-        userId: workflow.userId,
-        severity: workflow.severityLevel,
-        timestamp: new Date()
-      }
+    astralCoreWebSocketService.send('crisis-escalation', {
+      workflowId: workflow.id,
+      userId: workflow.userId,
+      severity: workflow.severityLevel,
+      timestamp: new Date()
     });
   }
 
@@ -665,22 +660,20 @@ class CrisisInterventionWorkflowService {
     
     if (event === 'initiated' && workflow.severityLevel === 'emergency') {
       // Send urgent notifications
-      await astralCoreNotificationService.sendNotification(workflow.userId, {
+      await astralCoreNotificationService.show({
         title: 'Crisis Support Activated',
         body: 'We\'re here to help. Emergency support has been activated.',
-        priority: 'urgent',
-        actionUrl: '/crisis/support'
+        priority: NotificationPriority.URGENT
       });
     }
   }
 
-  private async sendEscalationNotifications(workflow: InterventionWorkflow, reason: string): Promise<void> {
+  private async sendEscalationNotifications(_workflow: InterventionWorkflow, reason: string): Promise<void> {
     // Send escalation notifications
-    await astralCoreNotificationService.sendNotification(workflow.userId, {
+    await astralCoreNotificationService.show({
       title: 'Support Level Increased',
       body: `Your support has been escalated to ensure you get the help you need. Reason: ${reason}`,
-      priority: 'high',
-      actionUrl: '/crisis/status'
+      priority: NotificationPriority.HIGH
     });
   }
 
@@ -858,8 +851,8 @@ class CrisisInterventionWorkflowService {
         timeLimit: 5,
         actions: ['Call 911', 'Activate emergency protocol', 'Notify all available crisis counselors'],
         notifications: [
-          { recipient: 'crisis-team', method: 'push', template: 'emergency-activation', priority: 'urgent' },
-          { recipient: 'user', method: 'in-app', template: 'emergency-support', priority: 'urgent' }
+          { recipient: 'crisis-team', method: 'push', template: 'emergency-activation', priority: NotificationPriority.URGENT },
+          { recipient: 'user', method: 'in-app', template: 'emergency-support', priority: NotificationPriority.URGENT }
         ]
       }
     ];
@@ -874,7 +867,7 @@ class CrisisInterventionWorkflowService {
         timeLimit: 15,
         actions: ['Connect with crisis counselor', 'Initiate safety planning'],
         notifications: [
-          { recipient: 'crisis-team', method: 'push', template: 'critical-alert', priority: 'high' }
+          { recipient: 'crisis-team', method: 'push', template: 'critical-alert', priority: NotificationPriority.HIGH }
         ]
       }
     ];
@@ -1068,3 +1061,4 @@ class CrisisInterventionWorkflowService {
 // Export singleton instance
 export const crisisInterventionWorkflowService = new CrisisInterventionWorkflowService();
 export default crisisInterventionWorkflowService;
+

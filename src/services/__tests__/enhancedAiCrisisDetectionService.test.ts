@@ -3,9 +3,9 @@
  * Tests AI-powered crisis detection with advanced NLP and ML models
  */
 
-import { enhancedAiCrisisDetectionService } from '../enhancedAiCrisisDetectionService';
+import { enhancedAICrisisDetectionService } from '../enhancedAiCrisisDetectionService';
 
-describe('EnhancedAiCrisisDetectionService', () => {
+describe('enhancedAICrisisDetectionService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -14,7 +14,7 @@ describe('EnhancedAiCrisisDetectionService', () => {
     it('should detect crisis using AI model', async () => {
       const text = 'I am experiencing severe emotional distress and need help';
       
-      const result = await enhancedAiCrisisDetectionService.analyzeCrisisWithML(text);
+      const result = await enhancedAICrisisDetectionService.analyzeCrisisWithML(text);
       
       expect(result).toBeDefined();
       expect(result.crisisLevel).toBeDefined();
@@ -27,7 +27,7 @@ describe('EnhancedAiCrisisDetectionService', () => {
     it('should detect high-risk suicidal ideation', async () => {
       const text = 'I have been thinking about ending my life and have a plan';
       
-      const result = await enhancedAiCrisisDetectionService.analyzeCrisisWithML(text);
+      const result = await enhancedAICrisisDetectionService.analyzeCrisisWithML(text);
       
       expect(result.crisisLevel).toBeGreaterThan(0.8);
       expect(result.immediateAction).toBe(true);
@@ -39,7 +39,7 @@ describe('EnhancedAiCrisisDetectionService', () => {
     it('should identify self-harm indicators', async () => {
       const text = 'I have been cutting myself to cope with the pain';
       
-      const result = await enhancedAiCrisisDetectionService.analyzeCrisisWithML(text);
+      const result = await enhancedAICrisisDetectionService.analyzeCrisisWithML(text);
       
       expect(result.crisisLevel).toBeGreaterThan(0.5);
       expect(result.immediateAction).toBeDefined();
@@ -50,7 +50,7 @@ describe('EnhancedAiCrisisDetectionService', () => {
     it('should detect substance abuse crisis', async () => {
       const text = 'I took too many pills and I am feeling dizzy';
       
-      const result = await enhancedAiCrisisDetectionService.analyzeCrisisWithML(text);
+      const result = await enhancedAICrisisDetectionService.analyzeCrisisWithML(text);
       
       expect(result.crisisLevel).toBeGreaterThan(0.7);
       expect(result.immediateAction).toBe(true);
@@ -63,7 +63,7 @@ describe('EnhancedAiCrisisDetectionService', () => {
     it('should understand context and nuance', async () => {
       const text = 'I used to feel suicidal but I am much better now with therapy';
       
-      const result = await enhancedAiCrisisDetectionService.analyzeCrisisWithML(text);
+      const result = await enhancedAICrisisDetectionService.analyzeCrisisWithML(text);
       
       expect(result.crisisLevel).toBeLessThan(0.3);
       expect(result.immediateAction).toBe(false);
@@ -74,7 +74,7 @@ describe('EnhancedAiCrisisDetectionService', () => {
     it('should detect implied crisis without explicit keywords', async () => {
       const text = 'Everything is dark and I see no way forward anymore';
       
-      const result = await enhancedAiCrisisDetectionService.analyzeCrisisWithML(text);
+      const result = await enhancedAICrisisDetectionService.analyzeCrisisWithML(text);
       
       expect(result.crisisLevel).toBeGreaterThan(0.5);
       expect(result.immediateAction).toBeDefined();
@@ -85,7 +85,7 @@ describe('EnhancedAiCrisisDetectionService', () => {
     it('should handle metaphorical language', async () => {
       const text = 'I feel like I am drowning in my problems';
       
-      const result = await enhancedAiCrisisDetectionService.analyzeCrisisWithML(text);
+      const result = await enhancedAICrisisDetectionService.analyzeCrisisWithML(text);
       
       expect(result.crisisLevel).toBeGreaterThanOrEqual(0);
       expect(result.immediateAction).toBeDefined();
@@ -98,7 +98,7 @@ describe('EnhancedAiCrisisDetectionService', () => {
     it('should analyze emotional sentiment', async () => {
       const text = 'I am feeling completely hopeless and worthless';
       
-      const result = await enhancedAiCrisisDetectionService.analyzeCrisisWithML(text);
+      const result = await enhancedAICrisisDetectionService.analyzeCrisisWithML(text);
       
       expect(result.crisisLevel).toBeGreaterThan(0.5);
       expect(result.confidence).toBeDefined();
@@ -109,7 +109,7 @@ describe('EnhancedAiCrisisDetectionService', () => {
     it('should detect mixed emotions', async () => {
       const text = 'I want help but I am scared to reach out';
       
-      const result = await enhancedAiCrisisDetectionService.analyzeCrisisWithML(text);
+      const result = await enhancedAICrisisDetectionService.analyzeCrisisWithML(text);
       
       expect(result.crisisLevel).toBeGreaterThanOrEqual(0);
       expect(result.confidence).toBeDefined();
@@ -122,7 +122,7 @@ describe('EnhancedAiCrisisDetectionService', () => {
     it('should detect urgency markers', async () => {
       const text = 'I am going to do it tonight, I cannot wait anymore';
       
-      const result = await enhancedAiCrisisDetectionService.analyzeCrisisWithML(text);
+      const result = await enhancedAICrisisDetectionService.analyzeCrisisWithML(text);
       
       expect(result.crisisLevel).toBeGreaterThan(0.8);
       expect(result.immediateAction).toBe(true);
@@ -134,8 +134,8 @@ describe('EnhancedAiCrisisDetectionService', () => {
       const chronicText = 'I have been feeling this way for months';
       const acuteText = 'Something just happened and I cannot cope';
       
-      const chronicResult = await enhancedAiCrisisDetectionService.analyzeCrisisWithML(chronicText);
-      const acuteResult = await enhancedAiCrisisDetectionService.analyzeCrisisWithML(acuteText);
+      const chronicResult = await enhancedAICrisisDetectionService.analyzeCrisisWithML(chronicText);
+      const acuteResult = await enhancedAICrisisDetectionService.analyzeCrisisWithML(acuteText);
       
       expect(chronicResult.crisisLevel).toBeDefined();
       expect(acuteResult.crisisLevel).toBeDefined();
@@ -147,7 +147,7 @@ describe('EnhancedAiCrisisDetectionService', () => {
     it('should detect crisis in Spanish', async () => {
       const text = 'Quiero terminar con mi vida';
       
-      const result = await enhancedAiCrisisDetectionService.analyzeCrisisWithML(text, { language: 'es' });
+      const result = await enhancedAICrisisDetectionService.analyzeCrisisWithML(text, { language: 'es' });
       
       expect(result.crisisLevel).toBeGreaterThan(0.7);
       expect(result.immediateAction).toBe(true);
@@ -157,7 +157,7 @@ describe('EnhancedAiCrisisDetectionService', () => {
     it('should handle code-switching', async () => {
       const text = 'I am so tired, no puedo más, I want to give up';
       
-      const result = await enhancedAiCrisisDetectionService.analyzeCrisisWithML(text);
+      const result = await enhancedAICrisisDetectionService.analyzeCrisisWithML(text);
       
       expect(result.crisisLevel).toBeGreaterThan(0.5);
       expect(result.immediateAction).toBeDefined();
@@ -175,7 +175,7 @@ describe('EnhancedAiCrisisDetectionService', () => {
         'I am thinking of ending it all'
       ];
       
-      const results = await enhancedAiCrisisDetectionService.analyzeCrisisWithML(messages.join(' '));
+      const results = await enhancedAICrisisDetectionService.analyzeCrisisWithML(messages.join(' '));
       
       expect(results.crisisLevel).toBeGreaterThan(0.7);
       expect(results.immediateAction).toBe(true);
@@ -191,7 +191,7 @@ describe('EnhancedAiCrisisDetectionService', () => {
         'I think I will be okay'
       ];
       
-      const results = await enhancedAiCrisisDetectionService.analyzeCrisisWithML(messages.join(' '));
+      const results = await enhancedAICrisisDetectionService.analyzeCrisisWithML(messages.join(' '));
       
       expect(results.crisisLevel).toBeLessThan(0.3);
       expect(results.immediateAction).toBe(false);
@@ -208,7 +208,7 @@ describe('EnhancedAiCrisisDetectionService', () => {
         riskFactors: ['depression', 'previous_attempt']
       };
       
-      const result = await enhancedAiCrisisDetectionService.analyzeCrisisWithML(text, userContext);
+      const result = await enhancedAICrisisDetectionService.analyzeCrisisWithML(text, userContext);
       
       expect(result.crisisLevel).toBeGreaterThan(0.7);
       expect(result.immediateAction).toBe(true);
@@ -222,7 +222,7 @@ describe('EnhancedAiCrisisDetectionService', () => {
         protectiveFactors: ['strong_support_system', 'therapy_engaged', 'medication_compliant']
       };
       
-      const result = await enhancedAiCrisisDetectionService.analyzeCrisisWithML(text, userContext);
+      const result = await enhancedAICrisisDetectionService.analyzeCrisisWithML(text, userContext);
       
       expect(result.crisisLevel).toBeGreaterThan(0.3);
       expect(result.crisisLevel).toBeLessThan(0.7);
@@ -235,7 +235,7 @@ describe('EnhancedAiCrisisDetectionService', () => {
     it('should provide confidence scores', async () => {
       const text = 'Maybe I should just end everything';
       
-      const result = await enhancedAiCrisisDetectionService.analyzeCrisisWithML(text);
+      const result = await enhancedAICrisisDetectionService.analyzeCrisisWithML(text);
       
       expect(result.confidence).toBeDefined();
       expect(result.confidence).toBeGreaterThan(0.7); // High confidence for clear crisis
@@ -246,7 +246,7 @@ describe('EnhancedAiCrisisDetectionService', () => {
     it('should handle ambiguous input', async () => {
       const text = 'Things are hard';
       
-      const result = await enhancedAiCrisisDetectionService.analyzeCrisisWithML(text);
+      const result = await enhancedAICrisisDetectionService.analyzeCrisisWithML(text);
       
       expect(result.confidence).toBeDefined();
       expect(result.crisisLevel).toBeLessThanOrEqual(0.5);
@@ -257,7 +257,7 @@ describe('EnhancedAiCrisisDetectionService', () => {
       const text = 'I need immediate help with my crisis thoughts';
       const startTime = Date.now();
       
-      await enhancedAiCrisisDetectionService.analyzeCrisisWithML(text);
+      await enhancedAICrisisDetectionService.analyzeCrisisWithML(text);
       
       const duration = Date.now() - startTime;
       expect(duration).toBeLessThan(1000); // Under 1 second
@@ -268,7 +268,7 @@ describe('EnhancedAiCrisisDetectionService', () => {
     it('should provide reasoning for detection', async () => {
       const text = 'I want to die and have pills ready';
       
-      const result = await enhancedAiCrisisDetectionService.analyzeCrisisWithML(text);
+      const result = await enhancedAICrisisDetectionService.analyzeCrisisWithML(text);
       
       expect(result.riskFactors).toBeDefined();
       expect(result.riskFactors.length).toBeGreaterThan(0);
@@ -279,7 +279,7 @@ describe('EnhancedAiCrisisDetectionService', () => {
     it('should explain false positives', async () => {
       const text = 'I am studying suicide prevention for my psychology class';
       
-      const result = await enhancedAiCrisisDetectionService.analyzeCrisisWithML(text);
+      const result = await enhancedAICrisisDetectionService.analyzeCrisisWithML(text);
       
       expect(result.crisisLevel).toBeLessThan(0.3);
       expect(result.immediateAction).toBe(false);

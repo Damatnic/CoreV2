@@ -82,7 +82,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
       aria-label={ariaLabel || (iconOnly && typeof children === 'string' ? children : undefined)}
     >
       {isLoading ? (
-        <div className={`loading-spinner ${size !== 'md' ? size : ''}`}>
+        <div className={`loading-spinner${size !== 'md' ? ` ${size}` : ''}`}>
           <div className="loading-spinner-inner"></div>
         </div>
       ) : (

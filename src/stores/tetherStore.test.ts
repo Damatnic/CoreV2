@@ -3,17 +3,17 @@ import { useTetherStore, TetherProfile, TetherCircleMember, ActiveTether, Tether
 import { act } from 'react';
 
 // Mock fetch globally
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 const mockedFetch = global.fetch as jest.MockedFunction<typeof fetch>;
 
 // Mock WebSocket
 const mockWebSocket = {
   send: jest.fn(),
   close: jest.fn(),
-  onopen: null,
-  onclose: null,
-  onmessage: null,
-  onerror: null,
+  onopen: null as ((event: Event) => void) | null,
+  onclose: null as ((event: CloseEvent) => void) | null,
+  onmessage: null as ((event: MessageEvent) => void) | null,
+  onerror: null as ((event: Event) => void) | null,
   readyState: WebSocket.OPEN,
 };
 
@@ -27,7 +27,7 @@ Object.defineProperty(global.navigator, 'vibrate', {
 
 // Mock sessionStorage
 const mockSessionStorage = {
-  getItem: jest.fn(() => 'test-token'),
+  getItem: jest.fn(() => 'test-token') as jest.MockedFunction<(key: string) => string | null>,
   setItem: jest.fn(),
   removeItem: jest.fn(),
   clear: jest.fn(),

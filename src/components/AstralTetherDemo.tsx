@@ -88,7 +88,7 @@ export const AstralTetherDemo: React.FC = () => {
 
         {/* Energy Visualization */}
         <div className="tether-visualization">
-          <div className={`tether-orb ${isActive ? 'active' : ''} ${pulseAnimation ? 'pulsing' : ''}`}
+          <div className={`tether-orb${isActive ? ' active' : ''}${pulseAnimation ? ' pulsing' : ''}`}
                style={{ backgroundColor: selectedMode.color }}>
             <div className="tether-orb-inner">
               <span className="tether-orb-icon">{selectedMode.icon}</span>
@@ -142,7 +142,7 @@ export const AstralTetherDemo: React.FC = () => {
               {astralTetherDemo.availableModes.map((mode) => (
                 <button
                   key={mode.name}
-                  className={`mode-card ${selectedMode.name === mode.name ? 'selected' : ''}`}
+                  className={selectedMode.name === mode.name ? 'mode-card selected' : 'mode-card'}
                   onClick={() => setSelectedMode(mode)}
                   style={{ borderColor: selectedMode.name === mode.name ? mode.color : 'transparent' }}
                 >

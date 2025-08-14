@@ -264,11 +264,14 @@ class ApiService {
 
         // Apply error interceptors
         let finalError = lastError;
-        for (const interceptor of this.interceptors.error) {
-          finalError = await interceptor(finalError);
+        if (finalError) {
+          for (const interceptor of this.interceptors.error) {
+            finalError = await interceptor(finalError);
+          }
+          throw finalError;
+        } else {
+          throw new Error('Request failed');
         }
-
-        throw finalError;
       }
     }
 
@@ -394,8 +397,10 @@ class ApiService {
 }
 
 // Create and export default instance
+import { ENV } from '../utils/envConfig';
+
 const apiService = new ApiService({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
+  baseURL: ENV.API_BASE_URL,
   timeout: 30000,
   retries: 3,
   cache: true,
@@ -404,7 +409,7 @@ const apiService = new ApiService({
 
 // Export for crisis endpoints (with different config)
 export const crisisApiService = new ApiService({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
+  baseURL: ENV.API_BASE_URL,
   timeout: 60000, // Longer timeout for crisis
   retries: 5, // More retries for crisis
   cache: true,

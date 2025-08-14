@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent } from '../../test-utils';
 import { AppButton } from '../AppButton';
 import { createMockButtonProps } from '../../test-utils';
@@ -242,7 +241,6 @@ describe('AppButton', () => {
       render(<AppButton {...props} />);
       
       const button = screen.getByRole('button');
-      const styles = window.getComputedStyle(button);
       
       expect(button.style.minHeight).toBe('44px');
       expect(button.style.display).toBe('inline-flex');

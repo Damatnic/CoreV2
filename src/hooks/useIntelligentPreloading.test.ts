@@ -487,22 +487,14 @@ describe('withIntelligentPreloading HOC', () => {
   });
 
   it('should call original onClick handler', () => {
-    const originalOnClick = jest.fn();
     const TestComponent = ({ onClick }: { onClick?: (e: React.MouseEvent) => void }) => {
       return React.createElement('button', { onClick }, 'Test Button');
     };
 
     const WrappedComponent = withIntelligentPreloading(TestComponent);
     
-    const { result } = renderHook(() => useIntelligentPreloading(), { wrapper: Wrapper });
-    
-    // Create a mock event
-    const mockEvent = {
-      target: { tagName: 'BUTTON' }
-    } as React.MouseEvent;
-
-    // Test that the HOC properly handles the onClick
-    const props = { onClick: originalOnClick };
+    // Use the hook result to avoid unused variable warning
+    renderHook(() => useIntelligentPreloading(), { wrapper: Wrapper });
     
     // This is a simplified test - in practice, the HOC would need more complex testing
     expect(typeof WrappedComponent).toBe('function');

@@ -1,7 +1,5 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '../../test-utils';
+import { render, screen, fireEvent, waitFor, createMockModalProps, mockHTMLElementMethods } from '../../test-utils';
 import { Modal } from '../Modal';
-import { createMockModalProps, mockHTMLElementMethods } from '../../test-utils';
 
 // Mock the CloseIcon component
 jest.mock('../icons.dynamic', () => ({
@@ -154,7 +152,7 @@ describe('Modal', () => {
       render(<Modal {...props} />);
       
       await waitFor(() => {
-        expect(mockHTMLMethods.mockFocus).toHaveBeenCalled();
+        expect(mockHTMLMethods.focus).toHaveBeenCalled();
       });
     });
 
@@ -165,7 +163,7 @@ describe('Modal', () => {
       render(<Modal {...props} />);
       
       await waitFor(() => {
-        expect(mockHTMLMethods.mockFocus).toHaveBeenCalled();
+        expect(mockHTMLMethods.focus).toHaveBeenCalled();
       }, { timeout: 200 });
     });
 
@@ -177,7 +175,7 @@ describe('Modal', () => {
       rerender(<Modal {...props} isOpen={false} />);
       
       // Focus should be restored
-      expect(mockHTMLMethods.mockFocus).toHaveBeenCalled();
+      expect(mockHTMLMethods.focus).toHaveBeenCalled();
     });
 
     it('should trap focus within modal', () => {
@@ -263,7 +261,7 @@ describe('Modal', () => {
       render(<Modal {...props} />);
       
       const dialog = screen.getByRole('dialog');
-      fireEvent.cancel(dialog);
+      fireEvent.keyDown(dialog, { key: 'Escape' });
       
       expect(props.onClose).toHaveBeenCalled();
     });
@@ -361,7 +359,7 @@ describe('Modal', () => {
             <button type="submit">Submit</button>
           </form>
           <div>
-            <a href="#">Link</a>
+            <a href="https://example.com">Link</a>
             <button>Another Button</button>
           </div>
         </div>
@@ -398,7 +396,7 @@ describe('Modal', () => {
       
       await waitFor(() => {
         // Should attempt to focus the modal element itself
-        expect(mockHTMLMethods.mockFocus).toHaveBeenCalled();
+        expect(mockHTMLMethods.focus).toHaveBeenCalled();
       });
     });
   });

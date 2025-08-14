@@ -96,51 +96,56 @@ export enum Action {
 }
 
 // Role-Permission mapping
+const userPermissions = [
+  Permission.VIEW_PROFILE,
+  Permission.EDIT_PROFILE,
+  Permission.VIEW_CONTENT,
+  Permission.VIEW_CHAT,
+  Permission.SEND_MESSAGE,
+  Permission.VIEW_ASSESSMENT,
+  Permission.TAKE_ASSESSMENT,
+  Permission.VIEW_CRISIS_RESOURCES,
+  Permission.TRIGGER_CRISIS_ALERT,
+  Permission.ACCESS_API,
+];
+
+const helperPermissions = [
+  ...userPermissions,
+  Permission.VIEW_HELPER_DASHBOARD,
+  Permission.ACCEPT_HELP_REQUESTS,
+  Permission.PROVIDE_SUPPORT,
+  Permission.ACCESS_HELPER_TOOLS,
+  Permission.CREATE_CONTENT,
+  Permission.EDIT_CONTENT,
+];
+
+const moderatorPermissions = [
+  ...helperPermissions,
+  Permission.VIEW_REPORTS,
+  Permission.MODERATE_USERS,
+  Permission.REVIEW_CONTENT,
+  Permission.DELETE_MESSAGE,
+  Permission.MODERATE_CHAT,
+  Permission.DELETE_CONTENT,
+];
+
+const crisisResponderPermissions = [
+  ...userPermissions,
+  Permission.RESPOND_TO_CRISIS,
+  Permission.MANAGE_CRISIS_RESOURCES,
+  Permission.OVERRIDE_CRISIS_LIMITS,
+  Permission.VIEW_HELPER_DASHBOARD,
+  Permission.PROVIDE_SUPPORT,
+];
+
 const rolePermissions: Record<UserRole, Permission[]> = {
-  [UserRole.USER]: [
-    Permission.VIEW_PROFILE,
-    Permission.EDIT_PROFILE,
-    Permission.VIEW_CONTENT,
-    Permission.VIEW_CHAT,
-    Permission.SEND_MESSAGE,
-    Permission.VIEW_ASSESSMENT,
-    Permission.TAKE_ASSESSMENT,
-    Permission.VIEW_CRISIS_RESOURCES,
-    Permission.TRIGGER_CRISIS_ALERT,
-    Permission.ACCESS_API,
-  ],
+  [UserRole.USER]: userPermissions,
   
-  [UserRole.HELPER]: [
-    // Inherits all USER permissions
-    ...rolePermissions[UserRole.USER],
-    Permission.VIEW_HELPER_DASHBOARD,
-    Permission.ACCEPT_HELP_REQUESTS,
-    Permission.PROVIDE_SUPPORT,
-    Permission.ACCESS_HELPER_TOOLS,
-    Permission.CREATE_CONTENT,
-    Permission.EDIT_CONTENT,
-  ],
+  [UserRole.HELPER]: helperPermissions,
   
-  [UserRole.MODERATOR]: [
-    // Inherits all HELPER permissions
-    ...rolePermissions[UserRole.HELPER],
-    Permission.VIEW_REPORTS,
-    Permission.MODERATE_USERS,
-    Permission.REVIEW_CONTENT,
-    Permission.DELETE_MESSAGE,
-    Permission.MODERATE_CHAT,
-    Permission.DELETE_CONTENT,
-  ],
+  [UserRole.MODERATOR]: moderatorPermissions,
   
-  [UserRole.CRISIS_RESPONDER]: [
-    // Inherits USER permissions
-    ...rolePermissions[UserRole.USER],
-    Permission.RESPOND_TO_CRISIS,
-    Permission.MANAGE_CRISIS_RESOURCES,
-    Permission.OVERRIDE_CRISIS_LIMITS,
-    Permission.VIEW_HELPER_DASHBOARD,
-    Permission.PROVIDE_SUPPORT,
-  ],
+  [UserRole.CRISIS_RESPONDER]: crisisResponderPermissions,
   
   [UserRole.ADMIN]: [
     // Has all permissions
@@ -148,15 +153,8 @@ const rolePermissions: Record<UserRole, Permission[]> = {
   ],
 };
 
-// Resource-based permissions
-interface ResourcePermission {
-  resource: Resource;
-  action: Action;
-  condition?: (user: any, resource: any) => boolean;
-}
-
 class RBACService {
-  private permissionCache = new Map<string, boolean>();
+  private readonly permissionCache = new Map<string, boolean>();
 
   /**
    * Check if role has permission
@@ -319,7 +317,7 @@ class RBACService {
   /**
    * Apply data filtering based on permissions
    */
-  filterDataByPermissions<T extends any>(
+  filterDataByPermissions<T extends object>(
     data: T[],
     userRoles: UserRole[],
     filterFn?: (item: T) => boolean

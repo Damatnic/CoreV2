@@ -22,7 +22,7 @@ const securityConfig = getSecurityConfigForEnvironment(
 export const cspMiddleware = () => {
   const generateNonce = () => randomBytes(16).toString('base64');
   
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (_req: Request, res: Response, next: NextFunction) => {
     const nonce = generateNonce();
     res.locals.nonce = nonce;
     
@@ -228,7 +228,7 @@ export const apiKeyAuthMiddleware = (req: Request, res: Response, next: NextFunc
 /**
  * Input Sanitization Middleware
  */
-export const inputSanitizationMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const inputSanitizationMiddleware = (req: Request, _res: Response, next: NextFunction) => {
   if (!securityConfig.apiSecurity.validation.inputSanitization) {
     return next();
   }
@@ -313,7 +313,7 @@ export const sqlInjectionProtectionMiddleware = (req: Request, res: Response, ne
 /**
  * XSS Protection Middleware
  */
-export const xssProtectionMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const xssProtectionMiddleware = (_req: Request, res: Response, next: NextFunction) => {
   if (!securityConfig.apiSecurity.validation.xssProtection) {
     return next();
   }
@@ -349,7 +349,7 @@ export const deviceFingerprintMiddleware = (req: Request, res: Response, next: N
 /**
  * Crisis Override Middleware
  */
-export const crisisOverrideMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const crisisOverrideMiddleware = (req: Request, _res: Response, next: NextFunction) => {
   const crisisHeader = req.headers['x-crisis-override'] as string;
   
   if (crisisHeader === 'true' && securityConfig.crisis.emergencyOverrides.enabled) {

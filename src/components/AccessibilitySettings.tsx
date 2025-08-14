@@ -482,7 +482,7 @@ export const AccessibilitySettingsComponent: React.FC<AccessibilitySettingsProps
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              className={`accessibility-tab ${activeTab === tab.id ? 'active' : ''}`}
+              className={activeTab === tab.id ? 'accessibility-tab active' : 'accessibility-tab'}
               onClick={() => setActiveTab(tab.id)}
               aria-pressed={activeTab === tab.id}
             >

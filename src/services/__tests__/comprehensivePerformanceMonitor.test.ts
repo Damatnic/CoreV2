@@ -2,13 +2,11 @@
  * @jest-environment jsdom
  */
 
-import { ComprehensivePerformanceMonitor, comprehensivePerformanceMonitor } from '../comprehensivePerformanceMonitor';
+import ComprehensivePerformanceMonitor, { comprehensivePerformanceMonitor } from '../comprehensivePerformanceMonitor';
 import type {
   EnhancedPerformanceMetrics,
-  PerformanceBudget,
   PerformanceAlert,
   PerformanceBottleneck,
-  OptimizationRecommendation,
 } from '../comprehensivePerformanceMonitor';
 
 // Mock dependencies
@@ -1095,7 +1093,7 @@ describe('ComprehensivePerformanceMonitor', () => {
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
       
       // Mock observer creation to throw
-      (global.PerformanceObserver as jest.Mock).mockImplementation(() => {
+      (global.PerformanceObserver as unknown as jest.Mock).mockImplementation(() => {
         throw new Error('Observer not supported');
       });
 
@@ -1128,32 +1126,6 @@ describe('ComprehensivePerformanceMonitor', () => {
       
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       
-      const mockMetrics: EnhancedPerformanceMetrics = {
-        firstContentfulPaint: 1500,
-        largestContentfulPaint: 2500,
-        firstInputDelay: 50,
-        cumulativeLayoutShift: 0.1,
-        timeToFirstByte: 200,
-        loadTime: 2000,
-        domContentLoaded: 1000,
-        bundleSize: 600000,
-        chunkCount: 4,
-        cacheHitRate: 0.8,
-        totalResourceSize: 1000000,
-        memoryUsage: 60,
-        cpuUsage: 0.4,
-        networkLatency: 50,
-        bandwidth: 10,
-        crisisDetectionResponseTime: 120,
-        chatMessageLatency: 200,
-        videoStreamingQuality: 100,
-        offlineCapabilityStatus: 100,
-        userEngagementScore: 80,
-        featureUsabilityScore: 85,
-        accessibilityScore: 80,
-        timestamp: Date.now(),
-      };
-
       // This shouldn't throw even if analytics fails
       await (monitor as any).collectCurrentMetrics();
       

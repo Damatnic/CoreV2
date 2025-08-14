@@ -25,7 +25,7 @@ export const AppTextArea: React.FC<AppTextAreaProps> = ({
       )}
       <textarea
         id={textareaId}
-        className={`form-textarea ${error ? 'error' : ''} ${className}`}
+        className={`form-textarea${error ? ' error' : ''} ${className}`}
         aria-invalid={!!error}
         aria-describedby={error ? `${textareaId}-error` : helperText ? `${textareaId}-helper` : undefined}
         {...props}

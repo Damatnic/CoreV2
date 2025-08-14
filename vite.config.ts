@@ -2,7 +2,7 @@ import { defineConfig, loadEnv, splitVendorChunkPlugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 import viteCompression from 'vite-plugin-compression';
-import { VitePWA } from 'vite-plugin-pwa';
+// import { VitePWA } from 'vite-plugin-pwa';
 import legacy from '@vitejs/plugin-legacy';
 
 // https://vitejs.dev/config/
@@ -15,15 +15,7 @@ export default defineConfig(({ mode }) => {
   
   return {
     plugins: [
-      react({
-        fastRefresh: true,
-        babel: {
-          plugins: isProduction ? [
-            ['@babel/plugin-transform-react-constant-elements'],
-            ['@babel/plugin-transform-react-inline-elements'],
-          ] : [],
-        },
-      }),
+      react(),
       splitVendorChunkPlugin(),
       // Compression plugins for production
       isProduction && viteCompression({
@@ -39,44 +31,6 @@ export default defineConfig(({ mode }) => {
         threshold: 10240,
         algorithm: 'brotliCompress',
         ext: '.br',
-      }),
-      // PWA support
-      VitePWA({
-        registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
-        manifest: {
-          name: 'Astral Core Mental Health',
-          short_name: 'Astral Core',
-          theme_color: '#4A90E2',
-          background_color: '#ffffff',
-          display: 'standalone',
-        },
-        workbox: {
-          runtimeCaching: [
-            {
-              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'google-fonts-cache',
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: 60 * 60 * 24 * 365,
-                },
-              },
-            },
-            {
-              urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|avif)$/,
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'images-cache',
-                expiration: {
-                  maxEntries: 100,
-                  maxAgeSeconds: 60 * 60 * 24 * 30,
-                },
-              },
-            },
-          ],
-        },
       }),
       // Legacy browser support
       legacy({
@@ -95,10 +49,13 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         buffer: 'buffer',
-        crypto: 'crypto-js',
         stream: 'stream-browserify',
         util: 'util'
       }
+    },
+    esbuild: {
+      jsx: 'automatic',
+      jsxImportSource: 'react',
     },
     build: {
       outDir: 'dist',
@@ -228,8 +185,6 @@ export default defineConfig(({ mode }) => {
         'react-markdown',
         'buffer',
         // Force bundling of potential CommonJS modules
-        'crypto-js',
-        'compromise',
         'i18next',
         'react-i18next'
       ],
@@ -237,14 +192,13 @@ export default defineConfig(({ mode }) => {
         // Exclude service worker related files
         'src/services/serviceWorkerManager.ts',
         // Exclude server-side dependencies
-        'natural',
-        'sentiment',
         'pg',
-        'pg-protocol',
-        'crypto'
+        'pg-protocol'
       ],
       esbuildOptions: {
         target: 'esnext',
+        jsx: 'automatic',
+        jsxImportSource: 'react',
         define: {
           global: 'globalThis'
         }

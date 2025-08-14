@@ -104,6 +104,15 @@ export const MobileViewportProvider: React.FC<MobileViewportProviderProps> = ({
     }
   }, [viewport.isKeyboardOpen, viewport.orientation]);
 
+  // Style objects for esbuild compatibility
+  const srOnlyStyle: React.CSSProperties = { 
+    position: 'absolute', 
+    left: '-10000px', 
+    width: '1px', 
+    height: '1px', 
+    overflow: 'hidden' 
+  };
+
   return (
     <div 
       ref={containerRef}
@@ -112,31 +121,11 @@ export const MobileViewportProvider: React.FC<MobileViewportProviderProps> = ({
       data-orientation={viewport.orientation}
     >
       {/* Screen reader announcements */}
-      <div 
-        id="viewport-announcer" 
-        aria-live="polite" 
-        aria-atomic="true"
-        style={{ 
-          position: 'absolute', 
-          left: '-10000px', 
-          width: '1px', 
-          height: '1px', 
-          overflow: 'hidden' 
-        }}
-      />
+      <div id="viewport-announcer" aria-live="polite" aria-atomic="true" style={srOnlyStyle} />
       
       {/* Keyboard active indicator for screen readers */}
       {viewport.isKeyboardOpen && (
-        <div 
-          id="keyboard-active" 
-          style={{ 
-            position: 'absolute', 
-            left: '-10000px', 
-            width: '1px', 
-            height: '1px', 
-            overflow: 'hidden' 
-          }}
-        >
+        <div id="keyboard-active" style={srOnlyStyle}>
           Virtual keyboard is active
         </div>
       )}
@@ -246,15 +235,12 @@ export const MobileInput: React.FC<MobileInputProps> = ({
     ? 'mobile-input-container mobile-input-floating' 
     : 'mobile-input-container';
 
+  const inputClassName = ['mobile-input', className, error && 'error'].filter(Boolean).join(' ');
+  const ariaDescribedBy = [errorId, helpId].filter(Boolean).join(' ') || undefined;
+
   return (
     <div className={containerClass}>
-      <input
-        id={inputId}
-        className={`mobile-input ${className} ${error ? 'error' : ''}`}
-        aria-invalid={error ? 'true' : 'false'}
-        aria-describedby={[errorId, helpId].filter(Boolean).join(' ') || undefined}
-        {...rest}
-      />
+      <input id={inputId} className={inputClassName} aria-invalid={error ? 'true' : 'false'} aria-describedby={ariaDescribedBy} {...rest} />
       
       {label && (
         <label htmlFor={inputId}>

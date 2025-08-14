@@ -389,7 +389,7 @@ export const AccessibilityButton: React.FC = () => {
 
       <div className="accessibility-floating-container">
         {isExpanded && (
-          <div className={`accessibility-quick-panel ${isExpanded ? 'expanded' : ''}`}>
+          <div className={isExpanded ? 'accessibility-quick-panel expanded' : 'accessibility-quick-panel'}>
             <div className="accessibility-panel-header">
               <h3 className="accessibility-panel-title">
                 <SettingsIcon />
@@ -405,7 +405,7 @@ export const AccessibilityButton: React.FC = () => {
             </div>
 
             <button
-              className={`quick-action-item ${settings.highContrast ? 'active' : ''}`}
+              className={settings.highContrast ? 'quick-action-item active' : 'quick-action-item'}
               onClick={() => handleQuickActions('high-contrast')}
               aria-label="Toggle high contrast mode"
             >
@@ -416,11 +416,11 @@ export const AccessibilityButton: React.FC = () => {
                   <span className="quick-action-shortcut">Alt + H</span>
                 </div>
               </div>
-              <div className={`quick-action-toggle ${settings.highContrast ? 'active' : ''}`} />
+              <div className={settings.highContrast ? 'quick-action-toggle active' : 'quick-action-toggle'} />
             </button>
 
             <button
-              className={`quick-action-item ${(settings.increasedTextSize || 1.0) > 1.0 ? 'active' : ''}`}
+              className={(settings.increasedTextSize || 1.0) > 1.0 ? 'quick-action-item active' : 'quick-action-item'}
               onClick={() => handleQuickActions('large-text')}
               aria-label="Cycle text size"
             >
@@ -431,11 +431,11 @@ export const AccessibilityButton: React.FC = () => {
                   <span className="quick-action-shortcut">Alt + T</span>
                 </div>
               </div>
-              <div className={`quick-action-toggle ${(settings.increasedTextSize || 1.0) > 1.0 ? 'active' : ''}`} />
+              <div className={(settings.increasedTextSize || 1.0) > 1.0 ? 'quick-action-toggle active' : 'quick-action-toggle'} />
             </button>
 
             <button
-              className={`quick-action-item ${settings.reducedMotion ? 'active' : ''}`}
+              className={settings.reducedMotion ? 'quick-action-item active' : 'quick-action-item'}
               onClick={() => handleQuickActions('reduce-motion')}
               aria-label="Toggle reduced motion"
             >
@@ -446,11 +446,11 @@ export const AccessibilityButton: React.FC = () => {
                   <span className="quick-action-shortcut">Alt + M</span>
                 </div>
               </div>
-              <div className={`quick-action-toggle ${settings.reducedMotion ? 'active' : ''}`} />
+              <div className={settings.reducedMotion ? 'quick-action-toggle active' : 'quick-action-toggle'} />
             </button>
 
             <button
-              className={`quick-action-item ${settings.screenReaderEnabled ? 'active' : ''}`}
+              className={settings.screenReaderEnabled ? 'quick-action-item active' : 'quick-action-item'}
               onClick={() => handleQuickActions('screen-reader')}
               aria-label="Toggle screen reader mode"
             >
@@ -461,11 +461,11 @@ export const AccessibilityButton: React.FC = () => {
                   <span className="quick-action-shortcut">Alt + R</span>
                 </div>
               </div>
-              <div className={`quick-action-toggle ${settings.screenReaderEnabled ? 'active' : ''}`} />
+              <div className={settings.screenReaderEnabled ? 'quick-action-toggle active' : 'quick-action-toggle'} />
             </button>
 
             <button
-              className={`quick-action-item ${settings.enhancedKeyboardNavigation ? 'active' : ''}`}
+              className={settings.enhancedKeyboardNavigation ? 'quick-action-item active' : 'quick-action-item'}
               onClick={() => handleQuickActions('keyboard-nav')}
               aria-label="Toggle keyboard navigation"
             >
@@ -476,7 +476,7 @@ export const AccessibilityButton: React.FC = () => {
                   <span className="quick-action-shortcut">Alt + K</span>
                 </div>
               </div>
-              <div className={`quick-action-toggle ${settings.enhancedKeyboardNavigation ? 'active' : ''}`} />
+              <div className={settings.enhancedKeyboardNavigation ? 'quick-action-toggle active' : 'quick-action-toggle'} />
             </button>
 
             <button
@@ -507,7 +507,7 @@ export const AccessibilityButton: React.FC = () => {
         )}
 
         <button
-          className={`accessibility-main-button ${isExpanded ? 'active' : ''}`}
+          className={isExpanded ? 'accessibility-main-button active' : 'accessibility-main-button'}
           onClick={() => setIsExpanded(!isExpanded)}
           aria-label={isExpanded ? 'Close accessibility menu' : 'Open accessibility menu'}
           aria-expanded={isExpanded}

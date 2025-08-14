@@ -13,13 +13,16 @@ import { usePreferenceStore } from '../stores/preferenceStore';
 import { PreferencesManager } from '../components/PreferencesManager';
 
 export const SettingsView: React.FC<{ 
-    userToken: string | null; 
-    onResetId: () => void;
-    setActiveView: (view: View) => void;
-}> = ({ userToken, onResetId, setActiveView }) => {
-    const { user } = useAuth();
+    userToken?: string | null; 
+    onResetId?: () => void;
+    setActiveView?: (view: View) => void;
+}> = ({ userToken: propUserToken, onResetId, setActiveView }) => {
+    const { user, userToken: contextUserToken } = useAuth();
     const { theme, toggleTheme } = useTheme();
     const { contentFilters, setFilters } = usePreferenceStore();
+    
+    // Use userToken from props or context
+    const userToken = propUserToken ?? contextUserToken;
     const [isResetModalOpen, setIsResetModalOpen] = useState(false);
     const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
     const [researchConsent, setResearchConsent] = useState(false);
@@ -34,7 +37,7 @@ export const SettingsView: React.FC<{
     }, [user, userToken]);
 
     const handleReset = () => {
-        onResetId();
+        onResetId?.();
         setIsResetModalOpen(false);
     }
 
@@ -153,7 +156,7 @@ export const SettingsView: React.FC<{
                                 <label>Blocked Users</label>
                                 <p>Permanently block communication with specific users for your safety and peace of mind.</p>
                             </div>
-                            <AppButton variant="secondary" onClick={() => setActiveView('blocked-users')}>
+                            <AppButton variant="secondary" onClick={() => setActiveView?.('blocked-users')}>
                                 Manage Blocked Users
                             </AppButton>
                         </div>

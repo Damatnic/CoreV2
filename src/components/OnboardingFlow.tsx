@@ -8,7 +8,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAccessibility } from './AccessibilityProvider';
 import { useFeedback } from './UserFeedback';
 import { LoadingButton, ProgressBar } from './LoadingStates';
-import { useResponsive } from './withMobileResponsive';
 
 interface OnboardingStep {
   id: string;
@@ -27,16 +26,13 @@ interface OnboardingStep {
 interface OnboardingFlowProps {
   onComplete: () => void;
   onSkip?: () => void;
-  userId?: string;
 }
 
 const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   onComplete,
   onSkip,
-  userId,
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set());
   const [userPreferences, setUserPreferences] = useState({
     role: 'seeker',
     primaryConcerns: [] as string[],
@@ -48,9 +44,8 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
-  const { announce, getAriaLabel } = useAccessibility();
+  const { announce } = useAccessibility();
   const { showFeedback } = useFeedback();
-  const { isMobile } = useResponsive();
 
   // Define onboarding steps
   const steps: OnboardingStep[] = [
@@ -98,7 +93,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
         <div className="onboarding-role">
           <div className="role-options">
             <button
-              className={`role-option ${userPreferences.role === 'seeker' ? 'selected' : ''}`}
+              className={userPreferences.role === 'seeker' ? 'role-option selected' : 'role-option'}
               onClick={() => setUserPreferences(prev => ({ ...prev, role: 'seeker' }))}
               aria-pressed={userPreferences.role === 'seeker'}
             >
@@ -107,7 +102,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               <p>Connect with peers and find support for your mental health journey</p>
             </button>
             <button
-              className={`role-option ${userPreferences.role === 'helper' ? 'selected' : ''}`}
+              className={userPreferences.role === 'helper' ? 'role-option selected' : 'role-option'}
               onClick={() => setUserPreferences(prev => ({ ...prev, role: 'helper' }))}
               aria-pressed={userPreferences.role === 'helper'}
             >
@@ -116,7 +111,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               <p>Provide support and share your experience to help others</p>
             </button>
             <button
-              className={`role-option ${userPreferences.role === 'both' ? 'selected' : ''}`}
+              className={userPreferences.role === 'both' ? 'role-option selected' : 'role-option'}
               onClick={() => setUserPreferences(prev => ({ ...prev, role: 'both' }))}
               aria-pressed={userPreferences.role === 'both'}
             >
@@ -445,8 +440,6 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       }
       setIsLoading(false);
     }
-
-    setCompletedSteps(prev => new Set(prev).add(currentStepData.id));
 
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);

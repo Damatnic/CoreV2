@@ -179,7 +179,11 @@ export function CrisisAlert({
 
   return (
     <div 
-      className={`crisis-alert ${config.className} ${show ? 'crisis-alert--show' : 'crisis-alert--hide'}`}
+      className={[
+        'crisis-alert',
+        config.className,
+        show ? 'crisis-alert--show' : 'crisis-alert--hide'
+      ].join(' ')}
       role="alert"
       aria-live="assertive"
       aria-labelledby="crisis-alert-title"
@@ -200,7 +204,7 @@ export function CrisisAlert({
         <div className="crisis-alert__header">
           <div className="crisis-alert__icon-container">
             <div 
-              className={`crisis-alert__icon ${config.pulse ? 'crisis-alert__icon--pulse' : ''}`}
+              className={config.pulse ? 'crisis-alert__icon crisis-alert__icon--pulse' : 'crisis-alert__icon'}
               style={{ color: config.color }}
               aria-hidden="true"
             >

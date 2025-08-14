@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '../../test-utils';
 import { CrisisAlert } from '../CrisisAlertFixed';
 import { createMockCrisisAlert, mockWindowMethods } from '../../test-utils';
@@ -232,7 +231,7 @@ describe('CrisisAlert', () => {
       const chatButton = screen.getByText(/Start Crisis Chat/);
       fireEvent.click(chatButton);
       
-      expect(mockWindow.mockOpen).toHaveBeenCalledWith(
+      expect(mockWindow.open).toHaveBeenCalledWith(
         'https://suicidepreventionlifeline.org/chat/',
         '_blank'
       );
@@ -246,7 +245,7 @@ describe('CrisisAlert', () => {
       fireEvent.click(callButton);
       
       expect(props.onEmergencyCall).toHaveBeenCalled();
-      expect(mockWindow.mockOpen).toHaveBeenCalledWith('tel:988', '_self');
+      expect(mockWindow.open).toHaveBeenCalledWith('tel:988', '_self');
     });
 
     it('should handle emergency text contacts', () => {
@@ -257,7 +256,7 @@ describe('CrisisAlert', () => {
       fireEvent.click(textButton);
       
       expect(props.onEmergencyCall).toHaveBeenCalled();
-      expect(mockWindow.mockOpen).toHaveBeenCalledWith('sms:741741', '_self');
+      expect(mockWindow.open).toHaveBeenCalledWith('sms:741741', '_self');
     });
   });
 
@@ -296,7 +295,7 @@ describe('CrisisAlert', () => {
       fireEvent.click(callButton);
       
       // Should still try to open the phone app
-      expect(mockWindow.mockOpen).toHaveBeenCalledWith('tel:988', '_self');
+      expect(mockWindow.open).toHaveBeenCalledWith('tel:988', '_self');
     });
 
     it('should display timestamp when alert is shown', () => {

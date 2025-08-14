@@ -216,7 +216,7 @@ export function validateEnvironment(env: NodeJS.ProcessEnv = process.env): Valid
     envSchema.parse(env);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      error.errors.forEach(err => {
+      error.issues.forEach((err) => {
         if (err.message.includes('Required')) {
           result.missing.push(err.path.join('.'));
         } else {

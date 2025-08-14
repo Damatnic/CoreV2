@@ -49,6 +49,47 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   const [preferences, setPreferences] = useState<UserThemePreferences>(defaultPreferences);
   const [systemColorMode, setSystemColorMode] = useState<'light' | 'dark'>('light');
 
+  // Helper functions (defined early to avoid hoisting issues)
+  const calculateIntensityMultiplier = (intensity: ColorIntensity): number => {
+    switch (intensity) {
+      case 'subtle': return 0.7;
+      case 'balanced': return 1.0;
+      case 'vibrant': return 1.3;
+      default: return 1.0;
+    }
+  };
+
+  const applyIntensityToColors = (colors: ThemeColors, multiplier: number): ThemeColors => {
+    if (multiplier === 1.0) return colors;
+    
+    // Only adjust certain color types, preserve others for accessibility
+    const adjustableKeys: (keyof ThemeColors)[] = [
+      'primary', 'primaryLight', 'secondary', 'secondaryLight',
+      'calm', 'hope', 'support', 'growth'
+    ];
+    
+    const adjustedColors = { ...colors };
+    
+    adjustableKeys.forEach(key => {
+      const color = colors[key];
+      if (color && typeof color === 'string' && color.startsWith('#')) {
+        // Simple intensity adjustment - could be more sophisticated
+        const hex = color.substring(1);
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        
+        const adjustedR = Math.min(255, Math.floor(r * multiplier));
+        const adjustedG = Math.min(255, Math.floor(g * multiplier));
+        const adjustedB = Math.min(255, Math.floor(b * multiplier));
+        
+        adjustedColors[key] = `#${adjustedR.toString(16).padStart(2, '0')}${adjustedG.toString(16).padStart(2, '0')}${adjustedB.toString(16).padStart(2, '0')}`;
+      }
+    });
+    
+    return adjustedColors;
+  };
+
   // Load preferences from localStorage on mount
   useEffect(() => {
     try {
@@ -145,7 +186,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     const baseColors = currentTheme.colors[currentColorMode];
     
     // Apply intensity modifications
-    const intensityMultiplier = getIntensityMultiplier(preferences.intensity);
+    const intensityMultiplier = calculateIntensityMultiplier(preferences.intensity);
     const adjustedColors = applyIntensityToColors(baseColors, intensityMultiplier);
     
     // Apply user color overrides
@@ -198,45 +239,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
       document.body.classList.add('reduce-motion');
     }
   }, [currentColors, currentTheme.id, currentColorMode, preferences]);
-
-  // Helper functions
-  const getIntensityMultiplier = (intensity: ColorIntensity): number => {
-    switch (intensity) {
-      case 'subtle': return 0.7;
-      case 'balanced': return 1.0;
-      case 'vibrant': return 1.3;
-      default: return 1.0;
-    }
-  };
-
-  const applyIntensityToColors = (colors: ThemeColors, multiplier: number): ThemeColors => {
-    if (multiplier === 1.0) return colors;
-    
-    // Only adjust certain color types, preserve others for accessibility
-    const adjustableKeys: (keyof ThemeColors)[] = [
-      'primary', 'primaryLight', 'secondary', 'secondaryLight',
-      'calm', 'hope', 'support', 'growth'
-    ];
-    
-    const result = { ...colors };
-    adjustableKeys.forEach(key => {
-      if (colors[key]) {
-        result[key] = adjustColorIntensity(colors[key], multiplier);
-      }
-    });
-    
-    return result;
-  };
-
-  const adjustColorIntensity = (color: string, multiplier: number): string => {
-    // Simple intensity adjustment - in production, use a proper color manipulation library
-    if (multiplier === 1.0) return color;
-    
-    // This is a simplified implementation
-    // In production, use libraries like chroma-js or color2k for proper color manipulation
-    const opacity = Math.min(1, Math.max(0.3, multiplier));
-    return color.includes('rgba') ? color : `${color}${Math.round(opacity * 255).toString(16).padStart(2, '0')}`;
-  };
 
   const getSpacingScale = (spacing: 'compact' | 'comfortable' | 'spacious') => {
     const baseScale = {

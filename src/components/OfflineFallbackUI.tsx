@@ -28,7 +28,7 @@ export const OfflineFallbackUI: React.FC<OfflineFallbackUIProps> = ({
   className = ''
 }) => {
   const { t } = useTranslation();
-  const { isOnline, capabilities, syncQueueSize, updateOfflineResources } = useEnhancedOffline();
+  const { isOnline, updateOfflineResources } = useEnhancedOffline();
   const [syncStatus, setSyncStatus] = useState<{
     size: number;
     isSyncing: boolean;

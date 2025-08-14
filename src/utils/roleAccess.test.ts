@@ -24,22 +24,22 @@ describe('roleAccess', () => {
     displayName: 'Test Helper',
     expertise: ['mental-health'],
     bio: 'Test bio',
-    role,
-    isOnline: true,
+    role: role as 'Community' | 'Certified' | 'Moderator' | 'Admin',
+    // isOnline: true, // Not part of Helper interface
     isAvailable: true,
     averageRating: 4.5,
     totalSessions: 10,
     profileImageUrl: 'test-image.jpg',
-    kudosReceived: 5,
-    badges: ['newbie'],
-    joinedAt: new Date(),
-    lastActiveAt: new Date(),
-    trainingCompleted: true,
-    applicationStatus: 'approved',
-    applicationNotes: '',
-    applicationDate: new Date(),
-    isFavorite: false,
+    kudosCount: 5,
     achievements: [],
+    applicationStatus: 'approved',
+    joinDate: '2023-01-01',
+    helperType: role === 'Certified' ? 'Certified' : 'Community',
+    reputation: 100,
+    xp: 1000,
+    level: 5,
+    nextLevelXp: 1500,
+    trainingCompleted: true,
   });
 
   describe('ROLE_PERMISSIONS constant', () => {
@@ -450,8 +450,8 @@ describe('roleAccess', () => {
       ];
 
       malformedHelpers.forEach(helper => {
-        expect(() => getUserRole(helper as Helper)).not.toThrow();
-        expect(getUserRole(helper as Helper)).toBe('Starkeeper');
+        expect(() => getUserRole(helper as unknown as Helper)).not.toThrow();
+        expect(getUserRole(helper as unknown as Helper)).toBe('Starkeeper');
       });
     });
 
@@ -462,7 +462,7 @@ describe('roleAccess', () => {
       variations.forEach(variation => {
         const helper = { ...createMockHelper('Admin'), role: variation as UserRole };
         // This should return the role as-is (type casting), but permissions would default
-        expect(getUserRole(helper)).toBe(variation);
+        expect(getUserRole(helper as Helper)).toBe(variation);
       });
     });
   });

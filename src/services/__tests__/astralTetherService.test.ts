@@ -7,9 +7,7 @@ import type {
   TetherRequest,
   TetherSession,
   TetherSettings,
-  TetherProfile,
-  TetherMetrics,
-  TetherCircle
+  TetherProfile
 } from '../astralTetherService';
 
 // Mock dependencies
@@ -29,7 +27,7 @@ const mockSecureStorage = {
   removeItem: jest.fn(),
 };
 
-jest.mock('../websocketService', () => ({
+jest.mock('../webSocketService', () => ({
   getWebSocketService: () => mockWebSocketService,
 }));
 
@@ -73,7 +71,7 @@ describe('AstralTetherService', () => {
     
     // Reset navigator mocks
     (navigator.vibrate as jest.Mock).mockReturnValue(true);
-    (navigator.geolocation.getCurrentPosition as jest.Mock).mockImplementation((success, error, options) => {
+    (navigator.geolocation.getCurrentPosition as jest.Mock).mockImplementation((success) => {
       success({
         coords: {
           latitude: 40.7128,
@@ -130,7 +128,7 @@ describe('AstralTetherService', () => {
     test('should create default profile if none exists', async () => {
       mockSecureStorage.getItem.mockResolvedValue(null);
       
-      const newService = getAstralTetherService();
+      getAstralTetherService();
       
       // Allow time for async initialization
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -229,7 +227,7 @@ describe('AstralTetherService', () => {
         isAnonymous: true,
       };
 
-      const requestId = await tetherService.sendTetherRequest(request);
+      await tetherService.sendTetherRequest(request);
       
       expect(mockWebSocketService.send).toHaveBeenCalledWith('tether-request', expect.objectContaining({
         fromUserId: expect.stringMatching(/^anon-/),
@@ -1123,7 +1121,7 @@ describe('AstralTetherService', () => {
     });
 
     test('should handle geolocation errors gracefully', async () => {
-      (navigator.geolocation.getCurrentPosition as jest.Mock).mockImplementation((success, error) => {
+      (navigator.geolocation.getCurrentPosition as jest.Mock).mockImplementation((_, error) => {
         error({ code: 1, message: 'Permission denied' });
       });
 

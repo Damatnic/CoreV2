@@ -28,7 +28,7 @@ interface FeedbackMessage {
 }
 
 interface FeedbackContextValue {
-  showFeedback: (feedback: Omit<FeedbackMessage, 'id'>) => void;
+  showFeedback: (feedback: Omit<FeedbackMessage, 'id'>) => string;
   hideFeedback: (id: string) => void;
   clearAllFeedback: () => void;
   updateFeedback: (id: string, updates: Partial<FeedbackMessage>) => void;
@@ -116,7 +116,11 @@ const Toast: React.FC<{
 
   return (
     <div
-      className={`feedback-toast ${typeClasses[feedback.type]} ${isVisible ? 'feedback-toast--visible' : ''}`}
+      className={[
+        'feedback-toast',
+        typeClasses[feedback.type],
+        isVisible && 'feedback-toast--visible'
+      ].filter(Boolean).join(' ')}
       role={feedback.type === 'error' ? 'alert' : 'status'}
       aria-live={feedback.type === 'error' ? 'assertive' : 'polite'}
     >
@@ -314,6 +318,7 @@ export const FeedbackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     };
 
     setFeedbackMessages(prev => [...prev, newFeedback]);
+    return id;
   }, []);
 
   const hideFeedback = useCallback((id: string) => {
@@ -413,10 +418,8 @@ export const feedbackUtils = {
   ) => {
     const { showFeedback, hideFeedback } = useFeedback();
     
-    const loadingId = `loading-${Date.now()}`;
-    showFeedback({
+    const loadingId = showFeedback({
       ...feedbackUtils.loading(messages.loading || 'Processing...'),
-      id: loadingId,
     });
     
     try {

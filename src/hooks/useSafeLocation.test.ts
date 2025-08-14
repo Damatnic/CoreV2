@@ -2,7 +2,7 @@
  * Tests for Safe Location Hook
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { useSafeLocation } from './useSafeLocation';
 
@@ -230,7 +230,7 @@ describe('useSafeLocation Hook', () => {
         pathname: '/updated',
         search: '?updated=true',
         hash: '#new',
-        state: { updated: true },
+        state: { updated: true } as any,
         key: 'updated'
       }
     };

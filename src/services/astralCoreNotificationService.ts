@@ -76,14 +76,15 @@ class AstralCoreNotificationService {
   private swRegistration: ServiceWorkerRegistration | null = null;
   private permission: NotificationPermission = 'default';
   private preferences: NotificationPreferences;
-  private notificationQueue: Notification[] = [];
+  private readonly notificationQueue: Notification[] = [];
   private isOnline: boolean = navigator.onLine;
-  private vapidPublicKey: string;
+  private readonly vapidPublicKey: string;
 
   constructor() {
     this.vapidPublicKey = getEnv('VITE_VAPID_PUBLIC_KEY') || '';
     this.preferences = this.loadPreferences();
-    this.initializeService();
+    // Initialize service asynchronously to avoid constructor async operation
+    setTimeout(() => this.initializeService(), 0);
   }
 
   /**
@@ -238,14 +239,10 @@ class AstralCoreNotificationService {
       body: notification.body,
       icon: notification.icon || '/icon-192.png',
       badge: notification.badge || '/icon-96.png',
-      image: notification.image,
       tag: notification.id,
       data: notification.data,
       requireInteraction: notification.requireInteraction || notification.priority === NotificationPriority.CRISIS,
       silent: !notification.soundEnabled,
-      vibrate: notification.vibrationPattern || this.getVibrationPattern(notification.priority),
-      actions: notification.actions,
-      timestamp: notification.timestamp.getTime(),
     };
 
     // Use service worker if available
@@ -468,10 +465,8 @@ class AstralCoreNotificationService {
         if (currentTime >= start && currentTime <= end) {
           return false;
         }
-      } else {
-        if (currentTime >= start || currentTime <= end) {
-          return false;
-        }
+      } else if (currentTime >= start || currentTime <= end) {
+        return false;
       }
     }
 
@@ -492,24 +487,6 @@ class AstralCoreNotificationService {
         return this.preferences.communityUpdates;
       default:
         return true;
-    }
-  }
-
-  /**
-   * Get vibration pattern based on priority
-   */
-  private getVibrationPattern(priority: NotificationPriority): number[] {
-    switch (priority) {
-      case NotificationPriority.CRISIS:
-        return [200, 100, 200, 100, 200]; // SOS
-      case NotificationPriority.URGENT:
-        return [300, 100, 300];
-      case NotificationPriority.HIGH:
-        return [200, 100, 200];
-      case NotificationPriority.NORMAL:
-        return [200];
-      default:
-        return [100];
     }
   }
 
@@ -554,8 +531,8 @@ class AstralCoreNotificationService {
    */
   private trackNotification(notification: Notification): void {
     // Send analytics event
-    if (window.gtag) {
-      window.gtag('event', 'notification_shown', {
+    if ((window as any).gtag) {
+      (window as any).gtag('event', 'notification_shown', {
         notification_type: notification.type,
         notification_priority: notification.priority,
       });
@@ -612,7 +589,7 @@ class AstralCoreNotificationService {
    * Generate unique ID
    */
   private generateId(): string {
-    return `notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `notif_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**
@@ -621,7 +598,7 @@ class AstralCoreNotificationService {
   private urlBase64ToUint8Array(base64String: string): Uint8Array {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
     const base64 = (base64String + padding)
-      .replace(/\-/g, '+')
+      .replace(/-/g, '+')
       .replace(/_/g, '/');
 
     const rawData = window.atob(base64);

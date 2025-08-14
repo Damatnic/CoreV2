@@ -15,9 +15,10 @@ const OriginalDate = Date;
 global.Date = class extends OriginalDate {
   constructor(...args: any[]) {
     if (args.length === 0) {
-      return mockDate;
+      super(mockDate.getTime());
+    } else {
+      super(...args as []);
     }
-    return new OriginalDate(...args);
   }
 } as any;
 
@@ -28,7 +29,9 @@ describe('chartUtils', () => {
       userToken: 'test-user-token',
       notes: 'Test notes',
       tags: ['test'],
-      activities: []
+      anxietyLevel: 3,
+      sleepQuality: 4,
+      energyLevel: 3
     };
 
     beforeEach(() => {

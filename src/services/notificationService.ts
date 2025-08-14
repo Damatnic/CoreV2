@@ -4,6 +4,7 @@
  */
 
 import { Toast } from '../types';
+import { ENV } from '../utils/envConfig';
 import apiService from './apiService';
 
 export interface NotificationOptions {
@@ -77,7 +78,7 @@ class NotificationService {
     frequency: 'all'
   };
   private isOnline: boolean = navigator.onLine;
-  private vapidPublicKey: string = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
+  private vapidPublicKey: string = ENV.VAPID_PUBLIC_KEY || '';
   private _addToast: ((message: string, type?: Toast['type']) => void) | null = null;
 
   constructor() {
@@ -216,7 +217,7 @@ class NotificationService {
   /**
    * Convert VAPID key from base64 to Uint8Array
    */
-  private urlBase64ToUint8Array(base64String: string): Uint8Array {
+  private urlBase64ToUint8Array(base64String: string): ArrayBuffer {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
     const base64 = (base64String + padding)
       .replace(/\-/g, '+')
@@ -228,7 +229,7 @@ class NotificationService {
     for (let i = 0; i < rawData.length; ++i) {
       outputArray[i] = rawData.charCodeAt(i);
     }
-    return outputArray;
+    return outputArray.buffer;
   }
 
   /**
@@ -282,8 +283,8 @@ class NotificationService {
           data: options.data,
           requireInteraction: options.requireInteraction,
           silent: options.silent || !this.preferences.sound,
-          vibrate: this.preferences.vibration ? options.vibrate : undefined,
-          actions: options.actions
+          // vibrate: this.preferences.vibration ? options.vibrate : undefined,
+          // actions: options.actions
         });
       } else {
         // Fallback to Notification API
@@ -294,8 +295,8 @@ class NotificationService {
           tag: options.tag,
           data: options.data,
           requireInteraction: options.requireInteraction,
-          silent: options.silent || !this.preferences.sound,
-          vibrate: this.preferences.vibration ? options.vibrate : undefined
+          silent: options.silent || !this.preferences.sound
+          // vibrate: this.preferences.vibration ? options.vibrate : undefined
         });
       }
 
@@ -443,9 +444,10 @@ class NotificationService {
   /**
    * Schedule next occurrence of recurring notification
    */
-  private scheduleNextOccurrence(id: string, notification: NotificationOptions, lastTime: Date, recurring: ScheduledNotification['recurring']) {
+  private scheduleNextOccurrence(_id: string, notification: NotificationOptions, lastTime: Date, recurring: ScheduledNotification['recurring']) {
     let nextTime = new Date(lastTime);
 
+    if (!recurring) { return; }
     switch (recurring.type) {
       case 'daily':
         nextTime.setDate(nextTime.getDate() + 1);

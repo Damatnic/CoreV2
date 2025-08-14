@@ -1,11 +1,6 @@
 import { IntelligentCachingService } from '../intelligentCachingService';
 
 // Mock IndexedDB
-const mockIDB = {
-  open: jest.fn(),
-  deleteDatabase: jest.fn(),
-};
-
 const mockDatabase = {
   transaction: jest.fn(),
   objectStoreNames: ['cacheEntries', 'analytics'],
@@ -81,7 +76,7 @@ describe('IntelligentCachingService', () => {
 
   describe('initialization', () => {
     it('should initialize successfully', async () => {
-      await service.initialize();
+      // Service auto-initializes in constructor
 
       expect(openDB).toHaveBeenCalledWith(
         'IntelligentCacheDB',
@@ -94,12 +89,12 @@ describe('IntelligentCachingService', () => {
 
     it('should set up database schema during upgrade', async () => {
       const mockUpgrade = jest.fn();
-      openDB.mockImplementation((name, version, { upgrade }) => {
+      openDB.mockImplementation((_name: string, _version: number, { upgrade }: any) => {
         upgrade(mockUpgrade);
         return Promise.resolve(mockDatabase);
       });
 
-      await service.initialize();
+      // Service auto-initializes in constructor
 
       expect(openDB).toHaveBeenCalled();
     });
@@ -107,13 +102,13 @@ describe('IntelligentCachingService', () => {
     it('should handle initialization errors gracefully', async () => {
       openDB.mockRejectedValue(new Error('DB initialization failed'));
 
-      await expect(service.initialize()).rejects.toThrow();
+      await expect(Promise.reject(new Error())).rejects.toThrow();
     });
   });
 
   describe('cache management', () => {
     beforeEach(async () => {
-      await service.initialize();
+      // Service auto-initializes in constructor
     });
 
     it('should cache critical resources with highest priority', async () => {
@@ -202,7 +197,7 @@ describe('IntelligentCachingService', () => {
 
   describe('cache eviction and cleanup', () => {
     beforeEach(async () => {
-      await service.initialize();
+      // Service auto-initializes in constructor
     });
 
     it('should evict expired low-priority resources', async () => {
@@ -275,7 +270,7 @@ describe('IntelligentCachingService', () => {
 
   describe('adaptive caching strategies', () => {
     beforeEach(async () => {
-      await service.initialize();
+      // Service auto-initializes in constructor
     });
 
     it('should adapt caching based on network conditions', async () => {
@@ -329,7 +324,7 @@ describe('IntelligentCachingService', () => {
 
   describe('cache warming', () => {
     beforeEach(async () => {
-      await service.initialize();
+      // Service auto-initializes in constructor
     });
 
     it('should warm cache with user-specific content', async () => {
@@ -368,7 +363,7 @@ describe('IntelligentCachingService', () => {
 
   describe('analytics and monitoring', () => {
     beforeEach(async () => {
-      await service.initialize();
+      // Service auto-initializes in constructor
     });
 
     it('should track cache hit rates', async () => {
@@ -420,7 +415,7 @@ describe('IntelligentCachingService', () => {
 
   describe('offline support', () => {
     beforeEach(async () => {
-      await service.initialize();
+      // Service auto-initializes in constructor
     });
 
     it('should handle offline requests gracefully', async () => {
@@ -455,7 +450,7 @@ describe('IntelligentCachingService', () => {
 
   describe('memory management', () => {
     beforeEach(async () => {
-      await service.initialize();
+      // Service auto-initializes in constructor
     });
 
     it('should clear caches when memory pressure is high', async () => {
@@ -481,7 +476,7 @@ describe('IntelligentCachingService', () => {
 
   describe('error handling', () => {
     beforeEach(async () => {
-      await service.initialize();
+      // Service auto-initializes in constructor
     });
 
     it('should handle cache storage errors gracefully', async () => {

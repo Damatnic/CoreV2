@@ -3,9 +3,9 @@
  * Centralized error management with user-friendly messaging and crisis support
  */
 
-import { astralCoreNotificationService } from './astralCoreNotificationService';
+import { astralCoreNotificationService, NotificationType, NotificationPriority } from './astralCoreNotificationService';
 import { apiClient } from './apiClient';
-import { getEnv, isProduction, isDevelopment } from '../utils/envValidator';
+import { getEnvVar, isProd, isDev } from '../utils/envConfig';
 
 // Error Types
 export enum ErrorType {
@@ -128,16 +128,17 @@ const CRISIS_ERROR_CODES = [
  */
 class AstralCoreErrorService {
   private errorLog: AstralCoreError[] = [];
-  private maxLogSize = 100;
-  private reportingEnabled: boolean;
-  private errorListeners: Map<string, (error: AstralCoreError) => void> = new Map();
+  private readonly maxLogSize = 100;
+  private readonly reportingEnabled: boolean;
+  private readonly errorListeners: Map<string, (error: AstralCoreError) => void> = new Map();
   private globalHandlersSetup = false;
-  private sessionId: string;
+  private readonly sessionId: string;
   private batchReportTimer: NodeJS.Timeout | null = null;
   private errorBatch: AstralCoreError[] = [];
 
   constructor() {
-    this.reportingEnabled = getEnv('VITE_ERROR_REPORTING_ENABLED') === 'true';
+    // Enable error reporting in production, optional in development
+    this.reportingEnabled = getEnvVar('NODE_ENV') === 'production' || getEnvVar('VITE_DEBUG_MODE') === 'true';
     this.sessionId = this.generateSessionId();
     this.setupGlobalHandlers();
   }
@@ -146,7 +147,7 @@ class AstralCoreErrorService {
    * Handle error with options
    */
   handle(
-    error: Error | AstralCoreError | any,
+    error: Error | AstralCoreError,
     options: ErrorHandlerOptions = {}
   ): AstralCoreError {
     const {
@@ -355,21 +356,14 @@ class AstralCoreErrorService {
 
     // Window error handler
     window.addEventListener('error', (event) => {
-      this.handle({
-        message: event.message,
-        filename: event.filename,
-        lineno: event.lineno,
-        colno: event.colno,
-        error: event.error,
-      });
+      const error = event.error || new Error(event.message);
+      this.handle(error);
     });
 
     // Promise rejection handler
     window.addEventListener('unhandledrejection', (event) => {
-      this.handle({
-        message: 'Unhandled Promise Rejection',
-        reason: event.reason,
-      });
+      const error = event.reason instanceof Error ? event.reason : new Error('Unhandled Promise Rejection');
+      this.handle(error);
     });
 
     // Network status handler
@@ -382,8 +376,8 @@ class AstralCoreErrorService {
 
     window.addEventListener('online', () => {
       astralCoreNotificationService.show({
-        type: 'system_alert',
-        priority: 'normal',
+        type: NotificationType.SYSTEM_ALERT,
+        priority: NotificationPriority.NORMAL,
         title: 'Connection Restored',
         body: 'You\'re back online!',
       });
@@ -424,12 +418,11 @@ class AstralCoreErrorService {
    * Check if error is AstralCoreError
    */
   private isAstralError(error: any): error is AstralCoreError {
-    return error && 
-           error.id && 
-           error.type && 
-           error.severity &&
-           error.code &&
-           error.timestamp;
+    return error?.id && 
+           error?.type && 
+           error?.severity &&
+           error?.code &&
+           error?.timestamp;
   }
 
   /**
@@ -504,6 +497,11 @@ class AstralCoreErrorService {
       'SERVICE_TERMINATED',
       'CRITICAL_FAILURE',
     ];
+
+    // Crisis errors are generally not automatically recoverable
+    if (type === ErrorType.CRISIS) {
+      return false;
+    }
 
     return !nonRecoverableCodes.includes(code);
   }
@@ -592,10 +590,15 @@ class AstralCoreErrorService {
     }
 
     // Console logging
-    if (!suppressConsole && isDevelopment()) {
-      const logMethod = error.severity === ErrorSeverity.CRITICAL ? 'error' : 
-                       error.severity === ErrorSeverity.HIGH ? 'warn' : 
-                       'log';
+    if (!suppressConsole && isDev()) {
+      let logMethod: keyof Console;
+      if (error.severity === ErrorSeverity.CRITICAL) {
+        logMethod = 'error';
+      } else if (error.severity === ErrorSeverity.HIGH) {
+        logMethod = 'warn';
+      } else {
+        logMethod = 'log';
+      }
       
       console[logMethod]('Astral Core Error:', {
         code: error.code,
@@ -693,7 +696,7 @@ class AstralCoreErrorService {
       await apiClient.post('/errors/report', {
         errors: batch,
         sessionId: this.sessionId,
-        environment: isProduction() ? 'production' : 'development',
+        environment: isProd() ? 'production' : 'development',
       });
     } catch (error) {
       console.error('Astral Core: Failed to report errors', error);
@@ -713,14 +716,14 @@ class AstralCoreErrorService {
         
         // Notify success
         astralCoreNotificationService.show({
-          type: 'system_alert',
-          priority: 'normal',
+          type: NotificationType.SYSTEM_ALERT,
+          priority: NotificationPriority.NORMAL,
           title: 'Success',
           body: 'The operation completed successfully.',
         });
       } catch (retryError) {
         // Handle retry failure
-        this.handle(retryError, {
+        this.handle(retryError as Error, {
           notify: true,
           retry: undefined, // Don't retry again
         });
@@ -861,21 +864,21 @@ class AstralCoreErrorService {
    * Generate error ID
    */
   private generateErrorId(): string {
-    return `err_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `err_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**
    * Generate listener ID
    */
   private generateListenerId(): string {
-    return `listener_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `listener_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**
    * Generate session ID
    */
   private generateSessionId(): string {
-    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `session_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 }
 

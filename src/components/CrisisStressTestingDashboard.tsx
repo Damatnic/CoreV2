@@ -340,10 +340,10 @@ export const CrisisStressTestingDashboard: React.FC<CrisisStressTestingDashboard
           <h3>Detailed Test Results</h3>
           <div className="results-table">
             {testResults.map((result) => (
-              <div key={result.testId} className={`result-row ${result.success ? 'success' : 'failed'}`}>
+              <div key={result.testId} className={result.success ? 'result-row success' : 'result-row failed'}>
                 <div className="result-header">
                   <span className="test-name">{result.scenario.name}</span>
-                  <span className={`status-badge ${result.success ? 'success' : 'failed'}`}>
+                  <span className={result.success ? 'status-badge success' : 'status-badge failed'}>
                     {result.success ? '✅ PASSED' : '❌ FAILED'}
                   </span>
                   <span className={`safety-impact safety-${result.impactAssessment.safetyImpact}`}>
@@ -419,7 +419,7 @@ export const CrisisStressTestingDashboard: React.FC<CrisisStressTestingDashboard
               <div key={test.id} className="failover-card">
                 <div className="failover-header">
                   <span className="component-name">{test.component}</span>
-                  <span className={`failover-status ${test.testResult?.fallbackWorked ? 'success' : 'failed'}`}>
+                  <span className={test.testResult?.fallbackWorked ? 'failover-status success' : 'failover-status failed'}>
                     {test.testResult?.fallbackWorked ? '✅ SUCCESS' : '❌ FAILED'}
                   </span>
                 </div>

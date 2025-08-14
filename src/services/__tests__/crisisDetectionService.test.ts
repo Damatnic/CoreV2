@@ -1,4 +1,4 @@
-import crisisDetectionService, { CrisisAnalysisResult, CrisisEscalationAction } from '../crisisDetectionService';
+import crisisDetectionService, { CrisisAnalysisResult } from '../crisisDetectionService';
 
 // Mock analytics service
 jest.mock('../analyticsService', () => ({

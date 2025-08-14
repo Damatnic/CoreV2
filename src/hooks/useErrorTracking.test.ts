@@ -393,11 +393,12 @@ describe('useErrorTracking Hook', () => {
   });
 
   it('should maintain hook properties when options change', () => {
+    type TestProps = { userType: 'seeker' | 'helper' | 'admin', feature: 'chat' | 'crisis-detection' | 'safety-plan' | 'mood-tracking' | 'community' | 'mood-tracker' | 'assessment' | 'profile' | 'dashboard' | 'api' | 'moderation' };
     const { result, rerender } = renderHook(
-      ({ userType, feature }) => useErrorTracking({ userType, feature }),
+      ({ userType, feature }: TestProps) => useErrorTracking({ userType, feature }),
       {
         wrapper: Wrapper,
-        initialProps: { userType: 'seeker' as const, feature: 'initial' }
+        initialProps: { userType: 'seeker', feature: 'chat' } as TestProps
       }
     );
     
@@ -409,21 +410,21 @@ describe('useErrorTracking Hook', () => {
       error,
       expect.objectContaining({
         userType: 'seeker',
-        feature: 'initial'
+        feature: 'chat'
       }),
       undefined
     );
 
     // Change props
-    rerender({ userType: 'helper' as const, feature: 'updated' });
+    rerender({ userType: 'seeker', feature: 'community' } as TestProps);
     
     result.current.trackError(error);
     
     expect(ErrorTrackingService.captureError).toHaveBeenLastCalledWith(
       error,
       expect.objectContaining({
-        userType: 'helper',
-        feature: 'updated'
+        userType: 'seeker',
+        feature: 'community'
       }),
       undefined
     );

@@ -12,9 +12,16 @@ import { AuthContext } from '../../../contexts/AuthContext';
 // Mock auth context
 const mockAuthContext = {
   user: null,
+  isAuthenticated: false,
   isAnonymous: false,
+  helperProfile: null,
+  isNewUser: false,
+  isLoading: false,
+  userToken: null,
   login: jest.fn(),
   logout: jest.fn(),
+  reloadProfile: jest.fn(),
+  updateHelperProfile: jest.fn(),
   authState: {
     user: null,
     isAnonymous: false,

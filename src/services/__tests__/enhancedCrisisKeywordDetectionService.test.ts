@@ -1,11 +1,4 @@
-import enhancedCrisisKeywordDetectionService, { 
-  EnhancedCrisisDetectionResult,
-  CrisisKeywordMatch,
-  CrisisRiskAssessment,
-  EmotionalCrisisIndicator,
-  InterventionRecommendation,
-  InterventionUrgencyLevel
-} from '../enhancedCrisisKeywordDetectionService';
+import enhancedCrisisKeywordDetectionService from '../enhancedCrisisKeywordDetectionService';
 
 describe('EnhancedCrisisKeywordDetectionService', () => {
   let service: typeof enhancedCrisisKeywordDetectionService;

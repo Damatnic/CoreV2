@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen } from '../../test-utils';
 import LoadingSkeleton from '../LoadingSkeleton';
 
@@ -334,7 +333,7 @@ describe('LoadingSkeleton', () => {
       const wrappers = Array.from(container.children);
       expect(wrappers).toHaveLength(2);
       
-      wrappers.forEach((wrapper, index) => {
+      wrappers.forEach((wrapper) => {
         expect(wrapper.tagName.toLowerCase()).toBe('div');
         // Keys are not directly accessible, but structure should be correct
         expect(wrapper.children).toHaveLength(1);

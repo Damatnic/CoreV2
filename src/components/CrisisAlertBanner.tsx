@@ -29,7 +29,7 @@ export const CrisisAlertBanner: React.FC<{
   };
   
   return (
-    <div className={getBannerClass()}>
+    <div className={getBannerClass()} data-testid="crisis-alert-banner">
       <div className="crisis-alert-content">
         <div className="crisis-alert-header">
           <h3>You're Not Alone - Help is Available 24/7</h3>
@@ -119,7 +119,7 @@ export const FloatingCrisisButton: React.FC = () => {
   };
   
   return (
-    <div className={`floating-crisis-button ${isExpanded ? 'expanded' : ''}`}>
+    <div className={isExpanded ? 'floating-crisis-button expanded' : 'floating-crisis-button'}>
       {!isExpanded ? (
         <button 
           className="crisis-help-trigger urgent-pulse"

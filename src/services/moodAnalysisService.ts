@@ -465,17 +465,28 @@ class MoodAnalysisService {
 export const useMoodAnalysis = () => {
   const [service] = React.useState(() => new MoodAnalysisService());
   const [moodHistory, setMoodHistory] = React.useState<MoodAnalysis[]>([]);
+  const [isAnalyzing, setIsAnalyzing] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     service.getMoodHistory().then(setMoodHistory);
   }, [service]);
 
   const analyzeMood = React.useCallback(async (text: string) => {
-    const analysis = service.analyzeMood(text);
-    await service.saveMoodAnalysis(analysis);
-    const updatedHistory = await service.getMoodHistory();
-    setMoodHistory(updatedHistory);
-    return analysis;
+    setIsAnalyzing(true);
+    setError(null);
+    try {
+      const analysis = service.analyzeMood(text);
+      await service.saveMoodAnalysis(analysis);
+      const updatedHistory = await service.getMoodHistory();
+      setMoodHistory(updatedHistory);
+      return analysis;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Analysis failed');
+      throw err;
+    } finally {
+      setIsAnalyzing(false);
+    }
   }, [service]);
 
   const getMoodPattern = React.useCallback(() => {
@@ -492,6 +503,8 @@ export const useMoodAnalysis = () => {
     getMoodPattern,
     getRecommendations,
     moodHistory,
+    isAnalyzing,
+    error,
     clearHistory: async () => {
       await service.clearMoodHistory();
       setMoodHistory([]);

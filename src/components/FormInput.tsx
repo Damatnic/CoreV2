@@ -300,7 +300,7 @@ const FormInputWrapper: React.FC<FormInputWrapperProps> = ({
     <div className={formGroupClasses}>
       {/* Label (non-floating) */}
       {label && !floatingLabel && (
-        <label htmlFor={id} className={`form-label ${required ? 'required' : ''}`}>
+        <label htmlFor={id} className={required ? 'form-label required' : 'form-label'}>
           {label}
         </label>
       )}
@@ -328,7 +328,7 @@ const FormInputWrapper: React.FC<FormInputWrapperProps> = ({
 
         {/* Floating label */}
         {label && floatingLabel && (
-          <label htmlFor={id} className={`form-label ${required ? 'required' : ''}`}>
+          <label htmlFor={id} className={required ? 'form-label required' : 'form-label'}>
             {label}
           </label>
         )}
@@ -450,7 +450,11 @@ const CharacterCount: React.FC<CharacterCountProps> = ({
   return (
     <div 
       id={counterId}
-      className={`form-character-count ${isNearLimit ? 'near-limit' : ''} ${isOverLimit ? 'over-limit' : ''}`}
+      className={[
+        'form-character-count',
+        isNearLimit && 'near-limit',
+        isOverLimit && 'over-limit'
+      ].filter(Boolean).join(' ')}
     >
       <span>{charactersUsed}/{maxLength} characters</span>
       <span>{charactersRemaining} remaining</span>

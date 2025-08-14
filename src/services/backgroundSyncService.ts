@@ -203,7 +203,7 @@ class BackgroundSyncService {
     }
     
     try {
-      const registration = await navigator.serviceWorker.ready;
+      await navigator.serviceWorker.ready;
       
       // Listen for sync messages from service worker
       navigator.serviceWorker.addEventListener('message', (event) => {

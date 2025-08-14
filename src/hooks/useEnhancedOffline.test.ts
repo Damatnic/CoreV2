@@ -318,9 +318,11 @@ describe('useEnhancedOffline Hook', () => {
     });
 
     const syncItem = {
-      type: 'crisis-report' as const,
+      type: 'crisis-event' as const,
       data: { riskLevel: 75, timestamp: Date.now() },
-      priority: 'high' as const
+      priority: 5,
+      culturalContext: 'western',
+      language: 'en'
     };
 
     await act(async () => {
@@ -349,9 +351,11 @@ describe('useEnhancedOffline Hook', () => {
     });
 
     const syncItem = {
-      type: 'crisis-report' as const,
+      type: 'session-data' as const,
       data: { test: true },
-      priority: 'medium' as const
+      priority: 3,
+      culturalContext: 'western',
+      language: 'en'
     };
 
     await act(async () => {

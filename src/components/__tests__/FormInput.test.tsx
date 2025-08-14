@@ -1,12 +1,13 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '../../test-utils';
+import { render, screen, waitFor, user } from '../../test-utils';
 import { FormInput } from '../FormInput';
 import { createMockFormInputProps, mockUseFormAnimations } from '../../test-utils';
-import { user } from '../../test-utils';
+
+// Create a shared mock instance
+const mockAnimations = mockUseFormAnimations();
 
 // Mock the useFormAnimations hook
 jest.mock('../hooks/useAnimations', () => ({
-  useFormAnimations: () => mockUseFormAnimations
+  useFormAnimations: () => mockAnimations
 }));
 
 describe('FormInput', () => {
@@ -150,7 +151,7 @@ describe('FormInput', () => {
       await user.tab(); // Trigger blur
       
       await waitFor(() => {
-        expect(mockUseFormAnimations.showFieldError).toHaveBeenCalledWith(
+        expect(mockAnimations.showFieldError).toHaveBeenCalledWith(
           props.id,
           'This field is required'
         );
@@ -169,7 +170,7 @@ describe('FormInput', () => {
       await user.tab();
       
       await waitFor(() => {
-        expect(mockUseFormAnimations.showFieldError).toHaveBeenCalledWith(
+        expect(mockAnimations.showFieldError).toHaveBeenCalledWith(
           props.id,
           'Minimum 5 characters required'
         );
@@ -188,7 +189,7 @@ describe('FormInput', () => {
       await user.tab();
       
       await waitFor(() => {
-        expect(mockUseFormAnimations.showFieldError).toHaveBeenCalledWith(
+        expect(mockAnimations.showFieldError).toHaveBeenCalledWith(
           props.id,
           'Maximum 5 characters allowed'
         );
@@ -207,7 +208,7 @@ describe('FormInput', () => {
       await user.tab();
       
       await waitFor(() => {
-        expect(mockUseFormAnimations.showFieldError).toHaveBeenCalledWith(
+        expect(mockAnimations.showFieldError).toHaveBeenCalledWith(
           props.id,
           'Please enter a valid email address'
         );
@@ -226,7 +227,7 @@ describe('FormInput', () => {
       await user.tab();
       
       await waitFor(() => {
-        expect(mockUseFormAnimations.showFieldError).toHaveBeenCalledWith(
+        expect(mockAnimations.showFieldError).toHaveBeenCalledWith(
           props.id,
           'Please enter a valid format'
         );
@@ -249,7 +250,7 @@ describe('FormInput', () => {
       await user.tab();
       
       await waitFor(() => {
-        expect(mockUseFormAnimations.showFieldError).toHaveBeenCalledWith(
+        expect(mockAnimations.showFieldError).toHaveBeenCalledWith(
           props.id,
           'Value must contain "test"'
         );
@@ -268,7 +269,7 @@ describe('FormInput', () => {
       await user.tab();
       
       await waitFor(() => {
-        expect(mockUseFormAnimations.showFieldSuccess).toHaveBeenCalledWith(props.id);
+        expect(mockAnimations.showFieldSuccess).toHaveBeenCalledWith(props.id);
       });
     });
 
@@ -281,7 +282,7 @@ describe('FormInput', () => {
       render(<FormInput {...props} />);
       
       await waitFor(() => {
-        expect(mockUseFormAnimations.showFieldSuccess).toHaveBeenCalledWith(props.id);
+        expect(mockAnimations.showFieldSuccess).toHaveBeenCalledWith(props.id);
       });
     });
 
@@ -294,7 +295,7 @@ describe('FormInput', () => {
       render(<FormInput {...props} />);
       
       // Should not show error immediately
-      expect(mockUseFormAnimations.showFieldError).not.toHaveBeenCalled();
+      expect(mockAnimations.showFieldError).not.toHaveBeenCalled();
     });
   });
 
@@ -305,7 +306,7 @@ describe('FormInput', () => {
         maxLength: 100,
         value: 'Hello world'
       });
-      const { container } = render(<FormInput {...props} />);
+      render(<FormInput {...props} />);
       
       expect(screen.getByText('11/100 characters')).toBeInTheDocument();
       expect(screen.getByText('89 remaining')).toBeInTheDocument();
@@ -398,7 +399,7 @@ describe('FormInput', () => {
         maxLength: 100,
         'aria-describedby': 'external-description'
       });
-      const { container } = render(<FormInput {...props} />);
+      render(<FormInput {...props} />);
       
       const input = screen.getByRole('textbox');
       const describedBy = input.getAttribute('aria-describedby');
@@ -483,7 +484,7 @@ describe('FormInput', () => {
       const input = screen.getByRole('textbox');
       await user.click(input); // Should not focus disabled input
       
-      expect(mockUseFormAnimations.showFieldError).not.toHaveBeenCalled();
+      expect(mockAnimations.showFieldError).not.toHaveBeenCalled();
     });
   });
 
@@ -567,7 +568,7 @@ describe('FormInput', () => {
       await user.tab();
       
       await waitFor(() => {
-        expect(mockUseFormAnimations.showFieldError).toHaveBeenCalledWith(
+        expect(mockAnimations.showFieldError).toHaveBeenCalledWith(
           props.id,
           'Minimum 3 characters'
         );

@@ -517,7 +517,7 @@ export const FloatingButtonManager: React.FC<FloatingButtonManagerProps> = ({ on
 
                 {/* Main FAB Menu */}
                 <div className="fab-container">
-                    <div className={`fab-menu ${isExpanded ? 'expanded' : ''}`}>
+                    <div className={isExpanded ? 'fab-menu expanded' : 'fab-menu'}>
                         {floatingButtons.map((button, index) => (
                             <div key={button.id} className="fab-item" style={{
                                 transitionDelay: isExpanded ? `${index * 50}ms` : '0ms'
@@ -541,7 +541,7 @@ export const FloatingButtonManager: React.FC<FloatingButtonManagerProps> = ({ on
                     </div>
 
                     <button
-                        className={`fab-main ${isExpanded ? 'expanded' : ''}`}
+                        className={isExpanded ? 'fab-main expanded' : 'fab-main'}
                         onClick={() => setIsExpanded(!isExpanded)}
                         aria-label={isExpanded ? 'Close menu' : 'Open menu'}
                         aria-expanded={isExpanded}
@@ -558,7 +558,7 @@ export const FloatingButtonManager: React.FC<FloatingButtonManagerProps> = ({ on
             </div>
 
             {/* Stats Modal */}
-            <div className={`stats-modal ${showStatsModal ? 'open' : ''}`}>
+            <div className={showStatsModal ? 'stats-modal open' : 'stats-modal'}>
                 <div className="stats-header">
                     <h3 className="stats-title">Site Statistics</h3>
                     <button
@@ -593,7 +593,7 @@ export const FloatingButtonManager: React.FC<FloatingButtonManagerProps> = ({ on
             </div>
 
             {/* Help Modal */}
-            <div className={`help-modal ${showHelpModal ? 'open' : ''}`}>
+            <div className={showHelpModal ? 'help-modal open' : 'help-modal'}>
                 <div className="help-header">
                     <h3 className="help-title">Need Help Now?</h3>
                     <button

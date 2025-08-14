@@ -24,12 +24,6 @@ afterEach(() => {
   console.error = originalConsoleError;
 });
 
-const initialState = {
-  contentFilters: [],
-  setFilters: expect.any(Function),
-  loadFilters: expect.any(Function),
-};
-
 describe('preferenceStore', () => {
   beforeEach(() => {
     usePreferenceStore.setState({ contentFilters: [] });
@@ -253,7 +247,7 @@ describe('preferenceStore', () => {
         JSON.stringify(complexFilters)
       );
 
-      const savedData = (localStorageMock.setItem as jest.Mock).mock.calls[0][1];
+      const savedData = (localStorageMock.setItem as jest.Mock).mock.calls[0][1] as string;
       expect(JSON.parse(savedData)).toEqual(complexFilters);
     });
   });

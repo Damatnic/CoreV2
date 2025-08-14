@@ -1,3 +1,6 @@
+// --- Imports ---
+import { UserRole } from './services/auth0Service';
+
 // --- Interfaces ---
 
 export interface User {
@@ -5,6 +8,7 @@ export interface User {
   email: string;
   name?: string;
   role?: string;
+  roles?: UserRole[];  // Added for Auth0 integration
   picture?: string;
   isEmailVerified?: boolean;
   createdAt?: string;

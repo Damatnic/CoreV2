@@ -22,6 +22,54 @@ class ServiceWorkerManager {
   private readonly offlineCallbacks: Array<() => void> = [];
   private readonly updateCallbacks: Array<() => void> = [];
 
+  async initialize(): Promise<{ supported: boolean; registered?: boolean }> {
+    if (!('serviceWorker' in navigator)) {
+      return { supported: false };
+    }
+
+    try {
+      const registration = await navigator.serviceWorker.register('/sw.js');
+      console.log('[ServiceWorker] Registered:', registration);
+      return { supported: true, registered: true };
+    } catch (error) {
+      console.error('[ServiceWorker] Registration failed:', error);
+      return { supported: true, registered: false };
+    }
+  }
+
+  hasMessageChannel(): boolean {
+    return true; // Stub implementation
+  }
+
+  async cacheResources(resources: string[]): Promise<boolean> {
+    console.log('[ServiceWorker] Cache resources:', resources);
+    return true; // Stub implementation
+  }
+
+  async preloadCriticalResources(resources: string[]): Promise<void> {
+    console.log('[ServiceWorker] Preload critical resources:', resources);
+  }
+
+  async registerBackgroundSync(data: any): Promise<void> {
+    console.log('[ServiceWorker] Register background sync:', data);
+  }
+
+  async queueOfflineAction(action: any): Promise<void> {
+    console.log('[ServiceWorker] Queue offline action:', action);
+  }
+
+  async setupPushNotifications(vapidKey: string): Promise<PushSubscription | null> {
+    console.log('[ServiceWorker] Setup push notifications with VAPID key:', vapidKey);
+    return null; // Stub implementation
+  }
+
+  async sendNotification(notification: any): Promise<void> {
+    console.log('[ServiceWorker] Send notification:', notification);
+  }
+
+  // Keep the existing onNotification property for compatibility
+  onNotification?: (notification: any) => void;
+
   async isOfflineReady(): Promise<boolean> {
     return this.isReady;
   }
@@ -49,8 +97,9 @@ class ServiceWorkerManager {
     return false;
   }
 
-  async clearCache(): Promise<boolean> {
+  async clearCache(cacheName?: string): Promise<boolean> {
     // Stub implementation
+    console.log('[ServiceWorker] Clear cache:', cacheName || 'all');
     return true;
   }
 

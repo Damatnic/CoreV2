@@ -8,6 +8,7 @@ import { AppTextArea } from '../components/AppTextArea';
 import { Card } from '../components/Card';
 import { SparkleIcon, HeartIcon, StarIcon, SendIcon } from '../components/icons.dynamic';
 import { useReflectionStore } from '../stores/reflectionStore';
+import { useAuth } from '../contexts/AuthContext';
 
 
 // Sample reflections for demo purposes
@@ -89,7 +90,9 @@ const inspirationalPrompts = [
     "How did you take care of yourself today?"
 ];
 
-export const ReflectionsView: React.FC<{ userToken: string | null; }> = ({ userToken }) => {
+export const ReflectionsView: React.FC<{ userToken?: string | null; }> = ({ userToken: propUserToken }) => {
+    const { userToken: contextUserToken } = useAuth();
+    const userToken = propUserToken ?? contextUserToken;
     const [reflections, setReflections] = useState<Reflection[]>([]);
     const [newReflection, setNewReflection] = useState('');
     const [isLoading, setIsLoading] = useState(true);
@@ -598,21 +601,21 @@ export const ReflectionsView: React.FC<{ userToken: string | null; }> = ({ userT
 
                 <div className="filter-tabs">
                     <button 
-                        className={`filter-tab ${activeFilter === 'all' ? 'active' : ''}`}
+                        className={activeFilter === 'all' ? 'filter-tab active' : 'filter-tab'}
                         onClick={() => setActiveFilter('all')}
                     >
                         <StarIcon />
                         All Reflections
                     </button>
                     <button 
-                        className={`filter-tab ${activeFilter === 'popular' ? 'active' : ''}`}
+                        className={activeFilter === 'popular' ? 'filter-tab active' : 'filter-tab'}
                         onClick={() => setActiveFilter('popular')}
                     >
                         <HeartIcon />
                         Most Loved
                     </button>
                     <button 
-                        className={`filter-tab ${activeFilter === 'recent' ? 'active' : ''}`}
+                        className={activeFilter === 'recent' ? 'filter-tab active' : 'filter-tab'}
                         onClick={() => setActiveFilter('recent')}
                     >
                         <SparkleIcon />
@@ -643,21 +646,21 @@ export const ReflectionsView: React.FC<{ userToken: string | null; }> = ({ userT
                                     </span>
                                     <div className="reaction-buttons">
                                         <button 
-                                            className={`reaction-btn ${reflection.myReaction === 'heart' ? 'active' : ''}`}
+                                            className={reflection.myReaction === 'heart' ? 'reaction-btn active' : 'reaction-btn'}
                                             onClick={() => handleReact(reflection.id, 'heart')}
                                         >
                                             <span className="reaction-icon">❤️</span>
                                             <span className="reaction-count">{reflection.reactions.heart || 0}</span>
                                         </button>
                                         <button 
-                                            className={`reaction-btn ${reflection.myReaction === 'star' ? 'active' : ''}`}
+                                            className={reflection.myReaction === 'star' ? 'reaction-btn active' : 'reaction-btn'}
                                             onClick={() => handleReact(reflection.id, 'star')}
                                         >
                                             <span className="reaction-icon">⭐</span>
                                             <span className="reaction-count">{reflection.reactions.star || 0}</span>
                                         </button>
                                         <button 
-                                            className={`reaction-btn ${reflection.myReaction === 'lightbulb' ? 'active' : ''}`}
+                                            className={reflection.myReaction === 'lightbulb' ? 'reaction-btn active' : 'reaction-btn'}
                                             onClick={() => handleReact(reflection.id, 'lightbulb')}
                                         >
                                             <span className="reaction-icon">💡</span>

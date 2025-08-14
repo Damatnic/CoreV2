@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent } from '../../test-utils';
 import { ErrorState } from '../ErrorState';
 
@@ -257,7 +256,7 @@ describe('ErrorState', () => {
     it('should maintain correct DOM structure', () => {
       const { container } = render(<ErrorState onRetry={mockOnRetry} />);
       
-      const errorState = container.firstChild;
+      const errorState = container.firstChild as HTMLElement;
       expect(errorState).toHaveClass('error-state');
       
       const children = Array.from(errorState?.children || []);

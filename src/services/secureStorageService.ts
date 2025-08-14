@@ -545,4 +545,5 @@ export const useSecureStorage = () => {
   };
 };
 
+export { SecureStorageService };
 export default SecureStorageService;

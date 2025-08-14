@@ -249,6 +249,7 @@ export const ResponsiveGrid: React.FC<{
     md?: number;
     lg?: number;
     xl?: number;
+    xxl?: number;
   };
   gap?: number;
 }> = ({ children, className = '', cols = {}, gap = 4 }) => {
@@ -260,6 +261,7 @@ export const ResponsiveGrid: React.FC<{
     md: 3,
     lg: 4,
     xl: 5,
+    xxl: 6,
   };
   
   const colCount = cols[breakpoint] ?? defaultCols[breakpoint] ?? 1;

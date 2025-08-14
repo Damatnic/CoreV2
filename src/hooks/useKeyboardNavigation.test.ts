@@ -2,7 +2,7 @@
  * Tests for Keyboard Navigation Hook
  */
 
-import React, { useRef } from 'react';
+import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { 
   useKeyboardNavigation, 
@@ -30,7 +30,7 @@ const createMockElement = (tagName: string, props: any = {}) => ({
   removeAttribute: jest.fn(),
   querySelector: jest.fn(),
   querySelectorAll: jest.fn(),
-  contains: jest.fn((node: any) => true),
+  contains: jest.fn(() => true),
   appendChild: jest.fn(),
   removeChild: jest.fn(),
   ...props
@@ -39,7 +39,7 @@ const createMockElement = (tagName: string, props: any = {}) => ({
 const mockContainer = {
   querySelectorAll: jest.fn(),
   querySelector: jest.fn(),
-  contains: jest.fn((node: any) => true)
+  contains: jest.fn(() => true)
 };
 
 // Mock document methods
@@ -229,7 +229,7 @@ describe('useKeyboardNavigation Hook', () => {
     mockContainer.contains.mockReturnValue(true);
     (document as any).activeElement = elements[0];
 
-    const { result } = renderHook(() => useKeyboardNavigation(containerRef), { wrapper: Wrapper });
+    renderHook(() => useKeyboardNavigation(containerRef), { wrapper: Wrapper });
 
     // Simulate keydown event
     const eventListeners = (document.addEventListener as jest.Mock).mock.calls;
@@ -254,7 +254,7 @@ describe('useKeyboardNavigation Hook', () => {
     mockContainer.contains.mockReturnValue(true);
     (document as any).activeElement = elements[1];
 
-    const { result } = renderHook(() => useKeyboardNavigation(containerRef), { wrapper: Wrapper });
+    renderHook(() => useKeyboardNavigation(containerRef), { wrapper: Wrapper });
 
     const eventListeners = (document.addEventListener as jest.Mock).mock.calls;
     const keydownListener = eventListeners.find(call => call[0] === 'keydown')[1];

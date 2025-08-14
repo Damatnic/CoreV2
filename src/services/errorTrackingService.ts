@@ -6,10 +6,12 @@
 
 import * as Sentry from '@sentry/react';
 
-// Environment configuration  
-const isProduction = import.meta.env?.PROD || false;
-const isDevelopment = import.meta.env?.DEV || false;
-const sentryDsn = import.meta.env?.VITE_SENTRY_DSN;
+import { ENV } from '../utils/envConfig';
+
+// Environment configuration
+const isProduction = ENV.IS_PROD;
+const isDevelopment = ENV.IS_DEV;
+const sentryDsn = ENV.SENTRY_DSN;
 
 // Error classification for mental health context
 export interface ErrorContext {
@@ -96,7 +98,7 @@ export const initializeSentry = () => {
       const error = hint.originalException as Error;
       
       // Don't send errors in development unless explicitly enabled
-      if (isDevelopment && !import.meta.env?.VITE_SENTRY_DEV_ENABLED) {
+      if (isDevelopment && !ENV.SENTRY_DEV_ENABLED) {
         return null;
       }
 
@@ -145,7 +147,7 @@ export const initializeSentry = () => {
     maxBreadcrumbs: 50,
     
     // Release tracking
-    release: import.meta.env?.VITE_APP_VERSION || 'unknown',
+    release: ENV.APP_VERSION || 'unknown',
   });
 };
 
@@ -316,6 +318,38 @@ export class ErrorTrackingService {
    */
   static clearUserContext() {
     Sentry.setUser(null);
+  }
+
+  /**
+   * Capture a message (non-error event)
+   */
+  static captureMessage(
+    message: string,
+    level: 'fatal' | 'error' | 'warning' | 'info' | 'debug' = 'info',
+    context?: ErrorContext,
+    extra?: Record<string, any>
+  ) {
+    Sentry.withScope(scope => {
+      if (context) {
+        scope.setTag('error_type', context.errorType);
+        scope.setTag('severity', context.severity);
+        scope.setTag('privacy_level', context.privacyLevel);
+        
+        if (context.userType) {
+          scope.setTag('user_type', context.userType);
+        }
+        
+        if (context.feature) {
+          scope.setTag('feature', context.feature);
+        }
+      }
+
+      if (extra) {
+        scope.setExtra('additional_context', extra);
+      }
+
+      Sentry.captureMessage(message, level);
+    });
   }
 
   /**

@@ -5,14 +5,16 @@
 
 import { Auth0Client } from '@auth0/auth0-spa-js';
 import { User, Helper } from '../types';
-import { getEnv, isProduction } from '../utils/envValidator';
+import { isProduction } from '../utils/envValidator';
 
-// Auth0 configuration
+import { ENV } from '../utils/envConfig';
+
+// Auth0 configuration with fallbacks for development
 const auth0Config = {
-  domain: getEnv('VITE_AUTH0_DOMAIN'),
-  clientId: getEnv('VITE_AUTH0_CLIENT_ID'),
-  redirectUri: getEnv('VITE_AUTH0_CALLBACK_URL'),
-  audience: getEnv('VITE_AUTH0_AUDIENCE'),
+  domain: ENV.AUTH0_DOMAIN,
+  clientId: ENV.AUTH0_CLIENT_ID,
+  redirectUri: ENV.AUTH0_CALLBACK_URL,
+  audience: ENV.AUTH0_AUDIENCE,
   scope: 'openid profile email offline_access',
   useRefreshTokens: true,
   cacheLocation: 'localstorage' as const,
@@ -158,8 +160,7 @@ class Auth0Service {
       name: auth0User.name || auth0User.nickname,
       picture: auth0User.picture,
       roles: this.extractUserRoles(auth0User),
-      metadata: auth0User.user_metadata || {},
-      emailVerified: auth0User.email_verified,
+      isEmailVerified: auth0User.email_verified,
       createdAt: auth0User.created_at,
       updatedAt: auth0User.updated_at,
     };
@@ -238,9 +239,7 @@ class Auth0Service {
     }
 
     try {
-      const token = await this.auth0Client.getTokenSilently({
-        ignoreCache: true,
-      });
+      const token = await this.auth0Client.getTokenSilently();
       
       this.storeAuthData(token, this.currentUser!);
       return token;
@@ -321,7 +320,7 @@ class Auth0Service {
    */
   async hasAnyRole(roles: UserRole[]): Promise<boolean> {
     const user = await this.getCurrentUser();
-    if (!user || !user.roles) return false;
+    if (!user?.roles) return false;
     
     return roles.some(role => user.roles!.includes(role));
   }
@@ -331,7 +330,7 @@ class Auth0Service {
    */
   async hasAllRoles(roles: UserRole[]): Promise<boolean> {
     const user = await this.getCurrentUser();
-    if (!user || !user.roles) return false;
+    if (!user?.roles) return false;
     
     return roles.every(role => user.roles!.includes(role));
   }
@@ -355,7 +354,6 @@ class Auth0Service {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        user_metadata: updates.metadata,
         name: updates.name,
         picture: updates.picture,
       }),
@@ -384,7 +382,9 @@ class Auth0Service {
     this.currentUser = null;
     
     await this.auth0Client.logout({
-      returnTo: options?.returnTo || window.location.origin,
+      logoutParams: {
+        returnTo: options?.returnTo || window.location.origin,
+      }
     });
     
     this.emitAuthEvent('logout', null);
@@ -479,7 +479,7 @@ class Auth0Service {
       },
       body: JSON.stringify({
         client_id: auth0Config.clientId,
-        client_secret: getEnv('VITE_AUTH0_CLIENT_SECRET'),
+        client_secret: ENV.AUTH0_CLIENT_SECRET,
         audience: `https://${auth0Config.domain}/api/v2/`,
         grant_type: 'client_credentials',
       }),
@@ -513,7 +513,7 @@ export const authService = {
   setUpdater(updater: (profile: Helper) => void) {
     // Convert to new auth system
     auth0Service.onAuthStateChange((user) => {
-      if (user && user.roles?.includes(UserRole.HELPER)) {
+      if (user?.roles?.includes(UserRole.HELPER)) {
         updater(user as any);
       }
     });

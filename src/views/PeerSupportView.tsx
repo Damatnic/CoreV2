@@ -5,6 +5,7 @@ import { AppButton } from '../components/AppButton';
 import { EmptyState } from '../components/EmptyState';
 import { UsersIcon, HeartIcon, MessageCircleIcon, StarIcon, ShieldIcon  } from '../components/icons.dynamic';
 import { useNotification } from '../contexts/NotificationContext';
+import { useAuth } from '../contexts/AuthContext';
 
 interface PeerMatch {
   id: string;
@@ -17,7 +18,9 @@ interface PeerMatch {
   lastActive: string;
 }
 
-export const PeerSupportView: React.FC<{ userToken: string | null }> = ({ userToken }) => {
+export const PeerSupportView: React.FC<{ userToken?: string | null }> = ({ userToken: propUserToken }) => {
+    const { userToken: contextUserToken } = useAuth();
+    const userToken = propUserToken ?? contextUserToken;
   const [matches, setMatches] = useState<PeerMatch[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [_selectedMatch, setSelectedMatch] = useState<PeerMatch | null>(null);

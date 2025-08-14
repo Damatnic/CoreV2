@@ -8,8 +8,6 @@ import React from 'react';
 import errorHandlingService from './errorHandlingService';
 import apiService from './apiService';
 import { auth0Service } from './auth0Service';
-import webSocketService from './webSocketService';
-import notificationService from './notificationService';
 
 export interface AnalyticsEvent {
   id: string; // Unique event identifier
@@ -90,9 +88,9 @@ export interface DataDeletionRequest {
 class AnalyticsService {
   private config: AnalyticsConfig;
   private eventQueue: AnalyticsEvent[] = [];
-  private sessionId: string;
+  private readonly sessionId: string;
   private userId?: string;
-  private journey: UserJourney;
+  private readonly journey: UserJourney;
   private flushTimer?: NodeJS.Timeout;
   private performanceObserver?: PerformanceObserver;
   private consentStatus: ConsentStatus | null = null;
@@ -147,11 +145,11 @@ class AnalyticsService {
   }
 
   private generateSessionId(): string {
-    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `session_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   private generateEventId(): string {
-    return `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `event_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   private initializeJourney(): UserJourney {
@@ -559,6 +557,10 @@ class AnalyticsService {
     });
   }
 
+  trackEvent(eventName: string, properties?: Record<string, any>) {
+    this.track(eventName, 'user_action', properties);
+  }
+
   trackError(error: Error, context?: string) {
     this.track('error', 'error', {
       message: error.message,
@@ -887,6 +889,7 @@ export const useAnalytics = () => {
   return {
     track: service.track.bind(service),
     trackPageView: service.trackPageView.bind(service),
+    trackEvent: service.trackEvent.bind(service),
     trackFeatureUsage: service.trackFeatureUsage.bind(service),
     trackError: service.trackError.bind(service),
     trackUserAction: service.trackUserAction.bind(service),
@@ -907,11 +910,12 @@ export const useAnalytics = () => {
 
 // Web Vitals tracking
 export class WebVitalsTracker {
-  private analytics: AnalyticsService;
+  private readonly analytics: AnalyticsService;
 
   constructor(analytics: AnalyticsService) {
     this.analytics = analytics;
-    this.initializeWebVitals();
+    // Initialize web vitals synchronously or defer initialization
+    setTimeout(() => this.initializeWebVitals(), 0);
   }
 
   private async initializeWebVitals() {
@@ -939,8 +943,8 @@ export class WebVitalsTracker {
 
 // A/B Testing support
 export class ABTestingManager {
-  private experiments: Map<string, any> = new Map();
-  private analytics: AnalyticsService;
+  private readonly experiments: Map<string, any> = new Map();
+  private readonly analytics: AnalyticsService;
 
   constructor(analytics: AnalyticsService) {
     this.analytics = analytics;
@@ -998,7 +1002,7 @@ export class ABTestingManager {
 
 // Session Recording (privacy-compliant)
 export class SessionRecorder {
-  private analytics: AnalyticsService;
+  private readonly analytics: AnalyticsService;
   private recording: boolean = false;
   private events: any[] = [];
   private startTime: number = 0;
@@ -1023,7 +1027,7 @@ export class SessionRecorder {
     document.addEventListener('scroll', this.recordEvent);
   }
 
-  private recordEvent = (event: Event) => {
+  private readonly recordEvent = (event: Event) => {
     if (!this.recording) return;
 
     // Sanitize event data
@@ -1072,7 +1076,9 @@ export const getAnalyticsService = () => {
     analyticsServiceInstance = new AnalyticsService({ enabled: !optedOut });
     
     // Initialize additional tracking
-    new WebVitalsTracker(analyticsServiceInstance);
+    const webVitalsTracker = new WebVitalsTracker(analyticsServiceInstance);
+    // Keep reference to prevent garbage collection
+    (analyticsServiceInstance as any).webVitalsTracker = webVitalsTracker;
     
     // Set up error tracking integration
     errorHandlingService.onError((error) => {
@@ -1082,19 +1088,8 @@ export const getAnalyticsService = () => {
       );
     });
 
-    // Set up WebSocket analytics
-    webSocketService.on('connect', () => {
-      analyticsServiceInstance!.track('websocket_connected', 'performance', {
-        timestamp: Date.now()
-      });
-    });
-
-    webSocketService.on('disconnect', (data) => {
-      analyticsServiceInstance!.track('websocket_disconnected', 'performance', {
-        code: data.code,
-        reason: data.reason
-      });
-    });
+    // Note: WebSocket analytics would need to be implemented differently
+    // as the service doesn't expose event listeners
   }
   return analyticsServiceInstance;
 };
@@ -1129,4 +1124,8 @@ export const abTesting = new ABTestingManager(astralCoreAnalytics);
 // Export session recorder
 export const sessionRecorder = new SessionRecorder(astralCoreAnalytics);
 
-export default AnalyticsService;
+// Export the class for extending
+export { AnalyticsService };
+
+// Export the configured instance as default
+export default astralCoreAnalytics;

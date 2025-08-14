@@ -1,13 +1,14 @@
 /**
  * Push Notification Service for Astral Core Mental Health Platform
- * 
+ *
  * Handles push notification subscriptions, crisis alerts, helper notifications,
  * and background communication with service worker
  */
 
-// VAPID public key from environment variables with fallback for development
-const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || 
-  (import.meta.env.DEV ? 'BPrE3_xJcGZo5xOiKh_1G5VhbGxqr4K7SLkJtNhE9f2sQcDvRwXfOhY3zP8mKnN1wRtYuCvBmNzLkDhElLLr-I' : '');
+import { ENV } from '../utils/envConfig';
+
+// VAPID public key from environment configuration
+const VAPID_PUBLIC_KEY = ENV.VAPID_PUBLIC_KEY;
 
 interface PushSubscription {
   endpoint: string;
@@ -29,10 +30,209 @@ class PushNotificationService {
   private subscription: PushSubscription | null = null;
   private isSupported: boolean = false;
   private permissionStatus: NotificationPermission = 'default';
+  private notificationPreferences: Map<string, any> = new Map();
 
   constructor() {
     this.checkSupport();
     this.initializeServiceWorkerMessaging();
+  }
+
+  /**
+   * Initialize the push notification service
+   */
+  public async initialize(): Promise<{ supported: boolean }> {
+    this.checkSupport();
+    if (!this.isSupported) {
+      return { supported: false };
+    }
+
+    try {
+      await navigator.serviceWorker.ready;
+      return { supported: true };
+    } catch (error) {
+      console.error('[Push] Failed to initialize:', error);
+      return { supported: false };
+    }
+  }
+
+  /**
+   * Subscribe to push notifications (wrapper for subscribeToPush)
+   */
+  public async subscribe(): Promise<PushSubscription | null> {
+    if (this.permissionStatus !== 'granted') {
+      const granted = await this.requestPermission();
+      if (!granted) {
+        return null;
+      }
+    }
+
+    await this.subscribeToPush();
+    return this.subscription;
+  }
+
+  /**
+   * Subscribe user to crisis alerts
+   */
+  public async subscribeToCrisisAlerts(userId: string): Promise<{
+    subscribed: boolean;
+    alertTypes: string[];
+  }> {
+    const subscription = await this.subscribe();
+    if (!subscription) {
+      return {
+        subscribed: false,
+        alertTypes: []
+      };
+    }
+
+    // Store crisis alert subscription
+    const alertTypes = ['crisis_immediate', 'crisis_warning', 'crisis_support'];
+    this.notificationPreferences.set(`${userId}_crisis_alerts`, alertTypes);
+
+    return {
+      subscribed: true,
+      alertTypes
+    };
+  }
+
+  /**
+   * Send crisis notification to user
+   */
+  public async sendCrisisNotification(
+    userId: string,
+    notification: {
+      type: string;
+      message: string;
+      urgency: string;
+    }
+  ): Promise<void> {
+    const registration = await navigator.serviceWorker.getRegistration();
+    if (!registration) {
+      console.warn('[Push] No service worker registration for crisis notification');
+      return;
+    }
+
+    await registration.showNotification('Crisis Support Alert', {
+      body: notification.message,
+      icon: '/icon-192.png',
+      badge: '/icon-192.png',
+      tag: notification.type,
+      data: {
+        urgency: notification.urgency,
+        userId,
+        timestamp: Date.now()
+      },
+      requireInteraction: notification.urgency === 'high'
+      // Note: 'actions' are part of service worker notification API, not available in browser context
+    });
+  }
+
+  /**
+   * Send safety check notification
+   */
+  public async sendSafetyCheckNotification(
+    userId: string,
+    data: {
+      message: string;
+      type: string;
+    }
+  ): Promise<void> {
+    const registration = await navigator.serviceWorker.getRegistration();
+    if (!registration) {
+      console.warn('[Push] No service worker registration for safety check');
+      return;
+    }
+
+    await registration.showNotification('Daily Safety Check', {
+      body: data.message,
+      icon: '/icon-192.png',
+      badge: '/icon-192.png',
+      tag: 'safety_check',
+      data: {
+        type: data.type,
+        userId,
+        timestamp: Date.now()
+      }
+      // Note: 'actions' are part of service worker notification API, not available in browser context
+    });
+  }
+
+  /**
+   * Update user notification preferences
+   */
+  public async updateNotificationPreferences(
+    userId: string,
+    preferences: any
+  ): Promise<void> {
+    this.notificationPreferences.set(`${userId}_preferences`, preferences);
+    
+    // Persist to localStorage as backup
+    try {
+      localStorage.setItem(
+        `notification_prefs_${userId}`,
+        JSON.stringify(preferences)
+      );
+    } catch (error) {
+      console.error('[Push] Failed to persist preferences:', error);
+    }
+  }
+
+  /**
+   * Get user notification preferences
+   */
+  public async getNotificationPreferences(userId: string): Promise<any> {
+    // Try to get from memory first
+    let preferences = this.notificationPreferences.get(`${userId}_preferences`);
+    
+    // Fallback to localStorage
+    if (!preferences) {
+      try {
+        const stored = localStorage.getItem(`notification_prefs_${userId}`);
+        if (stored) {
+          preferences = JSON.parse(stored);
+          this.notificationPreferences.set(`${userId}_preferences`, preferences);
+        }
+      } catch (error) {
+        console.error('[Push] Failed to retrieve preferences:', error);
+      }
+    }
+
+    return preferences || {};
+  }
+
+  /**
+   * Check if notification should be sent based on preferences
+   */
+  public async shouldSendNotification(
+    userId: string,
+    type: string
+  ): Promise<boolean> {
+    const preferences = await this.getNotificationPreferences(userId);
+    
+    // Check quiet hours
+    if (preferences.quietHours) {
+      const now = new Date();
+      const currentHour = now.getHours();
+      const { start, end } = preferences.quietHours;
+      
+      // Handle overnight quiet hours
+      if (start > end) {
+        if (currentHour >= start || currentHour < end) {
+          return false;
+        }
+      } else {
+        if (currentHour >= start && currentHour < end) {
+          return false;
+        }
+      }
+    }
+
+    // Check if this notification type is enabled
+    if (type === 'non_urgent' && preferences.quietHours) {
+      return false;
+    }
+
+    return true;
   }
 
   /**
@@ -494,7 +694,7 @@ class PushNotificationService {
   /**
    * Utility: Convert URL-safe base64 to Uint8Array
    */
-  private urlBase64ToUint8Array(base64String: string): Uint8Array {
+  private urlBase64ToUint8Array(base64String: string): ArrayBuffer {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
     const base64 = (base64String + padding)
       .replace(/-/g, '+')
@@ -506,7 +706,7 @@ class PushNotificationService {
     for (let i = 0; i < rawData.length; ++i) {
       outputArray[i] = rawData.charCodeAt(i);
     }
-    return outputArray;
+    return outputArray.buffer;
   }
 
   /**
@@ -525,6 +725,9 @@ class PushNotificationService {
     return window.btoa(binary);
   }
 }
+
+// Export the class for testing
+export { PushNotificationService };
 
 // Create singleton instance
 export const pushNotificationService = new PushNotificationService();

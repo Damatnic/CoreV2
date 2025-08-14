@@ -154,7 +154,7 @@ export const ProgressBar: React.FC<{
          aria-label={label}>
       <div className={`progress-bar ${sizeClasses[size]}`}>
         <div
-          className={`progress-fill ${indeterminate ? 'progress-indeterminate' : ''}`}
+          className={indeterminate ? 'progress-fill progress-indeterminate' : 'progress-fill'}
           style={{
             width: indeterminate ? '30%' : `${percentage}%`,
             backgroundColor: color,
@@ -186,8 +186,6 @@ export const LoadingButton: React.FC<{
   className = '',
   variant = 'primary',
 }) => {
-  const { getAriaLabel } = useAccessibility();
-
   return (
     <button
       onClick={onClick}

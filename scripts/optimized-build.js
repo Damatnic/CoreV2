@@ -8,15 +8,14 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { CriticalCSSExtractor } from './critical-css-optimizer.js';
+// Critical CSS optimizer not needed for now
+// import { CriticalCSSExtractor } from './critical-css-optimizer.js';
 
 const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 class OptimizedBuildProcess {
-  private readonly projectRoot: string;
-  
   constructor() {
     this.projectRoot = path.resolve(__dirname, '..');
   }
@@ -24,7 +23,7 @@ class OptimizedBuildProcess {
   /**
    * Run Vite build with critical CSS optimization
    */
-  async build(mode: 'development' | 'production' = 'production'): Promise<void> {
+  async build(mode = 'production') {
     console.log(`🏗️  Starting optimized build (${mode})...`);
     
     try {
@@ -34,13 +33,13 @@ class OptimizedBuildProcess {
       await execAsync(buildCommand, { cwd: this.projectRoot });
       console.log('✅ Vite build completed');
 
-      // Step 2: Extract and optimize critical CSS
+      // Step 2: Additional production optimizations (Critical CSS disabled for now)
       if (mode === 'production') {
-        console.log('🎨 Optimizing critical CSS...');
-        const cssExtractor = new CriticalCSSExtractor();
-        await cssExtractor.optimize();
-        console.log('✅ Critical CSS optimization completed');
-
+        console.log('🎨 Running production optimizations...');
+        // Critical CSS extraction disabled for now
+        // const cssExtractor = new CriticalCSSExtractor();
+        // await cssExtractor.optimize();
+        
         // Step 3: Additional production optimizations
         await this.runProductionOptimizations();
       }
@@ -59,7 +58,7 @@ class OptimizedBuildProcess {
   /**
    * Run additional production optimizations
    */
-  private async runProductionOptimizations(): Promise<void> {
+  async runProductionOptimizations() {
     console.log('⚡ Running production optimizations...');
     
     try {
@@ -80,7 +79,7 @@ class OptimizedBuildProcess {
   /**
    * Optimize service worker for critical CSS
    */
-  private async optimizeServiceWorker(): Promise<void> {
+  async optimizeServiceWorker() {
     const swOptimization = `
 // Critical CSS Service Worker Optimization
 self.addEventListener('fetch', (event) => {
@@ -112,7 +111,7 @@ self.addEventListener('fetch', (event) => {
   /**
    * Generate resource hints for performance
    */
-  private async generateResourceHints(): Promise<void> {
+  async generateResourceHints() {
     const hints = [
       '<!-- DNS prefetch for external resources -->',
       '<link rel="dns-prefetch" href="//fonts.googleapis.com">',
@@ -137,7 +136,7 @@ self.addEventListener('fetch', (event) => {
   /**
    * Validate performance metrics
    */
-  private async validatePerformanceMetrics(): Promise<void> {
+  async validatePerformanceMetrics() {
     const metrics = {
       criticalCSSSize: 0, // Will be calculated
       totalCSSSize: 0,
@@ -157,7 +156,7 @@ self.addEventListener('fetch', (event) => {
   /**
    * Generate build report
    */
-  private async generateBuildReport(): Promise<void> {
+  async generateBuildReport() {
     const report = {
       timestamp: new Date().toISOString(),
       optimizations: {

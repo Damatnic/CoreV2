@@ -3,7 +3,7 @@
  * Handles real-time communication for chat, notifications, and live updates
  */
 
-import React from 'react';
+import * as React from 'react';
 import { auth0Service } from './auth0Service';
 import notificationService from './notificationService';
 
@@ -23,7 +23,8 @@ export type WebSocketEvent =
   | 'room_joined'
   | 'room_left'
   | 'user_joined'
-  | 'user_left';
+  | 'user_left'
+  | 'check_missed_notifications';
 
 export interface WebSocketMessage {
   type: string;
@@ -78,11 +79,10 @@ class WebSocketService {
   private readonly listeners = new Map<string, Set<(message: any) => void>>();
   private readonly connectionListeners = new Set<(connected: boolean) => void>();
   private readonly eventHandlers = new Map<WebSocketEvent, Set<(data: any) => void>>();
-  private typingIndicators = new Map<string, Map<string, NodeJS.Timeout>>();
-  private presenceData = new Map<string, PresenceData>();
-  private roomSubscriptions = new Set<string>();
+  private readonly typingIndicators = new Map<string, Map<string, NodeJS.Timeout>>();
+  private readonly presenceData = new Map<string, PresenceData>();
+  private readonly roomSubscriptions = new Set<string>();
   private demoMode = false;
-  private isAuthenticated = false;
   private connectionPromise: Promise<void> | null = null;
   private userId: string | null = null;
 
@@ -118,12 +118,10 @@ class WebSocketService {
       if (document.hidden) {
         // Page is hidden, stop heartbeat
         this.stopHeartbeat();
-      } else {
+      } else if (this.isConnected()) {
         // Page is visible again, restart heartbeat and check for missed notifications
-        if (this.isConnected()) {
-          this.startHeartbeat();
-          this.checkMissedNotifications();
-        }
+        this.startHeartbeat();
+        this.checkMissedNotifications();
       }
     });
 
@@ -133,7 +131,7 @@ class WebSocketService {
     });
   }
 
-  private async connect(): Promise<void> {
+  public async connect(): Promise<void> {
     // Return existing connection promise if connecting
     if (this.connectionPromise) {
       return this.connectionPromise;
@@ -161,35 +159,27 @@ class WebSocketService {
 
   private async performConnect(): Promise<void> {
     return new Promise((resolve, reject) => {
-      try {
-        // Get auth token if available
-        auth0Service.getAccessToken().then(token => {
-          // Get current user
-          const user = auth0Service.getCurrentUser();
+      // Get auth token if available
+      auth0Service.getAccessToken().then(token => {
+        // Get current user
+        auth0Service.getCurrentUser().then(user => {
           if (user) {
-            this.userId = user.sub;
+            this.userId = user.id;
           }
-
-          // Build WebSocket URL with auth if available
-          const wsUrl = token 
-            ? `${this.url}?token=${encodeURIComponent(token)}`
-            : this.url;
-
-          this.ws = new WebSocket(wsUrl);
-          this.setupEventListeners(resolve, reject);
-        }).catch(() => {
-          // Connect without auth
-          this.ws = new WebSocket(this.url);
-          this.setupEventListeners(resolve, reject);
         });
-      } catch (error) {
-        // Silently handle connection failure on first attempt
-        if (this.reconnectAttempts === 0) {
-          console.info('WebSocket server not available, running in offline mode');
-        }
-        this.scheduleReconnect();
-        reject(error);
-      }
+
+        // Build WebSocket URL with auth if available
+        const wsUrl = token 
+          ? `${this.url}?token=${encodeURIComponent(token)}`
+          : this.url;
+
+        this.ws = new WebSocket(wsUrl);
+        this.setupEventListeners(resolve, reject);
+      }).catch(() => {
+        // Connect without auth
+        this.ws = new WebSocket(this.url);
+        this.setupEventListeners(resolve, reject);
+      });
     });
   }
 
@@ -233,7 +223,6 @@ class WebSocketService {
         console.info('WebSocket disconnected (offline mode)');
       }
       this.stopHeartbeat();
-      this.isAuthenticated = false;
       this.notifyConnectionListeners(false);
       this.clearTypingIndicators();
       this.emit('disconnect', { code: event.code, reason: event.reason });
@@ -261,7 +250,6 @@ class WebSocketService {
   private handleMessage(message: WebSocketMessage) {
     // Handle auth responses
     if (message.type === 'auth_success') {
-      this.isAuthenticated = true;
       console.log('WebSocket authenticated');
       return;
     }
@@ -294,7 +282,7 @@ class WebSocketService {
         this.handleCrisisAlert(message.payload);
         break;
       
-      default:
+      default: {
         // Handle regular message listeners
         const listeners = this.listeners.get(message.type);
         if (listeners) {
@@ -306,11 +294,8 @@ class WebSocketService {
             }
           });
         }
-        
-        // Emit as event if applicable
-        if (message.event) {
-          this.emit(message.event, message.payload);
-        }
+        break;
+      }
     }
   }
 
@@ -764,8 +749,8 @@ let wsServiceInstance: WebSocketService | null = null;
 export const getWebSocketService = () => {
   if (!wsServiceInstance) {
     // Use environment variable or default URLs
-    const wsUrl = import.meta.env.VITE_WS_URL || 
-      (process.env.NODE_ENV === 'development' 
+    const wsUrl = process.env.VITE_WS_URL ||
+      (process.env.NODE_ENV === 'development'
         ? 'ws://localhost:8080/ws' 
         : 'wss://api.astralcore.app/ws');
     
@@ -798,3 +783,4 @@ if (typeof window !== 'undefined') {
 }
 
 export default WebSocketService;
+

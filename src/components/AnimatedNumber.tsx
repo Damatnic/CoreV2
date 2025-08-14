@@ -46,7 +46,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
 
   return (
     <output 
-      className={`animated-number ${isAnimating ? 'animating' : ''} ${className}`}
+      className={`animated-number${isAnimating ? ' animating' : ''} ${className}`}
       aria-live="polite"
       aria-label={`Current value: ${formatter(displayValue)}`}
     >

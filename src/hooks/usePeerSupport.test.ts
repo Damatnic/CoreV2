@@ -173,6 +173,19 @@ describe('usePeerSupport Hook', () => {
     const { result } = renderHook(() => usePeerSupport('user-token-123', 'en'), { wrapper: Wrapper });
 
     const peerData = {
+      userToken: 'test-token',
+      language: 'en',
+      culturalBackground: 'western',
+      preferredLanguages: ['en'],
+      availabilityStatus: 'available' as const,
+      experienceAreas: [
+        { category: 'anxiety' as const, level: 'personal' as const },
+        { category: 'depression' as const, level: 'supported-others' as const }
+      ],
+      supportStyle: 'listener' as const,
+      timezone: 'UTC',
+      ageRange: '26-35' as const,
+      isVerified: false,
       supportAreas: ['anxiety', 'depression'],
       languages: ['en'],
       culturalContexts: ['western'],
@@ -202,6 +215,16 @@ describe('usePeerSupport Hook', () => {
     const { result } = renderHook(() => usePeerSupport('user-token-123', 'en'), { wrapper: Wrapper });
 
     const peerData = {
+      userToken: 'test-token',
+      language: 'en',
+      culturalBackground: 'western',
+      preferredLanguages: ['en'],
+      availabilityStatus: 'available' as const,
+      experienceAreas: [{ category: 'anxiety' as const, level: 'personal' as const }],
+      supportStyle: 'listener' as const,
+      timezone: 'UTC',
+      ageRange: '26-35' as const,
+      isVerified: false,
       supportAreas: ['anxiety'],
       languages: ['en'],
       culturalContexts: ['western'],
@@ -316,10 +339,18 @@ describe('usePeerSupport Hook', () => {
     // First set up an active session
     const mockSession = {
       id: 'session-456',
-      requestId: 'request-789',
+      seekerId: 'seeker-123',
       supporterId: 'supporter-123',
+      language: 'en',
+      culturalContext: 'western',
       startTime: Date.now() - 3600000,
-      status: 'active' as const
+      status: 'active' as const,
+      riskLevel: 3,
+      escalationTriggers: [],
+      moderationFlags: [],
+      sessionType: 'text-chat' as const,
+      privacyLevel: 'anonymous' as const,
+      requestId: 'request-789'
     };
 
     const { result } = renderHook(() => usePeerSupport('user-token-123', 'en'), { wrapper: Wrapper });

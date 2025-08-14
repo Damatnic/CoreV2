@@ -7,8 +7,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAccessibility } from './AccessibilityProvider';
 import { useFeedback } from './UserFeedback';
-import { LoadingButton, Spinner } from './LoadingStates';
-import { useResponsive } from './withMobileResponsive';
+import { Spinner } from './LoadingStates';
 
 // Types for the help system
 interface HelpTopic {
@@ -88,14 +87,13 @@ const HelpTutorialSystem: React.FC<HelpTutorialSystemProps> = ({
   const [viewedTopics, setViewedTopics] = useState<Set<string>>(new Set());
   const [completedTutorials, setCompletedTutorials] = useState<Set<string>>(new Set());
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
   
   const location = useLocation();
   const navigate = useNavigate();
-  const { announce, getAriaLabel } = useAccessibility();
+  const { announce } = useAccessibility();
   const { showFeedback } = useFeedback();
-  const { isMobile } = useResponsive();
   const helpPanelRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -587,7 +585,6 @@ const HelpTutorialSystem: React.FC<HelpTutorialSystemProps> = ({
         const element = document.querySelector(tooltip.selector);
         if (!element) return;
 
-        const rect = element.getBoundingClientRect();
         const isHover = e.type === 'mouseenter' && tooltip.showOnHover;
         const isFocus = e.type === 'focus' && tooltip.showOnFocus;
 

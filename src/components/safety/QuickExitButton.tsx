@@ -6,13 +6,29 @@ interface QuickExitButtonProps {
   position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
   hotkey?: string; // e.g., 'Escape' or 'x'
   onExit?: () => void;
+  shortcutKey?: string; // Alternative shortcut key
+  shortcutCount?: number; // Number of times to press shortcut
+  buttonText?: string; // Custom button text
+  className?: string; // Custom CSS class
+  size?: 'small' | 'medium' | 'large'; // Button size variant
+  clearCookies?: jest.MockedFunction<any> | (() => void); // Function to clear cookies
+  clearHistory?: boolean; // Whether to clear browser history
+  fallbackUrl?: string; // Fallback URL if main redirect fails
 }
 
 export const QuickExitButton: React.FC<QuickExitButtonProps> = ({
   redirectUrl = 'https://www.google.com',
   position = 'top-left',
   hotkey = 'Escape',
-  onExit
+  onExit,
+  shortcutKey,
+  shortcutCount = 1,
+  buttonText = 'Quick Exit',
+  className = '',
+  size = 'medium',
+  clearCookies,
+  clearHistory = true,
+  fallbackUrl = 'https://news.google.com'
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
@@ -24,40 +40,72 @@ export const QuickExitButton: React.FC<QuickExitButtonProps> = ({
       // Clear session storage
       sessionStorage.clear();
       
-      // Add to history to prevent back button
-      window.history.pushState(null, '', window.location.href);
-      window.history.pushState(null, '', window.location.href);
-      window.history.pushState(null, '', window.location.href);
+      // Clear cookies if function provided
+      if (clearCookies) {
+        clearCookies();
+      }
+      
+      // Clear browser history if enabled
+      if (clearHistory) {
+        // Add to history to prevent back button
+        window.history.pushState(null, '', window.location.href);
+        window.history.pushState(null, '', window.location.href);
+        window.history.pushState(null, '', window.location.href);
+      }
       
       // Call custom exit handler if provided
       if (onExit) {
         onExit();
       }
       
-      // Open new safe site and close current
-      window.open(redirectUrl, '_newtab');
+      // Navigate to safe site
       window.location.replace(redirectUrl);
-      
-      // Try to close current window (may be blocked by browser)
-      window.close();
     } catch (error) {
-      // Fallback to simple redirect
-      window.location.replace(redirectUrl);
+      // Fallback to alternative URL if main redirect fails
+      console.error('Quick exit error:', error);
+      try {
+        window.location.replace(fallbackUrl);
+      } catch (fallbackError) {
+        console.error('Fallback exit error:', fallbackError);
+        // Final fallback
+        window.location.replace('https://www.google.com');
+      }
     }
-  }, [redirectUrl, onExit]);
+  }, [redirectUrl, onExit, clearCookies, clearHistory, fallbackUrl]);
 
-  // Keyboard shortcut handler
+  // Handle keyboard shortcuts
   useEffect(() => {
+    let keyPressCount = 0;
+    let lastKeyPress = 0;
+
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === hotkey || (e.key === 'x' && e.altKey)) {
+      const now = Date.now();
+      const primaryKey = e.key === hotkey || (e.key === 'x' && e.altKey);
+      const alternativeKey = shortcutKey && e.key === shortcutKey;
+
+      if (primaryKey || alternativeKey) {
         e.preventDefault();
-        handleQuickExit();
+        
+        // Reset count if too much time has passed
+        if (now - lastKeyPress > 2000) {
+          keyPressCount = 0;
+        }
+        
+        keyPressCount++;
+        lastKeyPress = now;
+        
+        const requiredCount = alternativeKey ? shortcutCount : 1;
+        
+        if (keyPressCount >= requiredCount) {
+          handleQuickExit();
+          keyPressCount = 0;
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [hotkey, handleQuickExit]);
+  }, [hotkey, shortcutKey, shortcutCount, handleQuickExit]);
 
   // Show tooltip on first visit
   useEffect(() => {
@@ -72,6 +120,36 @@ export const QuickExitButton: React.FC<QuickExitButtonProps> = ({
       }, 2000);
     }
   }, []);
+
+  // Create CSS classes for the button
+  const getButtonClasses = () => {
+    const classes = ['quick-exit-button'];
+    if (className) classes.push(className);
+    if (size) classes.push(`size-${size}`);
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) classes.push('mobile-size');
+    return classes.join(' ');
+  };
+
+  // Get button styling based on size
+  const getButtonStyles = () => {
+    let padding = '10px 16px';
+    let fontSize = '14px';
+    let minWidth = '120px';
+
+    if (size === 'small') {
+      padding = '6px 12px';
+      fontSize = '12px';
+      minWidth = '100px';
+    } else if (size === 'large') {
+      padding = '14px 20px';
+      fontSize = '16px';
+      minWidth = '140px';
+    }
+
+    return { padding, fontSize, minWidth };
+  };
+
+  const buttonStyles = getButtonStyles();
 
   const getPositionStyles = () => {
     const base = { position: 'fixed' as const, zIndex: 9999 };
@@ -92,7 +170,7 @@ export const QuickExitButton: React.FC<QuickExitButtonProps> = ({
   return (
     <>
       <button
-        className="quick-exit-button"
+        className={getButtonClasses()}
         onClick={handleQuickExit}
         onMouseEnter={() => {
           setIsHovered(true);
@@ -120,8 +198,8 @@ export const QuickExitButton: React.FC<QuickExitButtonProps> = ({
           color: 'var(--safe-white)',
           border: 'none',
           borderRadius: 'var(--safe-radius-md)',
-          padding: '10px 16px',
-          fontSize: '14px',
+          padding: buttonStyles.padding,
+          fontSize: buttonStyles.fontSize,
           fontWeight: '600',
           cursor: 'pointer',
           boxShadow: 'var(--safe-shadow-lg)',
@@ -130,7 +208,7 @@ export const QuickExitButton: React.FC<QuickExitButtonProps> = ({
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
-          minWidth: '120px',
+          minWidth: buttonStyles.minWidth,
         }}
       >
         <svg 
@@ -151,7 +229,7 @@ export const QuickExitButton: React.FC<QuickExitButtonProps> = ({
         <span>
           {exitCountdown !== null 
             ? `Exit in ${exitCountdown}...` 
-            : 'Quick Exit'}
+            : buttonText}
         </span>
       </button>
 
@@ -183,7 +261,20 @@ export const QuickExitButton: React.FC<QuickExitButtonProps> = ({
               borderRadius: '3px',
               margin: '0 4px',
               fontSize: '12px',
-            }}>{hotkey}</kbd> or click this button to immediately leave the site
+            }}>{hotkey}</kbd>
+            {shortcutKey && (
+              <>
+                {' '}or <kbd style={{
+                  background: 'var(--safe-gray-600)',
+                  padding: '2px 6px',
+                  borderRadius: '3px',
+                  margin: '0 4px',
+                  fontSize: '12px',
+                }}>{shortcutKey}</kbd>
+                {shortcutCount > 1 && ` ${shortcutCount} times`}
+              </>
+            )}
+            {' '}or click this button to immediately leave the site
           </div>
           <div 
             style={{

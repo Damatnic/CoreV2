@@ -4,10 +4,11 @@
  */
 
 import React, { Suspense, useEffect, useRef, useCallback } from 'react';
-import { Routes, Route, Navigate, useLocation, useNavigationType } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigationType } from 'react-router-dom';
 import { AuthGuard } from './auth/AuthGuard';
 import { LoadingSpinner } from './LoadingSpinner';
 import { ErrorBoundary } from './ErrorBoundary';
+import { UserRole } from '../services/auth0Service';
 
 // Performance monitoring
 interface RouteConfig {
@@ -19,30 +20,6 @@ interface RouteConfig {
   priority?: 'critical' | 'high' | 'medium' | 'low';
   chunkName?: string;
 }
-
-// Lazy load configuration with webpack magic comments for better chunking
-const lazyImport = (
-  importFn: () => Promise<any>,
-  chunkName: string,
-  prefetch: boolean = false
-) => {
-  if (prefetch) {
-    return React.lazy(() =>
-      import(
-        /* webpackChunkName: "[request]" */
-        /* webpackPrefetch: true */
-        `../views/${chunkName}`
-      )
-    );
-  }
-  return React.lazy(() =>
-    import(
-      /* webpackChunkName: "[request]" */
-      /* webpackPreload: false */
-      `../views/${chunkName}`
-    )
-  );
-};
 
 // Route Components with optimized chunking
 const routeComponents = {
@@ -166,7 +143,7 @@ const routeConfig: RouteConfig[] = [
 
 // Route performance tracker
 class RoutePerformanceTracker {
-  private metrics: Map<string, any> = new Map();
+  private readonly metrics: Map<string, any> = new Map();
   
   trackRouteChange(path: string) {
     const startTime = performance.now();
@@ -231,7 +208,7 @@ class RoutePerformanceTracker {
 
 // Preload manager for intelligent route preloading
 class PreloadManager {
-  private preloadedRoutes = new Set<string>();
+  private readonly preloadedRoutes = new Set<string>();
   private observer: IntersectionObserver | null = null;
   
   constructor() {
@@ -373,7 +350,7 @@ export const OptimizedRouter: React.FC = () => {
               path={route.path}
               element={
                 route.requiresAuth ? (
-                  <AuthGuard requireAuth={true} requiredRoles={route.roles}>
+                  <AuthGuard requireAuth={true} requireRoles={route.roles as UserRole[]}>
                     <route.component />
                   </AuthGuard>
                 ) : (

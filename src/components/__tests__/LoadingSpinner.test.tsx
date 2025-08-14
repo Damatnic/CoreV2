@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen } from '../../test-utils';
 import LoadingSpinner from '../LoadingSpinner';
 
@@ -351,7 +350,7 @@ describe('LoadingSpinner', () => {
         {}
       ];
       
-      props.forEach((prop, index) => {
+      props.forEach((prop) => {
         const { unmount } = render(<LoadingSpinner {...prop} />);
         
         const container = screen.getByRole('status');

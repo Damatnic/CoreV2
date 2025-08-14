@@ -18,9 +18,28 @@ declare global {
       toBeInvalid(): R;
       toHaveFocus(): R;
       toHaveStyle(css: string | Record<string, any>): R;
+      toBeOneOf(array: any[]): R;
     }
   }
 }
+
+// Add custom Jest matchers
+expect.extend({
+  toBeOneOf(received: any, expected: any[]) {
+    const pass = expected.includes(received);
+    if (pass) {
+      return {
+        message: () => `expected ${received} not to be one of ${expected.join(', ')}`,
+        pass: true,
+      };
+    } else {
+      return {
+        message: () => `expected ${received} to be one of ${expected.join(', ')}`,
+        pass: false,
+      };
+    }
+  },
+});
 
 // Mock crypto.randomUUID for Jest environment
 if (!global.crypto) {

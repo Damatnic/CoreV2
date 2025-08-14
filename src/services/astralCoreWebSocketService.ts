@@ -3,13 +3,12 @@
  * Handles real-time communication for chat, crisis alerts, and live features
  */
 
-import { apiClient } from './apiClient';
 import { auth0Service } from './auth0Service';
-import { astralCoreNotificationService } from './astralCoreNotificationService';
+import { astralCoreNotificationService, NotificationType, NotificationPriority } from './astralCoreNotificationService';
 import { getEnv, isProduction } from '../utils/envValidator';
 
 // WebSocket Configuration
-const WS_BASE_URL = getEnv('VITE_WS_BASE_URL') || 'ws://localhost:3000';
+const WS_BASE_URL = getEnv('VITE_WEBSOCKET_URL') || 'ws://localhost:3000';
 const RECONNECT_DELAY = 3000; // 3 seconds
 const MAX_RECONNECT_ATTEMPTS = 10;
 const HEARTBEAT_INTERVAL = 30000; // 30 seconds
@@ -95,17 +94,16 @@ export interface WSSubscription {
  */
 class AstralCoreWebSocketService {
   private ws: WebSocket | null = null;
-  private connectionState: WSConnectionState;
-  private subscriptions: Map<string, WSSubscription[]>;
-  private messageQueue: WSMessage[];
+  private readonly connectionState: WSConnectionState;
+  private readonly subscriptions: Map<string, WSSubscription[]>;
+  private readonly messageQueue: WSMessage[];
   private reconnectTimer: NodeJS.Timeout | null = null;
   private heartbeatTimer: NodeJS.Timeout | null = null;
-  private lastHeartbeat: Date;
-  private wsUrl: string;
+  private readonly wsUrl: string;
   private userId: string | null = null;
-  private sessionId: string;
-  private rooms: Set<string>;
-  private typingTimers: Map<string, NodeJS.Timeout>;
+  private readonly sessionId: string;
+  private readonly rooms: Set<string>;
+  private readonly typingTimers: Map<string, NodeJS.Timeout>;
 
   constructor() {
     this.wsUrl = WS_BASE_URL;
@@ -119,7 +117,6 @@ class AstralCoreWebSocketService {
     };
     this.subscriptions = new Map();
     this.messageQueue = [];
-    this.lastHeartbeat = new Date();
     this.sessionId = this.generateSessionId();
     this.rooms = new Set();
     this.typingTimers = new Map();
@@ -142,8 +139,8 @@ class AstralCoreWebSocketService {
       }
 
       // Get user ID
-      const user = auth0Service.getUser();
-      this.userId = user?.sub || null;
+      const user = await auth0Service.getCurrentUser();
+      this.userId = user?.id || null;
 
       // Build WebSocket URL with auth
       const url = new URL(this.wsUrl);
@@ -546,19 +543,19 @@ class AstralCoreWebSocketService {
   private async authenticate(): Promise<void> {
     try {
       const token = await auth0Service.getAccessToken();
-      const user = auth0Service.getUser();
+      const user = await auth0Service.getCurrentUser();
 
       this.send('authenticate', {
         token,
-        userId: user?.sub,
+        userId: user?.id,
         sessionId: this.sessionId,
         clientVersion: '2.0.0',
-        platform: navigator.platform,
+        platform: 'web',
         userAgent: navigator.userAgent,
       });
     } catch (error) {
       console.error('Astral Core WS: Authentication failed', error);
-      this.handleAuthFailure({ error: error.message });
+      this.handleAuthFailure({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
   }
 
@@ -626,8 +623,8 @@ class AstralCoreWebSocketService {
     
     // Show notification
     astralCoreNotificationService.show({
-      type: 'system_alert',
-      priority: 'high',
+      type: NotificationType.SYSTEM_ALERT,
+      priority: NotificationPriority.HIGH,
       title: 'Scheduled Maintenance',
       body: data.message || 'The service will undergo maintenance soon',
       requireInteraction: true,
@@ -646,7 +643,6 @@ class AstralCoreWebSocketService {
         this.send(WSEventType.HEARTBEAT, {
           timestamp: new Date().toISOString(),
         });
-        this.lastHeartbeat = new Date();
 
         // Calculate latency when pong received
         this.once('pong', () => {
@@ -795,21 +791,21 @@ class AstralCoreWebSocketService {
    * Generate unique message ID
    */
   private generateMessageId(): string {
-    return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `msg_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**
    * Generate unique subscription ID
    */
   private generateSubscriptionId(): string {
-    return `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `sub_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**
    * Generate session ID
    */
   private generateSessionId(): string {
-    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `session_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 }
 
@@ -817,12 +813,12 @@ class AstralCoreWebSocketService {
 export const astralCoreWebSocketService = new AstralCoreWebSocketService();
 
 // Auto-connect when authenticated
-auth0Service.on('authenticated', () => {
+window.addEventListener('auth:authenticated', () => {
   astralCoreWebSocketService.connect();
 });
 
 // Auto-disconnect when logged out
-auth0Service.on('logout', () => {
+window.addEventListener('auth:logout', () => {
   astralCoreWebSocketService.disconnect();
 });
 

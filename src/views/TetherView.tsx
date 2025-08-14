@@ -63,11 +63,12 @@ interface TetherProfile {
   breathingPattern: '4-7-8' | 'box' | 'coherent';
 }
 
-const TetherView: React.FC<{ userToken: string | null; setActiveView: (view: any) => void }> = ({ 
-  userToken, 
+const TetherView: React.FC<{ userToken?: string | null; setActiveView?: (view: any) => void }> = ({ 
+  userToken: propUserToken, 
   setActiveView 
 }) => {
-  const { user } = useAuth();
+  const { user, userToken: contextUserToken } = useAuth();
+  const userToken = propUserToken ?? contextUserToken;
   const { addToast } = useNotification();
   const tetherService = useRef(getAstralTetherService());
   
@@ -291,7 +292,7 @@ const TetherView: React.FC<{ userToken: string | null; setActiveView: (view: any
     
     // Optionally redirect to crisis resources
     if (requestUrgency === 'critical') {
-      setActiveView({ view: 'crisis' });
+      setActiveView?.({ view: 'crisis' });
     }
   };
 

@@ -13,7 +13,7 @@ import { renderHook, render } from '@testing-library/react';
 
 // Mock dependencies
 jest.mock('../components/EnhancedLazyComponent', () => ({
-  createEnhancedLazyComponent: jest.fn().mockImplementation((importFn, options) => {
+  createEnhancedLazyComponent: jest.fn().mockImplementation((importFn) => {
     return React.lazy(importFn);
   }),
   ComponentPreloader: {
@@ -373,13 +373,7 @@ describe('enhancedRouting', () => {
         });
 
         // Simulate mouseover event
-        const mockEvent = {
-          target: {
-            closest: jest.fn().mockReturnValue({
-              getAttribute: jest.fn().mockReturnValue('/hover-test')
-            })
-          }
-        };
+        // Event object would be used in actual implementation
 
         const hoverListener = document.addEventListener as jest.Mock;
         expect(hoverListener).toHaveBeenCalledWith('mouseover', expect.any(Function));

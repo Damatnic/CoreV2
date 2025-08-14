@@ -27,8 +27,8 @@ describe('CrisisEscalationWorkflowService', () => {
       const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
         crisisAnalysis as any,
         mockUserId,
-        { languageCode: 'en', location: { country: mockLocation } },
-        { messagesSent: 1, sessionDuration: 1000 }
+        { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
+        { conversationId: "test-conversation", messagesSent: 1, sessionDuration: 1000, previousEscalations: 0, riskTrend: "stable" as const }
       );
 
       expect(escalation).toBeDefined();
@@ -48,8 +48,8 @@ describe('CrisisEscalationWorkflowService', () => {
       const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
         crisisAnalysis as any,
         mockUserId,
-        { languageCode: 'en', location: { country: mockLocation } },
-        { messagesSent: 5, sessionDuration: 5000 }
+        { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
+        { conversationId: "test-conversation", messagesSent: 5, sessionDuration: 5000, previousEscalations: 0, riskTrend: "stable" as const }
       );
 
       expect(escalation).toBeDefined();
@@ -69,8 +69,8 @@ describe('CrisisEscalationWorkflowService', () => {
       const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
         crisisAnalysis as any,
         mockUserId,
-        { languageCode: 'en', location: { country: mockLocation } },
-        { messagesSent: 10, sessionDuration: 10000 }
+        { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
+        { conversationId: "test-conversation", messagesSent: 10, sessionDuration: 10000, previousEscalations: 0, riskTrend: "stable" as const }
       );
 
       expect(escalation).toBeDefined();
@@ -90,8 +90,8 @@ describe('CrisisEscalationWorkflowService', () => {
       const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
         crisisAnalysis as any,
         mockUserId,
-        { languageCode: 'en', location: { country: mockLocation } },
-        { messagesSent: 1, sessionDuration: 100 }
+        { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
+        { conversationId: "test-conversation", messagesSent: 1, sessionDuration: 100, previousEscalations: 0, riskTrend: "stable" as const }
       );
 
       expect(escalation).toBeDefined();
@@ -147,8 +147,8 @@ describe('CrisisEscalationWorkflowService', () => {
       const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
         crisisAnalysis as any,
         mockUserId,
-        { languageCode: 'en', location: { country: mockLocation } },
-        { messagesSent: 5, sessionDuration: 5000 }
+        { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
+        { conversationId: "test-conversation", messagesSent: 5, sessionDuration: 5000, previousEscalations: 0, riskTrend: "stable" as const }
       );
 
       expect(escalation.escalationId).toBeDefined();
@@ -169,8 +169,8 @@ describe('CrisisEscalationWorkflowService', () => {
       const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
         crisisAnalysis as any,
         mockUserId,
-        { languageCode: 'en', location: { country: mockLocation } },
-        { messagesSent: 5, sessionDuration: 5000 }
+        { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
+        { conversationId: "test-conversation", messagesSent: 5, sessionDuration: 5000, previousEscalations: 0, riskTrend: "stable" as const }
       );
 
       expect(escalation).toBeDefined();
@@ -190,8 +190,8 @@ describe('CrisisEscalationWorkflowService', () => {
       const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
         crisisAnalysis as any,
         mockUserId,
-        { languageCode: 'en', location: { country: mockLocation } },
-        { messagesSent: 5, sessionDuration: 5000 }
+        { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
+        { conversationId: "test-conversation", messagesSent: 5, sessionDuration: 5000, previousEscalations: 0, riskTrend: "stable" as const }
       );
 
       expect(escalation).toBeDefined();
@@ -213,8 +213,8 @@ describe('CrisisEscalationWorkflowService', () => {
       const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
         crisisAnalysis as any,
         mockUserId,
-        { languageCode: 'en', location: { country: mockLocation } },
-        { messagesSent: 10, sessionDuration: 10000 }
+        { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
+        { conversationId: "test-conversation", messagesSent: 10, sessionDuration: 10000, previousEscalations: 0, riskTrend: "stable" as const }
       );
 
       expect(escalation).toBeDefined();
@@ -234,8 +234,8 @@ describe('CrisisEscalationWorkflowService', () => {
       const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
         crisisAnalysis as any,
         mockUserId,
-        { languageCode: 'en', location: { country: mockLocation } },
-        { messagesSent: 1, sessionDuration: 100 }
+        { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
+        { conversationId: "test-conversation", messagesSent: 1, sessionDuration: 100, previousEscalations: 0, riskTrend: "stable" as const }
       );
 
       expect(escalation).toBeDefined();
@@ -253,11 +253,11 @@ describe('CrisisEscalationWorkflowService', () => {
         emergencyServicesRequired: false
       };
       
-      const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
+      await crisisEscalationWorkflowService.initiateCrisisEscalation(
         crisisAnalysis as any,
         mockUserId,
-        { languageCode: 'en', location: { country: mockLocation } },
-        { messagesSent: 5, sessionDuration: 5000 }
+        { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
+        { conversationId: "test-conversation", messagesSent: 5, sessionDuration: 5000, previousEscalations: 0, riskTrend: "stable" as const }
       );
 
       const metrics = crisisEscalationWorkflowService.getEscalationMetrics();
@@ -277,8 +277,8 @@ describe('CrisisEscalationWorkflowService', () => {
       const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
         crisisAnalysis as any,
         mockUserId,
-        { languageCode: 'en', location: { country: mockLocation } },
-        { messagesSent: 5, sessionDuration: 5000 }
+        { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
+        { conversationId: "test-conversation", messagesSent: 5, sessionDuration: 5000, previousEscalations: 0, riskTrend: "stable" as const }
       );
 
       expect(escalation).toHaveProperty('escalationId');
@@ -311,15 +311,15 @@ describe('CrisisEscalationWorkflowService', () => {
       const first = await crisisEscalationWorkflowService.initiateCrisisEscalation(
         crisisAnalysis as any,
         mockUserId,
-        { languageCode: 'en', location: { country: mockLocation } },
-        { messagesSent: 5, sessionDuration: 5000 }
+        { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
+        { conversationId: "test-conversation", messagesSent: 5, sessionDuration: 5000, previousEscalations: 0, riskTrend: "stable" as const }
       );
 
       const second = await crisisEscalationWorkflowService.initiateCrisisEscalation(
         crisisAnalysis as any,
         mockUserId,
-        { languageCode: 'en', location: { country: mockLocation } },
-        { messagesSent: 6, sessionDuration: 6000 }
+        { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
+        { conversationId: "test-conversation", messagesSent: 6, sessionDuration: 6000, previousEscalations: 0, riskTrend: "stable" as const }
       );
 
       expect(first).toBeDefined();
@@ -338,8 +338,8 @@ describe('CrisisEscalationWorkflowService', () => {
       const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
         crisisAnalysis as any,
         mockUserId,
-        { languageCode: 'en', location: { country: mockLocation } },
-        { messagesSent: 5, sessionDuration: 5000 }
+        { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
+        { conversationId: "test-conversation", messagesSent: 5, sessionDuration: 5000, previousEscalations: 0, riskTrend: "stable" as const }
       );
 
       expect(escalation).toBeDefined();
@@ -354,8 +354,8 @@ describe('CrisisEscalationWorkflowService', () => {
       const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
         null,
         mockUserId,
-        { languageCode: 'en', location: { country: mockLocation } },
-        { messagesSent: 1, sessionDuration: 100 }
+        { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
+        { conversationId: "test-conversation", messagesSent: 1, sessionDuration: 100, previousEscalations: 0, riskTrend: "stable" as const }
       );
 
       expect(escalation).toBeDefined();
@@ -363,3 +363,4 @@ describe('CrisisEscalationWorkflowService', () => {
     });
   });
 });
+

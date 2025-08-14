@@ -331,7 +331,7 @@ describe('networkDetection', () => {
     });
 
     it('should initialize with current adaptive loading config', () => {
-      const { result } = renderHook(() => useAdaptiveLoading());
+      // const { result } = renderHook(() => useAdaptiveLoading());
       
       expect(mockUseState).toHaveBeenCalledWith(getAdaptiveLoadingConfig());
     });

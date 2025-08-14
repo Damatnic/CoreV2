@@ -2,96 +2,69 @@
  * @jest-environment jsdom
  */
 
-import { CoreWebVitalsService, coreWebVitalsService } from '../coreWebVitalsService';
+import ComprehensivePerformanceMonitor, { comprehensivePerformanceMonitor } from '../comprehensivePerformanceMonitor';
+import type {
+  EnhancedPerformanceMetrics,
+  PerformanceAlert,
+  PerformanceBottleneck,
+} from '../comprehensivePerformanceMonitor';
 
-// Mock web-vitals library
-const mockOnCLS = jest.fn();
-const mockOnINP = jest.fn();
-const mockOnFCP = jest.fn();
-const mockOnLCP = jest.fn();
-const mockOnTTFB = jest.fn();
+// Mock dependencies
+const mockAnalyticsService = {
+  track: jest.fn(),
+};
 
-jest.mock('web-vitals', () => ({
-  onCLS: mockOnCLS,
-  onINP: mockOnINP,
-  onFCP: mockOnFCP,
-  onLCP: mockOnLCP,
-  onTTFB: mockOnTTFB,
+jest.mock('../analyticsService', () => ({
+  getAnalyticsService: () => mockAnalyticsService,
 }));
 
-// Mock PerformanceObserver
+// Mock performance APIs
 const mockPerformanceObserver = {
   observe: jest.fn(),
   disconnect: jest.fn(),
   getEntries: jest.fn(() => []),
 };
 
+const mockPerformanceEntry = {
+  name: 'test-entry',
+  entryType: 'navigation',
+  startTime: 100,
+  duration: 200,
+  loadEventStart: 300,
+  loadEventEnd: 400,
+  domContentLoadedEventStart: 250,
+  domContentLoadedEventEnd: 280,
+  responseStart: 150,
+  requestStart: 120,
+  transferSize: 1024,
+  encodedBodySize: 512,
+} as PerformanceNavigationTiming;
+
 Object.defineProperty(global, 'PerformanceObserver', {
   value: jest.fn().mockImplementation(() => mockPerformanceObserver),
   writable: true,
 });
 
-// Mock performance API
-const mockNavigationEntry: PerformanceNavigationTiming = {
-  name: 'test-navigation',
-  entryType: 'navigation',
-  startTime: 0,
-  duration: 1000,
-  loadEventStart: 800,
-  loadEventEnd: 900,
-  domContentLoadedEventStart: 400,
-  domContentLoadedEventEnd: 450,
-  responseStart: 200,
-  requestStart: 100,
-  transferSize: 2048,
-  encodedBodySize: 1536,
-  decodedBodySize: 2048,
-  type: 'navigate',
-  redirectCount: 0,
-  initiatorType: '',
-  nextHopProtocol: 'http/1.1',
-  renderBlockingStatus: 'non-blocking',
-  deliveryType: '',
-  serverTiming: [],
-  workerStart: 0,
-  redirectStart: 0,
-  redirectEnd: 0,
-  fetchStart: 100,
-  domainLookupStart: 110,
-  domainLookupEnd: 120,
-  connectStart: 120,
-  connectEnd: 140,
-  secureConnectionStart: 130,
-  responseEnd: 250,
-  domInteractive: 350,
-  domContentLoadedEventEnd: 450,
-  domContentLoadedEventStart: 400,
-  domComplete: 750,
-  loadEventStart: 800,
-  loadEventEnd: 900,
-  unloadEventStart: 0,
-  unloadEventEnd: 0,
-  toJSON: function() { return this; }
-};
-
 Object.defineProperty(global, 'performance', {
   value: {
     now: jest.fn(() => Date.now()),
-    getEntriesByType: jest.fn(() => [mockNavigationEntry]),
-    getEntriesByName: jest.fn(() => []),
+    mark: jest.fn(),
+    measure: jest.fn(),
+    getEntriesByType: jest.fn(() => [mockPerformanceEntry]),
+    getEntriesByName: jest.fn(() => [mockPerformanceEntry]),
     timing: {
       navigationStart: Date.now() - 5000,
+    },
+    memory: {
+      usedJSHeapSize: 50 * 1024 * 1024, // 50MB
+      totalJSHeapSize: 100 * 1024 * 1024, // 100MB
+      jsHeapSizeLimit: 200 * 1024 * 1024, // 200MB
     },
   },
   writable: true,
 });
 
-// Mock navigator
-Object.defineProperty(navigator, 'userAgent', {
-  value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-  writable: true,
-});
-
+// Mock navigator connection
 Object.defineProperty(navigator, 'connection', {
   value: {
     effectiveType: '4g',
@@ -101,19 +74,13 @@ Object.defineProperty(navigator, 'connection', {
   writable: true,
 });
 
-// Mock localStorage
-const mockLocalStorage = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-};
-
-Object.defineProperty(global, 'localStorage', {
-  value: mockLocalStorage,
+// Mock document for crisis detection
+Object.defineProperty(document, 'querySelectorAll', {
+  value: jest.fn(() => []),
   writable: true,
 });
 
-// Mock window dimensions
+// Mock window for viewport and other checks
 Object.defineProperty(window, 'innerWidth', {
   value: 1024,
   writable: true,
@@ -124,716 +91,1082 @@ Object.defineProperty(window, 'innerHeight', {
   writable: true,
 });
 
-// Mock location
-Object.defineProperty(window, 'location', {
-  value: {
-    pathname: '/test-page',
-    href: 'https://example.com/test-page',
-  },
-  writable: true,
-});
-
-// Mock history
-Object.defineProperty(window, 'history', {
-  value: {
-    pushState: jest.fn(),
-  },
-  writable: true,
-});
-
-describe('CoreWebVitalsService', () => {
-  let service: CoreWebVitalsService;
+describe('ComprehensivePerformanceMonitor', () => {
+  let monitor: ComprehensivePerformanceMonitor;
 
   beforeEach(() => {
     jest.clearAllMocks();
     
-    // Reset localStorage mock
-    mockLocalStorage.getItem.mockReturnValue(null);
-    mockLocalStorage.setItem.mockImplementation();
+    // Reset DOM
+    document.body.innerHTML = '';
     
     // Reset performance mocks
     (performance.now as jest.Mock).mockReturnValue(Date.now());
-    (performance.getEntriesByType as jest.Mock).mockReturnValue([mockNavigationEntry]);
-    
-    // Reset web-vitals mocks
-    mockOnCLS.mockImplementation((callback) => callback);
-    mockOnINP.mockImplementation((callback) => callback);
-    mockOnFCP.mockImplementation((callback) => callback);
-    mockOnLCP.mockImplementation((callback) => callback);
-    mockOnTTFB.mockImplementation((callback) => callback);
+    (performance.getEntriesByType as jest.Mock).mockReturnValue([mockPerformanceEntry]);
+    (document.querySelectorAll as jest.Mock).mockReturnValue([]);
 
-    service = new CoreWebVitalsService();
+    monitor = new ComprehensivePerformanceMonitor();
+  });
+
+  afterEach(() => {
+    if (monitor) {
+      monitor.destroy();
+    }
   });
 
   describe('Initialization', () => {
-    test('should initialize with default values', () => {
-      expect(service).toBeDefined();
-      expect((service as any).sessionId).toMatch(/^cwv-\d+-[a-z0-9]+$/);
-      expect((service as any).deviceType).toBe('desktop'); // innerWidth = 1024
-      expect((service as any).connectionType).toBe('4g');
+    test('should initialize with default configuration', () => {
+      expect(monitor).toBeDefined();
+      expect(PerformanceObserver).toHaveBeenCalled();
     });
 
-    test('should detect mobile device', () => {
+    test('should set up performance observers', () => {
+      expect(mockPerformanceObserver.observe).toHaveBeenCalled();
+    });
+
+    test('should detect device type correctly', () => {
+      // Test mobile detection
       Object.defineProperty(window, 'innerWidth', { value: 600, writable: true });
-      const mobileService = new CoreWebVitalsService();
+      const mobileMonitor = new ComprehensivePerformanceMonitor();
       
-      expect((mobileService as any).deviceType).toBe('mobile');
-    });
-
-    test('should detect tablet device', () => {
-      Object.defineProperty(window, 'innerWidth', { value: 800, writable: true });
-      const tabletService = new CoreWebVitalsService();
+      const budgets = (mobileMonitor as any).getDefaultBudgets();
+      expect(budgets.firstContentfulPaint.target).toBe(2000); // Mobile target
       
-      expect((tabletService as any).deviceType).toBe('tablet');
+      mobileMonitor.destroy();
     });
 
-    test('should track initial route', () => {
-      expect((service as any).userJourney).toContain('/test-page');
-    });
-
-    test('should initialize web vitals on initialize call', async () => {
-      await service.initialize('https://api.example.com/vitals');
-      
-      expect(mockOnCLS).toHaveBeenCalled();
-      expect(mockOnINP).toHaveBeenCalled();
-      expect(mockOnFCP).toHaveBeenCalled();
-      expect(mockOnLCP).toHaveBeenCalled();
-      expect(mockOnTTFB).toHaveBeenCalled();
-    });
-
-    test('should handle web-vitals import failure', async () => {
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
-      
-      // Mock import to fail
-      jest.doMock('web-vitals', () => {
-        throw new Error('Import failed');
-      });
-
-      await service.initialize();
-      
-      expect(consoleSpy).toHaveBeenCalledWith('Core Web Vitals monitoring not available:', expect.any(Error));
-      consoleSpy.mockRestore();
-    });
-  });
-
-  describe('Device and Connection Detection', () => {
-    test('should detect connection type from navigator', () => {
-      Object.defineProperty(navigator, 'connection', {
-        value: { effectiveType: '3g' },
-        writable: true,
-      });
-
-      const service3g = new CoreWebVitalsService();
-      expect((service3g as any).connectionType).toBe('3g');
-    });
-
-    test('should handle missing connection info', () => {
-      Object.defineProperty(navigator, 'connection', {
-        value: undefined,
-        writable: true,
-      });
-
-      const serviceUnknown = new CoreWebVitalsService();
-      expect((serviceUnknown as any).connectionType).toBe('unknown');
-    });
-
-    test('should generate unique session IDs', () => {
-      const service1 = new CoreWebVitalsService();
-      const service2 = new CoreWebVitalsService();
-      
-      expect((service1 as any).sessionId).not.toBe((service2 as any).sessionId);
-    });
-  });
-
-  describe('Performance Budget Validation', () => {
-    test('should have correct performance budgets', () => {
-      const budgets = (service as any).PERFORMANCE_BUDGET;
-      
-      expect(budgets.LCP.good).toBe(2500);
-      expect(budgets.LCP.needsImprovement).toBe(4000);
-      expect(budgets.FID.good).toBe(100);
-      expect(budgets.FID.needsImprovement).toBe(300);
-      expect(budgets.CLS.good).toBe(0.1);
-      expect(budgets.CLS.needsImprovement).toBe(0.25);
-      expect(budgets.FCP.good).toBe(1800);
-      expect(budgets.FCP.needsImprovement).toBe(3000);
-      expect(budgets.TTFB.good).toBe(800);
-      expect(budgets.TTFB.needsImprovement).toBe(1800);
-      expect(budgets.INP.good).toBe(200);
-      expect(budgets.INP.needsImprovement).toBe(500);
-    });
-  });
-
-  describe('Metric Rating Calculation', () => {
-    test('should calculate good ratings correctly', () => {
-      expect((service as any).calculateRating('LCP', 2000)).toBe('good');
-      expect((service as any).calculateRating('FID', 50)).toBe('good');
-      expect((service as any).calculateRating('CLS', 0.05)).toBe('good');
-      expect((service as any).calculateRating('FCP', 1500)).toBe('good');
-      expect((service as any).calculateRating('TTFB', 600)).toBe('good');
-      expect((service as any).calculateRating('INP', 150)).toBe('good');
-    });
-
-    test('should calculate needs-improvement ratings correctly', () => {
-      expect((service as any).calculateRating('LCP', 3000)).toBe('needs-improvement');
-      expect((service as any).calculateRating('FID', 200)).toBe('needs-improvement');
-      expect((service as any).calculateRating('CLS', 0.15)).toBe('needs-improvement');
-      expect((service as any).calculateRating('FCP', 2500)).toBe('needs-improvement');
-      expect((service as any).calculateRating('TTFB', 1500)).toBe('needs-improvement');
-      expect((service as any).calculateRating('INP', 400)).toBe('needs-improvement');
-    });
-
-    test('should calculate poor ratings correctly', () => {
-      expect((service as any).calculateRating('LCP', 5000)).toBe('poor');
-      expect((service as any).calculateRating('FID', 400)).toBe('poor');
-      expect((service as any).calculateRating('CLS', 0.3)).toBe('poor');
-      expect((service as any).calculateRating('FCP', 3500)).toBe('poor');
-      expect((service as any).calculateRating('TTFB', 2000)).toBe('poor');
-      expect((service as any).calculateRating('INP', 600)).toBe('poor');
-    });
-
-    test('should handle unknown metrics gracefully', () => {
-      expect((service as any).calculateRating('UNKNOWN_METRIC', 1000)).toBe('good');
-    });
-  });
-
-  describe('Metric Handling', () => {
-    test('should handle web vital metrics correctly', () => {
-      const mockMetric = {
-        name: 'LCP',
-        value: 2400,
-        rating: 'good',
-        delta: 2400,
-        id: 'test-lcp',
-        navigationType: 'navigate',
+    test('should initialize with custom config', () => {
+      const customConfig = {
+        enableRealTimeMonitoring: false,
+        collectInterval: 10000,
+        retentionPeriod: 60,
       };
 
-      (service as any).handleMetric(mockMetric);
+      const customMonitor = new ComprehensivePerformanceMonitor(customConfig);
       
-      const metrics = (service as any).metrics;
-      expect(metrics).toHaveLength(1);
-      expect(metrics[0].name).toBe('LCP');
-      expect(metrics[0].value).toBe(2400);
-      expect(metrics[0].rating).toBe('good');
-      expect(metrics[0].route).toBe('/test-page');
-      expect(metrics[0].userAgent).toBe(navigator.userAgent);
-      expect(metrics[0].connectionType).toBe('4g');
-    });
-
-    test('should detect crisis situations', () => {
-      Object.defineProperty(window, 'location', {
-        value: { pathname: '/crisis-support' },
-        writable: true,
-      });
-
-      const crisisService = new CoreWebVitalsService();
-      expect((crisisService as any).isCrisisRoute()).toBe(true);
-    });
-
-    test('should detect emergency routes', () => {
-      Object.defineProperty(window, 'location', {
-        value: { pathname: '/emergency-help' },
-        writable: true,
-      });
-
-      const emergencyService = new CoreWebVitalsService();
-      expect((emergencyService as any).isCrisisRoute()).toBe(true);
-    });
-
-    test('should detect safety routes', () => {
-      Object.defineProperty(window, 'location', {
-        value: { pathname: '/safety-plan' },
-        writable: true,
-      });
-
-      const safetyService = new CoreWebVitalsService();
-      expect((safetyService as any).isCrisisRoute()).toBe(true);
-    });
-
-    test('should detect offline crisis routes', () => {
-      Object.defineProperty(window, 'location', {
-        value: { pathname: '/offline-crisis' },
-        writable: true,
-      });
-
-      const offlineCrisisService = new CoreWebVitalsService();
-      expect((offlineCrisisService as any).isCrisisRoute()).toBe(true);
-    });
-
-    test('should handle real-time alerts for poor crisis performance', () => {
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
-      
-      const mockCrisisMetric = {
-        name: 'LCP',
-        value: 5000,
-        rating: 'poor',
-        delta: 5000,
-        id: 'crisis-lcp',
-        navigationType: 'navigate',
-      };
-
-      Object.defineProperty(window, 'location', {
-        value: { pathname: '/crisis-support' },
-        writable: true,
-      });
-
-      const crisisService = new CoreWebVitalsService();
-      (crisisService as any).handleMetric(mockCrisisMetric);
-      
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Poor LCP in crisis situation:'),
-        expect.any(Object)
-      );
-      
-      consoleSpy.mockRestore();
+      expect(customMonitor).toBeDefined();
+      customMonitor.destroy();
     });
   });
 
-  describe('Crisis-Specific Metrics', () => {
-    test('should measure crisis resource timing', () => {
-      const mockResourceEntry = {
-        name: 'https://example.com/crisis-support.js',
-        entryType: 'resource',
-        startTime: 100,
-        duration: 500,
-      };
+  describe('Performance Budgets', () => {
+    test('should have appropriate mobile budgets', () => {
+      Object.defineProperty(window, 'innerWidth', { value: 600, writable: true });
+      const mobileMonitor = new ComprehensivePerformanceMonitor();
+      const budgets = (mobileMonitor as any).getDefaultBudgets();
 
-      // Mock performance observer callback
-      const observerCallback = mockPerformanceObserver.observe.mock.calls.find(
-        call => call[0].type === 'resource'
-      );
+      expect(budgets.firstContentfulPaint.target).toBe(2000);
+      expect(budgets.largestContentfulPaint.target).toBe(3000);
+      expect(budgets.loadTime.target).toBe(3000);
+      expect(budgets.bundleSize.target).toBe(500000); // 500KB for mobile
       
-      if (observerCallback) {
-        // Simulate resource entry being observed
-        mockPerformanceObserver.getEntries.mockReturnValue([mockResourceEntry]);
-        
-        // Simulate observer callback
-        const list = {
-          getEntries: () => [mockResourceEntry]
-        };
-        
-        // Call the observer setup method directly
-        (service as any).measureCrisisResourceTiming();
-      }
+      mobileMonitor.destroy();
     });
 
-    test('should calculate crisis resource rating', () => {
-      expect((service as any).calculateCrisisResourceRating(800)).toBe('good');
-      expect((service as any).calculateCrisisResourceRating(2000)).toBe('needs-improvement');
-      expect((service as any).calculateCrisisResourceRating(3000)).toBe('poor');
+    test('should have appropriate desktop budgets', () => {
+      Object.defineProperty(window, 'innerWidth', { value: 1200, writable: true });
+      const desktopMonitor = new ComprehensivePerformanceMonitor();
+      const budgets = (desktopMonitor as any).getDefaultBudgets();
+
+      expect(budgets.firstContentfulPaint.target).toBe(1500);
+      expect(budgets.largestContentfulPaint.target).toBe(2500);
+      expect(budgets.loadTime.target).toBe(2000);
+      expect(budgets.bundleSize.target).toBe(800000); // 800KB for desktop
+      
+      desktopMonitor.destroy();
     });
 
-    test('should calculate emergency response rating', () => {
-      expect((service as any).calculateEmergencyResponseRating(30)).toBe('good');
-      expect((service as any).calculateEmergencyResponseRating(75)).toBe('needs-improvement');
-      expect((service as any).calculateEmergencyResponseRating(150)).toBe('poor');
+    test('should have strict crisis detection budgets', () => {
+      const budgets = (monitor as any).getDefaultBudgets();
+      
+      expect(budgets.crisisDetectionResponseTime.target).toBe(100); // Very strict
+      expect(budgets.crisisDetectionResponseTime.critical).toBe(500);
+    });
+  });
+
+  describe('Metrics Collection', () => {
+    beforeEach(() => {
+      // Mock paint entries
+      (performance.getEntriesByType as jest.Mock).mockImplementation((type) => {
+        if (type === 'paint') {
+          return [
+            { name: 'first-contentful-paint', startTime: 1500 },
+            { name: 'first-paint', startTime: 1200 },
+          ];
+        }
+        if (type === 'navigation') {
+          return [mockPerformanceEntry];
+        }
+        if (type === 'resource') {
+          return [
+            {
+              name: 'app.js',
+              transferSize: 100000,
+              encodedBodySize: 80000,
+              duration: 200,
+            },
+            {
+              name: 'styles.css',
+              transferSize: 50000,
+              encodedBodySize: 40000,
+              duration: 100,
+            },
+          ];
+        }
+        return [];
+      });
     });
 
-    test('should monitor emergency button clicks', () => {
+    test('should collect current performance metrics', async () => {
+      const metrics = await (monitor as any).collectCurrentMetrics();
+      
+      expect(metrics).toBeDefined();
+      expect(metrics.timestamp).toBeDefined();
+      expect(metrics.firstContentfulPaint).toBe(1500);
+      expect(metrics.loadTime).toBe(100); // loadEventEnd - loadEventStart
+      expect(metrics.domContentLoaded).toBe(30); // domContentLoadedEventEnd - domContentLoadedEventStart
+      expect(metrics.timeToFirstByte).toBe(30); // responseStart - requestStart
+    });
+
+    test('should calculate memory usage', async () => {
+      const metrics = await (monitor as any).collectCurrentMetrics();
+      
+      expect(metrics.memoryUsage).toBeCloseTo(50, 0); // 50MB
+    });
+
+    test('should calculate bundle size', async () => {
+      const metrics = await (monitor as any).collectCurrentMetrics();
+      
+      expect(metrics.bundleSize).toBe(100000); // Size of .js files
+      expect(metrics.totalResourceSize).toBe(150000); // Total size
+      expect(metrics.chunkCount).toBe(1); // Number of JS files
+    });
+
+    test('should detect network information', async () => {
+      const metrics = await (monitor as any).collectCurrentMetrics();
+      
+      expect(metrics.networkLatency).toBe(50);
+      expect(metrics.bandwidth).toBe(10);
+    });
+
+    test('should measure crisis detection time', async () => {
+      const crisisTime = await (monitor as any).measureCrisisDetectionTime();
+      
+      expect(typeof crisisTime).toBe('number');
+      expect(crisisTime).toBeGreaterThan(0);
+    });
+
+    test('should measure chat latency', async () => {
+      const chatLatency = await (monitor as any).measureChatLatency();
+      
+      expect(typeof chatLatency).toBe('number');
+      expect(chatLatency).toBeGreaterThanOrEqual(10); // Includes 10ms delay
+    });
+  });
+
+  describe('Video Quality Assessment', () => {
+    test('should assess video quality with HD videos', () => {
+      const mockVideo = document.createElement('video');
+      Object.defineProperty(mockVideo, 'videoWidth', { value: 1280, writable: true });
+      document.body.appendChild(mockVideo);
+
+      (document.querySelectorAll as jest.Mock).mockReturnValue([mockVideo]);
+      
+      const quality = (monitor as any).assessVideoQuality();
+      expect(quality).toBe(100);
+    });
+
+    test('should assess video quality with SD videos', () => {
+      const mockVideo = document.createElement('video');
+      Object.defineProperty(mockVideo, 'videoWidth', { value: 640, writable: true });
+      document.body.appendChild(mockVideo);
+
+      (document.querySelectorAll as jest.Mock).mockReturnValue([mockVideo]);
+      
+      const quality = (monitor as any).assessVideoQuality();
+      expect(quality).toBe(75);
+    });
+
+    test('should return perfect score with no videos', () => {
+      (document.querySelectorAll as jest.Mock).mockReturnValue([]);
+      
+      const quality = (monitor as any).assessVideoQuality();
+      expect(quality).toBe(100);
+    });
+  });
+
+  describe('Offline Capability Check', () => {
+    test('should check offline capabilities', () => {
+      Object.defineProperty(navigator, 'serviceWorker', { value: {}, writable: true });
+      Object.defineProperty(window, 'caches', { value: {}, writable: true });
+      Object.defineProperty(navigator, 'onLine', { value: true, writable: true });
+      
+      const score = (monitor as any).checkOfflineCapability();
+      expect(score).toBe(100); // 40 + 30 + 30 = 100
+    });
+
+    test('should handle missing offline features', () => {
+      Object.defineProperty(navigator, 'serviceWorker', { value: undefined, writable: true });
+      Object.defineProperty(window, 'caches', { value: undefined, writable: true });
+      Object.defineProperty(navigator, 'onLine', { value: false, writable: true });
+      
+      const score = (monitor as any).checkOfflineCapability();
+      expect(score).toBe(0);
+    });
+  });
+
+  describe('User Experience Scores', () => {
+    test('should calculate engagement score based on session duration', () => {
+      const score = (monitor as any).calculateEngagementScore();
+      
+      expect(typeof score).toBe('number');
+      expect(score).toBeGreaterThanOrEqual(0);
+      expect(score).toBeLessThanOrEqual(100);
+    });
+
+    test('should calculate usability score', () => {
+      // Add aria labels and alt text
       document.body.innerHTML = `
-        <button class="crisis-button">Emergency Help</button>
-        <button class="emergency-button">Call Now</button>
-        <div data-crisis="true">Crisis Resource</div>
+        <button aria-label="Submit">Submit</button>
+        <img src="test.jpg" alt="Test image">
+        <meta name="viewport" content="width=device-width">
       `;
 
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const score = (monitor as any).calculateUsabilityScore();
+      expect(score).toBe(100); // Base 60 + 15 + 15 + 10 = 100
+    });
+
+    test('should calculate accessibility score', async () => {
+      // Mock elements for accessibility checks
+      document.body.innerHTML = `
+        <button>Click me</button>
+        <a href="/test">Link</a>
+      `;
+
+      const score = await (monitor as any).calculateAccessibilityScore();
       
-      // Simulate emergency button click
-      const crisisButton = document.querySelector('.crisis-button') as HTMLElement;
-      const clickEvent = new MouseEvent('click', { bubbles: true });
-      
-      // Mock performance.now to simulate slow response
-      (performance.now as jest.Mock)
-        .mockReturnValueOnce(0)
-        .mockReturnValueOnce(150); // 150ms response time - poor
-      
-      crisisButton.dispatchEvent(clickEvent);
-      
-      // Wait for requestAnimationFrame
-      setTimeout(() => {
-        expect(consoleSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Poor emergency button response time:'),
-          150,
-          'ms'
-        );
-      }, 20);
-      
-      consoleSpy.mockRestore();
+      expect(typeof score).toBe('number');
+      expect(score).toBeGreaterThanOrEqual(0);
+      expect(score).toBeLessThanOrEqual(100);
     });
   });
 
-  describe('Network Status Monitoring', () => {
-    test('should track online status changes', () => {
-      const onlineEvent = new Event('online');
-      window.dispatchEvent(onlineEvent);
-      
-      const metrics = (service as any).metrics;
-      const networkMetric = metrics.find((m: any) => m.id.includes('network-online'));
-      
-      expect(networkMetric).toBeDefined();
-      if (networkMetric) {
-        expect(networkMetric.rating).toBe('good');
-      }
-    });
-
-    test('should track offline status changes', () => {
-      const offlineEvent = new Event('offline');
-      window.dispatchEvent(offlineEvent);
-      
-      const metrics = (service as any).metrics;
-      const networkMetric = metrics.find((m: any) => m.id.includes('network-offline'));
-      
-      expect(networkMetric).toBeDefined();
-      if (networkMetric) {
-        expect(networkMetric.rating).toBe('poor');
-        expect(networkMetric.value).toBe(0);
-      }
-    });
-  });
-
-  describe('Performance Summary', () => {
-    test('should generate performance summary', () => {
-      // Add some test metrics
-      const metrics = [
-        {
-          name: 'LCP',
-          rating: 'good',
-          isCrisisSituation: false,
-        },
-        {
-          name: 'FID',
-          rating: 'needs-improvement',
-          isCrisisSituation: false,
-        },
-        {
-          name: 'CLS',
-          rating: 'poor',
-          isCrisisSituation: true,
-        },
-      ];
-
-      (service as any).metrics = metrics;
-
-      const summary = service.getPerformanceSummary();
-      
-      expect(summary.totalMetrics).toBe(3);
-      expect(summary.goodMetrics).toBe(1);
-      expect(summary.needsImprovementMetrics).toBe(1);
-      expect(summary.poorMetrics).toBe(1);
-      expect(summary.crisisMetrics).toBe(1);
-      expect(summary.deviceType).toBe('desktop');
-      expect(summary.connectionType).toBe('4g');
-      expect(summary.sessionId).toMatch(/^cwv-\d+-[a-z0-9]+$/);
-    });
-  });
-
-  describe('Report Generation', () => {
-    test('should generate comprehensive report', () => {
-      // Add test metrics
-      const testMetrics = [
-        {
-          name: 'LCP',
-          value: 2400,
-          rating: 'good',
-          isCrisisSituation: false,
-          id: 'lcp-1',
-        },
-        {
-          name: 'FID',
-          value: 80,
-          rating: 'good',
-          isCrisisSituation: false,
-          id: 'fid-1',
-        },
-        {
-          name: 'CLS',
-          value: 0.05,
-          rating: 'good',
-          isCrisisSituation: true,
-          id: 'cls-crisis',
-        },
-      ];
-
-      (service as any).metrics = testMetrics;
-
-      const report = service.generateReport();
-      
-      expect(report.metrics).toEqual(testMetrics);
-      expect(report.sessionId).toMatch(/^cwv-\d+-[a-z0-9]+$/);
-      expect(report.deviceType).toBe('desktop');
-      expect(report.connectionType).toBe('4g');
-      expect(report.route).toBe('/test-page');
-      expect(report.userJourney).toContain('/test-page');
-      expect(report.timestamp).toBeCloseTo(Date.now(), -3);
-    });
-
-    test('should calculate crisis-specific metrics', () => {
-      const crisisMetrics = [
-        {
-          name: 'LCP',
-          value: 2000,
-          id: 'crisis-resource-123',
-          isCrisisSituation: true,
-        },
-        {
-          name: 'FID',
-          value: 50,
-          id: 'emergency-response-456',
-          isCrisisSituation: true,
-        },
-        {
-          name: 'LCP',
-          value: 3000,
-          id: 'regular-lcp',
-          isCrisisSituation: true,
-        },
-      ];
-
-      (service as any).metrics = crisisMetrics;
-
-      const crisisData = (service as any).calculateCrisisMetrics();
-      
-      expect(crisisData).toBeDefined();
-      expect(crisisData.timeToFirstCrisisResource).toBe(2000);
-      expect(crisisData.emergencyButtonResponseTime).toBe(50);
-      expect(crisisData.crisisPageLoadTime).toBe(3000);
-    });
-
-    test('should handle empty crisis metrics', () => {
-      (service as any).metrics = [];
-
-      const crisisData = (service as any).calculateCrisisMetrics();
-      
-      expect(crisisData).toBeNull();
-    });
-
-    test('should clear metrics after reporting', () => {
-      (service as any).metrics = [{ name: 'LCP', value: 2000 }];
-
-      service.generateReport();
-      
-      expect((service as any).metrics).toHaveLength(0);
-    });
-  });
-
-  describe('Route Tracking', () => {
-    test('should track route changes with history.pushState', () => {
-      const originalPushState = history.pushState;
-      
-      // Simulate route change
-      history.pushState({}, 'New Page', '/new-route');
-      
-      const userJourney = (service as any).userJourney;
-      expect(userJourney).toContain('/new-route');
-      
-      // Restore original method
-      history.pushState = originalPushState;
-    });
-
-    test('should limit user journey length', () => {
-      // Add 25 routes to exceed the 20-route limit
-      for (let i = 0; i < 25; i++) {
-        history.pushState({}, `Page ${i}`, `/route-${i}`);
-      }
-      
-      const userJourney = (service as any).userJourney;
-      expect(userJourney.length).toBe(20);
-      expect(userJourney).toContain('/route-24'); // Most recent
-      expect(userJourney).not.toContain('/route-0'); // Should be removed
-    });
-  });
-
-  describe('Periodic Reporting', () => {
-    test('should set up periodic reporting intervals', () => {
-      const setIntervalSpy = jest.spyOn(global, 'setInterval');
-      
-      new CoreWebVitalsService();
-      
-      expect(setIntervalSpy).toHaveBeenCalledWith(expect.any(Function), 30000);
-      setIntervalSpy.mockRestore();
-    });
-
-    test('should report on beforeunload', () => {
-      const reportSpy = jest.spyOn(service, 'generateReport');
-      
-      const beforeUnloadEvent = new Event('beforeunload');
-      window.dispatchEvent(beforeUnloadEvent);
-      
-      expect(reportSpy).toHaveBeenCalled();
-    });
-  });
-
-  describe('External Reporting', () => {
-    test('should send report to endpoint when configured', async () => {
-      const mockFetch = jest.fn().mockResolvedValue({ ok: true });
-      global.fetch = mockFetch;
-
-      await service.initialize('https://api.example.com/vitals');
-      
-      (service as any).metrics = [{ name: 'LCP', value: 2000 }];
-      
-      const report = service.generateReport();
-      
-      // Wait for async send
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      expect(mockFetch).toHaveBeenCalledWith(
-        'https://api.example.com/vitals',
-        expect.objectContaining({
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(report),
-        })
-      );
-    });
-
-    test('should handle fetch errors gracefully', async () => {
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
-      const mockFetch = jest.fn().mockRejectedValue(new Error('Network error'));
-      global.fetch = mockFetch;
-
-      await service.initialize('https://api.example.com/vitals');
-      
-      (service as any).metrics = [{ name: 'LCP', value: 2000 }];
-      service.generateReport();
-      
-      // Wait for async send
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Failed to send Web Vitals report:',
-        expect.any(Error)
-      );
-      
-      consoleSpy.mockRestore();
-    });
-  });
-
-  describe('Crisis Metrics Storage', () => {
-    test('should store crisis metrics in localStorage', () => {
-      const crisisData = {
-        metric: { name: 'LCP', value: 2000, isCrisisSituation: true },
+  describe('Budget Checking', () => {
+    test('should detect budget violations', () => {
+      const mockMetrics: EnhancedPerformanceMetrics = {
+        firstContentfulPaint: 5000, // Exceeds critical threshold
+        largestContentfulPaint: 2000,
+        firstInputDelay: 50,
+        cumulativeLayoutShift: 0.05,
+        timeToFirstByte: 100,
+        loadTime: 1000,
+        domContentLoaded: 500,
+        bundleSize: 500000,
+        chunkCount: 5,
+        cacheHitRate: 0.8,
+        totalResourceSize: 2000000,
+        memoryUsage: 100,
+        cpuUsage: 0.5,
+        networkLatency: 50,
+        bandwidth: 10,
+        crisisDetectionResponseTime: 100,
+        chatMessageLatency: 200,
+        videoStreamingQuality: 100,
+        offlineCapabilityStatus: 100,
+        userEngagementScore: 80,
+        featureUsabilityScore: 90,
+        accessibilityScore: 85,
         timestamp: Date.now(),
-        route: '/crisis-support',
-        sessionId: 'test-session',
-        deviceType: 'mobile',
-        connectionType: '4g',
       };
 
-      (service as any).storeCrisisMetrics(crisisData);
+      (monitor as any).checkPerformanceBudgets(mockMetrics);
       
-      expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
-        'crisis-performance-metrics',
-        JSON.stringify([crisisData])
-      );
+      const alerts = (monitor as any).activeAlerts;
+      expect(alerts.length).toBeGreaterThan(0);
+      
+      const fcpAlert = alerts.find((alert: PerformanceAlert) => alert.metric === 'firstContentfulPaint');
+      expect(fcpAlert).toBeDefined();
+      expect(fcpAlert.severity).toBe('critical');
     });
 
-    test('should limit crisis metrics storage to 100 entries', () => {
-      // Mock existing data with 100 entries
-      const existingData = Array(100).fill({}).map((_, i) => ({ id: i }));
-      mockLocalStorage.getItem.mockReturnValue(JSON.stringify(existingData));
+    test('should handle good performance gracefully', () => {
+      const mockMetrics: EnhancedPerformanceMetrics = {
+        firstContentfulPaint: 1200, // Good performance
+        largestContentfulPaint: 2000,
+        firstInputDelay: 30,
+        cumulativeLayoutShift: 0.02,
+        timeToFirstByte: 200,
+        loadTime: 1500,
+        domContentLoaded: 800,
+        bundleSize: 300000,
+        chunkCount: 3,
+        cacheHitRate: 0.9,
+        totalResourceSize: 800000,
+        memoryUsage: 40,
+        cpuUsage: 0.3,
+        networkLatency: 30,
+        bandwidth: 15,
+        crisisDetectionResponseTime: 80,
+        chatMessageLatency: 150,
+        videoStreamingQuality: 100,
+        offlineCapabilityStatus: 100,
+        userEngagementScore: 90,
+        featureUsabilityScore: 95,
+        accessibilityScore: 90,
+        timestamp: Date.now(),
+      };
 
-      const newData = { id: 'new-entry' };
-      (service as any).storeCrisisMetrics(newData);
+      (monitor as any).checkPerformanceBudgets(mockMetrics);
       
-      const expectedData = [...existingData.slice(1), newData];
-      expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
-        'crisis-performance-metrics',
-        JSON.stringify(expectedData)
+      const alerts = (monitor as any).activeAlerts;
+      const highSeverityAlerts = alerts.filter((alert: PerformanceAlert) => 
+        alert.severity === 'critical' || alert.severity === 'high'
       );
+      expect(highSeverityAlerts.length).toBe(0);
+    });
+  });
+
+  describe('Bottleneck Detection', () => {
+    test('should detect bundle size bottlenecks', () => {
+      const mockMetrics: EnhancedPerformanceMetrics = {
+        bundleSize: 2500000, // 2.5MB - critical size
+        memoryUsage: 50,
+        crisisDetectionResponseTime: 100,
+        firstContentfulPaint: 1500,
+        largestContentfulPaint: 2500,
+        firstInputDelay: 50,
+        cumulativeLayoutShift: 0.1,
+        timeToFirstByte: 200,
+        loadTime: 2000,
+        domContentLoaded: 1000,
+        chunkCount: 10,
+        cacheHitRate: 0.8,
+        totalResourceSize: 3000000,
+        cpuUsage: 0.4,
+        networkLatency: 50,
+        bandwidth: 10,
+        chatMessageLatency: 200,
+        videoStreamingQuality: 100,
+        offlineCapabilityStatus: 100,
+        userEngagementScore: 80,
+        featureUsabilityScore: 85,
+        accessibilityScore: 80,
+        timestamp: Date.now(),
+      };
+
+      const bottlenecks = (monitor as any).detectBottlenecks(mockMetrics);
+      
+      const bundleBottleneck = bottlenecks.find((b: PerformanceBottleneck) => 
+        b.metric === 'bundleSize'
+      );
+      expect(bundleBottleneck).toBeDefined();
+      expect(bundleBottleneck.impact).toBe('critical');
+      expect(bundleBottleneck.suggestions).toContain('Implement code splitting for non-critical routes');
     });
 
-    test('should handle localStorage errors gracefully', () => {
+    test('should detect memory usage bottlenecks', () => {
+      const mockMetrics: EnhancedPerformanceMetrics = {
+        bundleSize: 500000,
+        memoryUsage: 300, // 300MB - critical memory usage
+        crisisDetectionResponseTime: 100,
+        firstContentfulPaint: 1500,
+        largestContentfulPaint: 2500,
+        firstInputDelay: 50,
+        cumulativeLayoutShift: 0.1,
+        timeToFirstByte: 200,
+        loadTime: 2000,
+        domContentLoaded: 1000,
+        chunkCount: 5,
+        cacheHitRate: 0.8,
+        totalResourceSize: 1000000,
+        cpuUsage: 0.4,
+        networkLatency: 50,
+        bandwidth: 10,
+        chatMessageLatency: 200,
+        videoStreamingQuality: 100,
+        offlineCapabilityStatus: 100,
+        userEngagementScore: 80,
+        featureUsabilityScore: 85,
+        accessibilityScore: 80,
+        timestamp: Date.now(),
+      };
+
+      const bottlenecks = (monitor as any).detectBottlenecks(mockMetrics);
+      
+      const memoryBottleneck = bottlenecks.find((b: PerformanceBottleneck) => 
+        b.metric === 'memoryUsage'
+      );
+      expect(memoryBottleneck).toBeDefined();
+      expect(memoryBottleneck.impact).toBe('critical');
+      expect(memoryBottleneck.suggestions).toContain('Implement virtual scrolling for long lists');
+    });
+
+    test('should detect crisis detection bottlenecks', () => {
+      const mockMetrics: EnhancedPerformanceMetrics = {
+        bundleSize: 500000,
+        memoryUsage: 50,
+        crisisDetectionResponseTime: 600, // 600ms - too slow for crisis
+        firstContentfulPaint: 1500,
+        largestContentfulPaint: 2500,
+        firstInputDelay: 50,
+        cumulativeLayoutShift: 0.1,
+        timeToFirstByte: 200,
+        loadTime: 2000,
+        domContentLoaded: 1000,
+        chunkCount: 5,
+        cacheHitRate: 0.8,
+        totalResourceSize: 1000000,
+        cpuUsage: 0.4,
+        networkLatency: 50,
+        bandwidth: 10,
+        chatMessageLatency: 200,
+        videoStreamingQuality: 100,
+        offlineCapabilityStatus: 100,
+        userEngagementScore: 80,
+        featureUsabilityScore: 85,
+        accessibilityScore: 80,
+        timestamp: Date.now(),
+      };
+
+      const bottlenecks = (monitor as any).detectBottlenecks(mockMetrics);
+      
+      const crisisBottleneck = bottlenecks.find((b: PerformanceBottleneck) => 
+        b.component === 'Crisis Detection System'
+      );
+      expect(crisisBottleneck).toBeDefined();
+      expect(crisisBottleneck.impact).toBe('critical');
+      expect(crisisBottleneck.suggestions).toContain('Optimize AI model inference time');
+    });
+  });
+
+  describe('Optimization Recommendations', () => {
+    test('should generate bundle optimization recommendations', () => {
+      const mockMetrics: EnhancedPerformanceMetrics = {
+        bundleSize: 1200000, // 1.2MB - needs optimization
+        largestContentfulPaint: 2000,
+        memoryUsage: 80,
+        crisisDetectionResponseTime: 150,
+        accessibilityScore: 90,
+        firstContentfulPaint: 1500,
+        firstInputDelay: 50,
+        cumulativeLayoutShift: 0.1,
+        timeToFirstByte: 200,
+        loadTime: 2000,
+        domContentLoaded: 1000,
+        chunkCount: 8,
+        cacheHitRate: 0.8,
+        totalResourceSize: 1500000,
+        cpuUsage: 0.4,
+        networkLatency: 50,
+        bandwidth: 10,
+        chatMessageLatency: 200,
+        videoStreamingQuality: 100,
+        offlineCapabilityStatus: 100,
+        userEngagementScore: 80,
+        featureUsabilityScore: 85,
+        timestamp: Date.now(),
+      };
+
+      (monitor as any).performanceHistory = [mockMetrics];
+
+      const recommendations = monitor.generateOptimizationRecommendations();
+      
+      const bundleRec = recommendations.find(r => r.id === 'bundle_optimization');
+      expect(bundleRec).toBeDefined();
+      expect(bundleRec?.priority).toBe('high');
+      expect(bundleRec?.mentalHealthImpact).toContain('crisis intervention');
+    });
+
+    test('should generate LCP optimization recommendations', () => {
+      const mockMetrics: EnhancedPerformanceMetrics = {
+        bundleSize: 500000,
+        largestContentfulPaint: 4000, // 4s - needs optimization
+        memoryUsage: 50,
+        crisisDetectionResponseTime: 100,
+        accessibilityScore: 90,
+        firstContentfulPaint: 1500,
+        firstInputDelay: 50,
+        cumulativeLayoutShift: 0.1,
+        timeToFirstByte: 200,
+        loadTime: 2000,
+        domContentLoaded: 1000,
+        chunkCount: 3,
+        cacheHitRate: 0.8,
+        totalResourceSize: 800000,
+        cpuUsage: 0.3,
+        networkLatency: 50,
+        bandwidth: 10,
+        chatMessageLatency: 200,
+        videoStreamingQuality: 100,
+        offlineCapabilityStatus: 100,
+        userEngagementScore: 80,
+        featureUsabilityScore: 85,
+        timestamp: Date.now(),
+      };
+
+      (monitor as any).performanceHistory = [mockMetrics];
+
+      const recommendations = monitor.generateOptimizationRecommendations();
+      
+      const lcpRec = recommendations.find(r => r.id === 'lcp_optimization');
+      expect(lcpRec).toBeDefined();
+      expect(lcpRec?.category).toBe('loading');
+      expect(lcpRec?.priority).toBe('high');
+    });
+
+    test('should generate crisis detection optimization recommendations', () => {
+      const mockMetrics: EnhancedPerformanceMetrics = {
+        bundleSize: 500000,
+        largestContentfulPaint: 2500,
+        memoryUsage: 50,
+        crisisDetectionResponseTime: 400, // 400ms - needs optimization
+        accessibilityScore: 90,
+        firstContentfulPaint: 1500,
+        firstInputDelay: 50,
+        cumulativeLayoutShift: 0.1,
+        timeToFirstByte: 200,
+        loadTime: 2000,
+        domContentLoaded: 1000,
+        chunkCount: 3,
+        cacheHitRate: 0.8,
+        totalResourceSize: 800000,
+        cpuUsage: 0.3,
+        networkLatency: 50,
+        bandwidth: 10,
+        chatMessageLatency: 200,
+        videoStreamingQuality: 100,
+        offlineCapabilityStatus: 100,
+        userEngagementScore: 80,
+        featureUsabilityScore: 85,
+        timestamp: Date.now(),
+      };
+
+      (monitor as any).performanceHistory = [mockMetrics];
+
+      const recommendations = monitor.generateOptimizationRecommendations();
+      
+      const crisisRec = recommendations.find(r => r.id === 'crisis_detection_optimization');
+      expect(crisisRec).toBeDefined();
+      expect(crisisRec?.priority).toBe('critical');
+      expect(crisisRec?.mentalHealthImpact).toContain('save lives');
+    });
+
+    test('should sort recommendations by priority', () => {
+      const mockMetrics: EnhancedPerformanceMetrics = {
+        bundleSize: 1200000,
+        largestContentfulPaint: 4000,
+        memoryUsage: 150,
+        crisisDetectionResponseTime: 400,
+        accessibilityScore: 70,
+        firstContentfulPaint: 3000,
+        firstInputDelay: 50,
+        cumulativeLayoutShift: 0.1,
+        timeToFirstByte: 200,
+        loadTime: 2000,
+        domContentLoaded: 1000,
+        chunkCount: 8,
+        cacheHitRate: 0.8,
+        totalResourceSize: 2000000,
+        cpuUsage: 0.3,
+        networkLatency: 50,
+        bandwidth: 10,
+        chatMessageLatency: 200,
+        videoStreamingQuality: 100,
+        offlineCapabilityStatus: 100,
+        userEngagementScore: 80,
+        featureUsabilityScore: 85,
+        timestamp: Date.now(),
+      };
+
+      (monitor as any).performanceHistory = [mockMetrics];
+
+      const recommendations = monitor.generateOptimizationRecommendations();
+      
+      expect(recommendations.length).toBeGreaterThan(1);
+      
+      // First recommendation should be critical priority
+      expect(recommendations[0].priority).toBe('critical');
+      
+      // Should be sorted by priority (critical > high > medium > low)
+      const priorities = recommendations.map(r => r.priority);
+      const criticalIndex = priorities.indexOf('critical');
+      const highIndex = priorities.indexOf('high');
+      
+      if (criticalIndex !== -1 && highIndex !== -1) {
+        expect(criticalIndex).toBeLessThan(highIndex);
+      }
+    });
+  });
+
+  describe('Alert System', () => {
+    test('should create and track alerts', () => {
+      const alert: PerformanceAlert = {
+        id: 'test-alert',
+        type: 'budget_violation',
+        severity: 'high',
+        metric: 'firstContentfulPaint',
+        currentValue: 3000,
+        expectedValue: 1500,
+        description: 'FCP exceeds target',
+        recommendations: ['Optimize critical CSS'],
+        timestamp: Date.now(),
+        isCrisisRelated: false,
+      };
+
+      (monitor as any).createAlert(alert);
+      
+      const activeAlerts = monitor.getActiveAlerts();
+      expect(activeAlerts).toContain(alert);
+    });
+
+    test('should prevent duplicate alerts', () => {
+      const alert1: PerformanceAlert = {
+        id: 'alert-1',
+        type: 'budget_violation',
+        severity: 'high',
+        metric: 'firstContentfulPaint',
+        currentValue: 3000,
+        expectedValue: 1500,
+        description: 'FCP exceeds target',
+        recommendations: ['Optimize critical CSS'],
+        timestamp: Date.now(),
+        isCrisisRelated: false,
+      };
+
+      const alert2: PerformanceAlert = {
+        id: 'alert-2',
+        type: 'budget_violation',
+        severity: 'medium',
+        metric: 'firstContentfulPaint',
+        currentValue: 2500,
+        expectedValue: 1500,
+        description: 'FCP still exceeds target',
+        recommendations: ['Optimize critical CSS'],
+        timestamp: Date.now() + 1000,
+        isCrisisRelated: false,
+      };
+
+      (monitor as any).createAlert(alert1);
+      (monitor as any).createAlert(alert2);
+      
+      const activeAlerts = monitor.getActiveAlerts();
+      expect(activeAlerts.length).toBe(1);
+      expect(activeAlerts[0].currentValue).toBe(2500); // Should be updated
+    });
+
+    test('should register alert callbacks', () => {
+      const mockCallback = jest.fn();
+      const unsubscribe = monitor.onAlert(mockCallback);
+
+      const alert: PerformanceAlert = {
+        id: 'callback-test',
+        type: 'bottleneck_detected',
+        severity: 'critical',
+        metric: 'crisisDetectionResponseTime',
+        currentValue: 600,
+        expectedValue: 100,
+        description: 'Crisis detection too slow',
+        recommendations: ['Optimize AI model'],
+        timestamp: Date.now(),
+        isCrisisRelated: true,
+      };
+
+      (monitor as any).createAlert(alert);
+      
+      expect(mockCallback).toHaveBeenCalledWith(alert);
+      
+      unsubscribe();
+    });
+
+    test('should clear resolved alerts', async () => {
+      const mockMetrics: EnhancedPerformanceMetrics = {
+        firstContentfulPaint: 1200, // Good value now
+        largestContentfulPaint: 2000,
+        firstInputDelay: 50,
+        cumulativeLayoutShift: 0.05,
+        timeToFirstByte: 200,
+        loadTime: 1500,
+        domContentLoaded: 800,
+        bundleSize: 500000,
+        chunkCount: 5,
+        cacheHitRate: 0.8,
+        totalResourceSize: 1000000,
+        memoryUsage: 60,
+        cpuUsage: 0.3,
+        networkLatency: 50,
+        bandwidth: 10,
+        crisisDetectionResponseTime: 100,
+        chatMessageLatency: 200,
+        videoStreamingQuality: 100,
+        offlineCapabilityStatus: 100,
+        userEngagementScore: 85,
+        featureUsabilityScore: 90,
+        accessibilityScore: 85,
+        timestamp: Date.now(),
+      };
+
+      // Add a resolved alert
+      const alert: PerformanceAlert = {
+        id: 'resolved-alert',
+        type: 'budget_violation',
+        severity: 'high',
+        metric: 'firstContentfulPaint',
+        currentValue: 3000,
+        expectedValue: 1500,
+        description: 'FCP was too slow',
+        recommendations: ['Optimize CSS'],
+        timestamp: Date.now(),
+        isCrisisRelated: false,
+      };
+
+      (monitor as any).createAlert(alert);
+      (monitor as any).performanceHistory = [mockMetrics];
+
+      monitor.clearResolvedAlerts();
+      
+      const activeAlerts = monitor.getActiveAlerts();
+      expect(activeAlerts).not.toContain(alert);
+    });
+  });
+
+  describe('Performance Reports', () => {
+    test('should generate comprehensive performance report', () => {
+      const mockMetrics: EnhancedPerformanceMetrics = {
+        firstContentfulPaint: 1200,
+        largestContentfulPaint: 2400,
+        firstInputDelay: 45,
+        cumulativeLayoutShift: 0.08,
+        timeToFirstByte: 180,
+        loadTime: 1800,
+        domContentLoaded: 900,
+        bundleSize: 650000,
+        chunkCount: 4,
+        cacheHitRate: 0.85,
+        totalResourceSize: 1200000,
+        memoryUsage: 75,
+        cpuUsage: 0.35,
+        networkLatency: 40,
+        bandwidth: 12,
+        crisisDetectionResponseTime: 95,
+        chatMessageLatency: 180,
+        videoStreamingQuality: 95,
+        offlineCapabilityStatus: 90,
+        userEngagementScore: 88,
+        featureUsabilityScore: 92,
+        accessibilityScore: 87,
+        timestamp: Date.now(),
+      };
+
+      (monitor as any).performanceHistory = [mockMetrics];
+
+      const report = monitor.generatePerformanceReport();
+      
+      expect(report).toContain('Comprehensive Performance Report');
+      expect(report).toContain('Core Web Vitals');
+      expect(report).toContain('Crisis Detection Response');
+      expect(report).toContain('Performance Grade');
+      expect(report).toContain('1200ms'); // FCP value
+      expect(report).toContain('95ms'); // Crisis detection
+    });
+
+    test('should calculate performance grade correctly', () => {
+      const excellentMetrics: EnhancedPerformanceMetrics = {
+        firstContentfulPaint: 800,
+        largestContentfulPaint: 1800,
+        firstInputDelay: 20,
+        cumulativeLayoutShift: 0.02,
+        timeToFirstByte: 120,
+        loadTime: 1200,
+        domContentLoaded: 600,
+        bundleSize: 400000,
+        chunkCount: 3,
+        cacheHitRate: 0.95,
+        totalResourceSize: 800000,
+        memoryUsage: 35,
+        cpuUsage: 0.25,
+        networkLatency: 25,
+        bandwidth: 20,
+        crisisDetectionResponseTime: 60,
+        chatMessageLatency: 120,
+        videoStreamingQuality: 100,
+        offlineCapabilityStatus: 100,
+        userEngagementScore: 95,
+        featureUsabilityScore: 98,
+        accessibilityScore: 95,
+        timestamp: Date.now(),
+      };
+
+      (monitor as any).performanceHistory = [excellentMetrics];
+      const report = monitor.generatePerformanceReport();
+      
+      expect(report).toContain('Excellent (A+)');
+    });
+
+    test('should handle empty metrics gracefully', () => {
+      const report = monitor.generatePerformanceReport();
+      
+      expect(report).toBe('No performance data available');
+    });
+  });
+
+  describe('Data Management', () => {
+    test('should add metrics to history', () => {
+      const mockMetrics: EnhancedPerformanceMetrics = {
+        firstContentfulPaint: 1500,
+        largestContentfulPaint: 2500,
+        firstInputDelay: 50,
+        cumulativeLayoutShift: 0.1,
+        timeToFirstByte: 200,
+        loadTime: 2000,
+        domContentLoaded: 1000,
+        bundleSize: 600000,
+        chunkCount: 4,
+        cacheHitRate: 0.8,
+        totalResourceSize: 1000000,
+        memoryUsage: 60,
+        cpuUsage: 0.4,
+        networkLatency: 50,
+        bandwidth: 10,
+        crisisDetectionResponseTime: 120,
+        chatMessageLatency: 200,
+        videoStreamingQuality: 100,
+        offlineCapabilityStatus: 100,
+        userEngagementScore: 80,
+        featureUsabilityScore: 85,
+        accessibilityScore: 80,
+        timestamp: Date.now(),
+      };
+
+      (monitor as any).addMetricsToHistory(mockMetrics);
+      
+      const history = monitor.getPerformanceHistory();
+      expect(history).toContain(mockMetrics);
+    });
+
+    test('should limit history size', () => {
+      // Add more than 1000 metrics
+      for (let i = 0; i < 1200; i++) {
+        const mockMetrics: EnhancedPerformanceMetrics = {
+          firstContentfulPaint: 1500,
+          largestContentfulPaint: 2500,
+          firstInputDelay: 50,
+          cumulativeLayoutShift: 0.1,
+          timeToFirstByte: 200,
+          loadTime: 2000,
+          domContentLoaded: 1000,
+          bundleSize: 600000,
+          chunkCount: 4,
+          cacheHitRate: 0.8,
+          totalResourceSize: 1000000,
+          memoryUsage: 60,
+          cpuUsage: 0.4,
+          networkLatency: 50,
+          bandwidth: 10,
+          crisisDetectionResponseTime: 120,
+          chatMessageLatency: 200,
+          videoStreamingQuality: 100,
+          offlineCapabilityStatus: 100,
+          userEngagementScore: 80,
+          featureUsabilityScore: 85,
+          accessibilityScore: 80,
+          timestamp: Date.now() + i,
+        };
+        (monitor as any).addMetricsToHistory(mockMetrics);
+      }
+      
+      const history = monitor.getPerformanceHistory();
+      expect(history.length).toBe(1000);
+    });
+
+    test('should get current metrics', () => {
+      const mockMetrics: EnhancedPerformanceMetrics = {
+        firstContentfulPaint: 1500,
+        largestContentfulPaint: 2500,
+        firstInputDelay: 50,
+        cumulativeLayoutShift: 0.1,
+        timeToFirstByte: 200,
+        loadTime: 2000,
+        domContentLoaded: 1000,
+        bundleSize: 600000,
+        chunkCount: 4,
+        cacheHitRate: 0.8,
+        totalResourceSize: 1000000,
+        memoryUsage: 60,
+        cpuUsage: 0.4,
+        networkLatency: 50,
+        bandwidth: 10,
+        crisisDetectionResponseTime: 120,
+        chatMessageLatency: 200,
+        videoStreamingQuality: 100,
+        offlineCapabilityStatus: 100,
+        userEngagementScore: 80,
+        featureUsabilityScore: 85,
+        accessibilityScore: 80,
+        timestamp: Date.now(),
+      };
+
+      (monitor as any).addMetricsToHistory(mockMetrics);
+      
+      const current = monitor.getCurrentMetrics();
+      expect(current).toBe(mockMetrics);
+    });
+
+    test('should filter history by time range', () => {
+      const now = Date.now();
+      const oldMetrics: EnhancedPerformanceMetrics = {
+        firstContentfulPaint: 1500,
+        largestContentfulPaint: 2500,
+        firstInputDelay: 50,
+        cumulativeLayoutShift: 0.1,
+        timeToFirstByte: 200,
+        loadTime: 2000,
+        domContentLoaded: 1000,
+        bundleSize: 600000,
+        chunkCount: 4,
+        cacheHitRate: 0.8,
+        totalResourceSize: 1000000,
+        memoryUsage: 60,
+        cpuUsage: 0.4,
+        networkLatency: 50,
+        bandwidth: 10,
+        crisisDetectionResponseTime: 120,
+        chatMessageLatency: 200,
+        videoStreamingQuality: 100,
+        offlineCapabilityStatus: 100,
+        userEngagementScore: 80,
+        featureUsabilityScore: 85,
+        accessibilityScore: 80,
+        timestamp: now - 25 * 60 * 60 * 1000, // 25 hours ago
+      };
+
+      const recentMetrics: EnhancedPerformanceMetrics = {
+        ...oldMetrics,
+        timestamp: now - 1 * 60 * 60 * 1000, // 1 hour ago
+      };
+
+      (monitor as any).addMetricsToHistory(oldMetrics);
+      (monitor as any).addMetricsToHistory(recentMetrics);
+      
+      const recent = monitor.getPerformanceHistory(24); // Last 24 hours
+      expect(recent).toContain(recentMetrics);
+      expect(recent).not.toContain(oldMetrics);
+    });
+
+    test('should cleanup old data', () => {
+      const oldTimestamp = Date.now() - 40 * 24 * 60 * 60 * 1000; // 40 days ago
+      const mockMetrics: EnhancedPerformanceMetrics = {
+        firstContentfulPaint: 1500,
+        largestContentfulPaint: 2500,
+        firstInputDelay: 50,
+        cumulativeLayoutShift: 0.1,
+        timeToFirstByte: 200,
+        loadTime: 2000,
+        domContentLoaded: 1000,
+        bundleSize: 600000,
+        chunkCount: 4,
+        cacheHitRate: 0.8,
+        totalResourceSize: 1000000,
+        memoryUsage: 60,
+        cpuUsage: 0.4,
+        networkLatency: 50,
+        bandwidth: 10,
+        crisisDetectionResponseTime: 120,
+        chatMessageLatency: 200,
+        videoStreamingQuality: 100,
+        offlineCapabilityStatus: 100,
+        userEngagementScore: 80,
+        featureUsabilityScore: 85,
+        accessibilityScore: 80,
+        timestamp: oldTimestamp,
+      };
+
+      (monitor as any).addMetricsToHistory(mockMetrics);
+      (monitor as any).cleanupOldData();
+      
+      const history = monitor.getPerformanceHistory();
+      expect(history).not.toContain(mockMetrics);
+    });
+  });
+
+  describe('Error Handling', () => {
+    test('should handle observer setup errors', () => {
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
-      mockLocalStorage.setItem.mockImplementation(() => {
-        throw new Error('Storage quota exceeded');
+      
+      // Mock observer creation to throw
+      (global.PerformanceObserver as unknown as jest.Mock).mockImplementation(() => {
+        throw new Error('Observer not supported');
       });
 
-      (service as any).storeCrisisMetrics({ test: 'data' });
+      const errorMonitor = new ComprehensivePerformanceMonitor();
       
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Could not store crisis metrics:',
-        expect.any(Error)
-      );
-      
+      expect(consoleSpy).toHaveBeenCalled();
       consoleSpy.mockRestore();
+      
+      errorMonitor.destroy();
     });
-  });
 
-  describe('Development Team Notifications', () => {
-    test('should log critical performance issues', () => {
+    test('should handle metrics collection errors', async () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       
-      const criticalMetric = {
-        name: 'LCP',
-        value: 8000,
-        rating: 'poor',
-        isCrisisSituation: true,
-      };
+      // Mock performance.getEntriesByType to throw
+      (performance.getEntriesByType as jest.Mock).mockImplementation(() => {
+        throw new Error('Performance API error');
+      });
 
-      (service as any).notifyDevelopmentTeam(criticalMetric);
+      const metrics = await (monitor as any).collectCurrentMetrics();
       
-      expect(consoleSpy).toHaveBeenCalledWith(
-        '🚨 Critical performance issue detected:',
-        criticalMetric
-      );
-      
+      expect(metrics).toBeDefined();
+      expect(metrics.timestamp).toBeDefined();
+      expect(consoleSpy).toHaveBeenCalled();
       consoleSpy.mockRestore();
     });
-  });
 
-  describe('Service Control', () => {
-    test('should stop monitoring and generate final report', () => {
-      const reportSpy = jest.spyOn(service, 'generateReport');
+    test('should handle analytics tracking errors', async () => {
+      mockAnalyticsService.track.mockRejectedValue(new Error('Analytics error'));
       
-      service.stop();
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       
-      expect(mockPerformanceObserver.disconnect).toHaveBeenCalled();
-      expect(reportSpy).toHaveBeenCalled();
+      // This shouldn't throw even if analytics fails
+      await (monitor as any).collectCurrentMetrics();
+      
+      consoleSpy.mockRestore();
     });
   });
 
   describe('Singleton Instance', () => {
     test('should export singleton instance', () => {
-      expect(coreWebVitalsService).toBeInstanceOf(CoreWebVitalsService);
+      expect(comprehensivePerformanceMonitor).toBeInstanceOf(ComprehensivePerformanceMonitor);
     });
 
     test('should maintain same instance', () => {
-      const instance1 = coreWebVitalsService;
-      const instance2 = coreWebVitalsService;
+      const instance1 = comprehensivePerformanceMonitor;
+      const instance2 = comprehensivePerformanceMonitor;
       expect(instance1).toBe(instance2);
     });
   });
 
-  describe('Error Handling', () => {
-    test('should handle PerformanceObserver setup errors', () => {
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+  describe('Cleanup', () => {
+    test('should stop monitoring properly', () => {
+      const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
       
-      // Mock PerformanceObserver to throw
-      (global.PerformanceObserver as jest.Mock).mockImplementation(() => {
-        throw new Error('Observer not supported');
-      });
-
-      const errorService = new CoreWebVitalsService();
+      monitor.stopMonitoring();
       
-      // Should still initialize without throwing
-      expect(errorService).toBeDefined();
-      
-      consoleSpy.mockRestore();
+      expect(clearIntervalSpy).toHaveBeenCalled();
+      expect(mockPerformanceObserver.disconnect).toHaveBeenCalled();
     });
 
-    test('should handle missing PerformanceObserver gracefully', () => {
-      const originalPerformanceObserver = global.PerformanceObserver;
-      delete (global as any).PerformanceObserver;
-
-      const noObserverService = new CoreWebVitalsService();
+    test('should destroy monitor properly', () => {
+      const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
       
-      expect(noObserverService).toBeDefined();
+      monitor.destroy();
       
-      // Restore
-      global.PerformanceObserver = originalPerformanceObserver;
+      expect(clearIntervalSpy).toHaveBeenCalled();
+      expect(mockPerformanceObserver.disconnect).toHaveBeenCalled();
+      
+      // Should clear internal data
+      expect((monitor as any).performanceHistory.length).toBe(0);
+      expect((monitor as any).activeAlerts.length).toBe(0);
+      expect((monitor as any).alertCallbacks.length).toBe(0);
     });
   });
 });

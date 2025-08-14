@@ -49,12 +49,7 @@ export const useAnalyticsTracking = (options: UseAnalyticsTrackingOptions = {}) 
     
     previousPath.current = currentPath;
 
-    analyticsService.trackPageView(currentPath, {
-      navigationType,
-      referrer: document.referrer,
-      componentName,
-      featureName
-    });
+    analyticsService.trackPageView(currentPath, componentName || featureName);
   }, [location, navigationType, trackPageViews, componentName, featureName]);
 
   // Track custom events
@@ -81,7 +76,7 @@ export const useAnalyticsTracking = (options: UseAnalyticsTrackingOptions = {}) 
     feature: string,
     metadata?: Record<string, any>
   ) => {
-    analyticsService.trackFeatureUsage(feature, {
+    analyticsService.trackFeatureUsage(feature, 'usage', {
       ...metadata,
       componentName,
       path: location.pathname

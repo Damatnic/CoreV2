@@ -10,8 +10,8 @@
   autoLaunch = false
 
 [build.environment]
-  NODE_VERSION = "18"
-  NPM_VERSION = "9"
+  NODE_VERSION = "20"
+  NPM_VERSION = "10"
 
 # Service Worker specific headers
 [[headers]]
@@ -102,8 +102,8 @@
 
 # Redirect HTTP to HTTPS
 [[redirects]]
-  from = "http://astral-core-react.netlify.app/*"
-  to = "https://astral-core-react.netlify.app/:splat"
+  from = "http://astralcorev2.netlify.app/*"
+  to = "https://astralcorev2.netlify.app/:splat"
   status = 301
   force = true
 
@@ -124,7 +124,7 @@
 # API routes to Netlify Functions
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  to = "/.netlify/functions/api-:splat"
   status = 200
 
 # Environment-specific settings
@@ -133,6 +133,7 @@
   [context.production.environment]
     NODE_ENV = "production"
     VITE_BUILD_MODE = "production"
+    NEXT_PUBLIC_APP_URL = "https://astralcorev2.netlify.app"
 
 [context.development]
   command = "npm run dev:vite"
@@ -160,7 +161,7 @@
 [[plugins]]
   package = "netlify-plugin-submit-sitemap"
   [plugins.inputs]
-    baseUrl = "https://astral-core-react.netlify.app"
+    baseUrl = "https://astralcorev2.netlify.app"
     sitemapPath = "/sitemap.xml"
     ignorePeriod = 0
 

@@ -722,7 +722,7 @@ describe('CacheStatusMonitor Component', () => {
 });
 
 // Helper function to render components in tests
-function render(component: React.ReactElement) {
+function render(_component: React.ReactElement) {
   const container = document.createElement('div');
   document.body.appendChild(container);
 

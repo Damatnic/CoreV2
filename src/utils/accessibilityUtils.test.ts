@@ -8,7 +8,7 @@ import { AccessibilityUtils } from './accessibilityUtils';
 // Mock DOM methods
 const mockQuerySelectorAll = jest.fn();
 const mockGetComputedStyle = jest.fn();
-const mockClosest = jest.fn();
+// const mockClosest = jest.fn();
 
 // Setup DOM mocks
 Object.defineProperty(document, 'querySelectorAll', {
@@ -413,7 +413,7 @@ describe('AccessibilityUtils', () => {
     it('should handle undefined textContent', () => {
       const mockElement = {
         textContent: undefined,
-      } as Element;
+      } as unknown as Element;
 
       const result = AccessibilityUtils.hasTextContent(mockElement);
 

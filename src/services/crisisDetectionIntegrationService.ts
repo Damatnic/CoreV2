@@ -178,6 +178,43 @@ export class CrisisDetectionIntegrationService {
       recommendedActions
     };
   }
+
+  /**
+   * Process emergency escalation for safety plan events
+   */
+  async processEmergencyEscalation(
+    userId: string,
+    severity: 'high' | 'critical',
+    message: string,
+    context: { source: string; [key: string]: any }
+  ): Promise<void> {
+    try {
+      // Create emergency escalation event
+      const escalationData = {
+        userId,
+        severity,
+        message,
+        source: context.source,
+        timestamp: new Date(),
+        context
+      };
+
+      // Log the escalation
+      console.log('Emergency escalation triggered:', escalationData);
+
+      // Here you would typically integrate with:
+      // - Emergency notification systems
+      // - Crisis hotlines
+      // - Emergency contacts
+      // - Healthcare providers
+      
+      // For now, just log the escalation
+      return Promise.resolve();
+    } catch (error) {
+      console.error('Failed to process emergency escalation:', error);
+      throw error;
+    }
+  }
 }
 
 // Export singleton instance

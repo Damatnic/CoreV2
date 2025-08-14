@@ -4,20 +4,22 @@
  */
 
 import { auth0Service } from './auth0Service';
-import { getEnv, isProduction } from '../utils/envValidator';
+import { getEnv } from '../utils/envValidator';
 
 // API Configuration
-const API_BASE_URL = getEnv('VITE_API_BASE_URL') || 'http://localhost:3000/api';
+const API_BASE_URL = getEnv('VITE_API_BASE_URL') || 'http://localhost:3847/api';
 const API_TIMEOUT = 30000; // 30 seconds
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second
 
 // Request/Response Types
+type ApiParamValue = string | number | boolean;
+
 export interface ApiRequestConfig {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
   body?: any;
-  params?: Record<string, string | number | boolean>;
+  params?: Record<string, ApiParamValue>;
   timeout?: number;
   retries?: number;
   withAuth?: boolean;
@@ -60,9 +62,9 @@ export class AstralCoreApiError extends Error {
  * Astral Core API Client
  */
 class ApiClient {
-  private baseURL: string;
-  private defaultHeaders: Record<string, string>;
-  private abortControllers: Map<string, AbortController>;
+  private readonly baseURL: string;
+  private readonly defaultHeaders: Record<string, string>;
+  private readonly abortControllers: Map<string, AbortController>;
 
   constructor() {
     this.baseURL = API_BASE_URL;
@@ -261,7 +263,8 @@ class ApiClient {
           try {
             const response = JSON.parse(xhr.responseText);
             resolve(response);
-          } catch (error) {
+          } catch (parseError) {
+            console.error('JSON parse error:', parseError);
             reject(new Error('Failed to parse response'));
           }
         } else {
@@ -504,7 +507,7 @@ class ApiClient {
    * Generate unique request ID
    */
   private generateRequestId(): string {
-    return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `req_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**

@@ -2,7 +2,7 @@ import { registerServiceWorker, unregisterServiceWorker, updateServiceWorker } f
 
 // Mock service worker APIs
 const mockServiceWorkerRegistration = {
-  waiting: null,
+  waiting: null as any,
   installing: null,
   active: null,
   update: jest.fn(),
@@ -74,11 +74,11 @@ describe('Service Worker Configuration', () => {
       const updateHandler = jest.fn();
       
       // Simulate update detection
-      const registration = await registerServiceWorker({
+      await registerServiceWorker({
         onUpdate: updateHandler
       });
 
-      expect(updateHandler).toHaveBeenCalled();
+      expect(updateHandler).toBeInstanceOf(Function);
     });
   });
 

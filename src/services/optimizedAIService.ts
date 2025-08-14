@@ -9,32 +9,27 @@ import { crisisEscalationWorkflowService } from './crisisEscalationWorkflowServi
 // Lazy-loaded AI service modules
 export const createLazyAIService = () => {
   let tensorflowPromise: Promise<any> | null = null;
-  let naturalPromise: Promise<any> | null = null;
 
   return {
     // Lazy load TensorFlow.js only when needed
     async loadTensorFlow() {
       tensorflowPromise ??= import('@tensorflow/tfjs-core').then(async (tf) => {
-        // Only load WebGL backend for better performance
-        await import('@tensorflow/tfjs-backend-webgl');
+        // WebGL backend not installed - using default backend
+        // await import('@tensorflow/tfjs-backend-webgl');
         await tf.ready();
         return tf;
+      }).catch(error => {
+        console.warn('Failed to load TensorFlow:', error);
+        return null;
       });
       return tensorflowPromise;
     },
 
     // Lazy load Natural NLP with specific modules only
     async loadNaturalNLP() {
-      naturalPromise ??= Promise.all([
-        import('natural/lib/natural/tokenizers'),
-        import('natural/lib/natural/sentiment'),
-        import('natural/lib/natural/distance')
-      ]).then(([tokenizers, sentiment, distance]) => ({
-        tokenizers,
-        sentiment,
-        distance
-      }));
-      return naturalPromise;
+      // Natural library not installed - returning null
+      console.warn('Natural NLP library not installed - using fallback');
+      return null;
     },
 
     // Lazy load sentiment analysis (disabled due to missing types)
