@@ -299,7 +299,16 @@ class PerformanceMonitoringService {
     if (!('memory' in performance)) return;
     
     setInterval(() => {
-      const memory = (performance as any).memory;
+      // Type-safe memory access
+      const performanceWithMemory = performance as Performance & {
+        memory?: {
+          usedJSHeapSize: number;
+          totalJSHeapSize: number;
+          jsHeapSizeLimit: number;
+        };
+      };
+      
+      const memory = performanceWithMemory.memory;
       if (memory) {
         this.report.memory = {
           usedJSHeapSize: memory.usedJSHeapSize,
@@ -325,7 +334,18 @@ class PerformanceMonitoringService {
   private monitorConnection(): void {
     if (!('connection' in navigator)) return;
     
-    const connection = (navigator as any).connection;
+    // Type-safe connection access
+    const navigatorWithConnection = navigator as Navigator & {
+      connection?: {
+        effectiveType: string;
+        downlink: number;
+        rtt: number;
+        saveData: boolean;
+        addEventListener: (event: string, handler: () => void) => void;
+      };
+    };
+    
+    const connection = navigatorWithConnection.connection;
     if (connection) {
       this.report.connection = {
         effectiveType: connection.effectiveType,

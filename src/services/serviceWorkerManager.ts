@@ -50,7 +50,7 @@ class ServiceWorkerManager {
     console.log('[ServiceWorker] Preload critical resources:', resources);
   }
 
-  async registerBackgroundSync(data: any): Promise<void> {
+  async registerBackgroundSync(data: unknown): Promise<void> {
     console.log('[ServiceWorker] Register background sync:', data);
   }
 
@@ -150,9 +150,16 @@ class ServiceWorkerManager {
   }
 
   getNetworkStatus(): { isOnline: boolean; type?: string } {
+    // Type-safe access to network connection API
+    const navigatorWithConnection = navigator as Navigator & {
+      connection?: {
+        effectiveType?: string;
+      };
+    };
+    
     return {
       isOnline: navigator.onLine,
-      type: (navigator as any).connection?.effectiveType || 'unknown'
+      type: navigatorWithConnection.connection?.effectiveType || 'unknown'
     };
   }
 }

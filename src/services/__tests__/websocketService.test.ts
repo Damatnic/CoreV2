@@ -45,7 +45,7 @@ class MockWebSocket {
   removeEventListener = jest.fn();
 }
 
-global.WebSocket = MockWebSocket as any;
+global.WebSocket = MockWebSocket as unknown;
 
 describe('WebSocketService', () => {
   let service: any;
@@ -91,7 +91,7 @@ describe('WebSocketService', () => {
       // Mock WebSocket constructor to throw error
       const FailingWebSocket = function() {
         throw new Error('Connection failed');
-      } as any;
+      } as unknown;
       FailingWebSocket.CONNECTING = 0;
       FailingWebSocket.OPEN = 1;
       FailingWebSocket.CLOSING = 2;
@@ -109,7 +109,7 @@ describe('WebSocketService', () => {
   describe('message handling', () => {
     beforeEach(async () => {
       await service.connect('ws://localhost:8080/test');
-      mockWebSocket = (global.WebSocket as any).mock.instances[0];
+      mockWebSocket = (global.WebSocket as unknown).mock.instances[0];
     });
 
     it('should send crisis alert messages', async () => {
@@ -200,7 +200,7 @@ describe('WebSocketService', () => {
   describe('room and channel management', () => {
     beforeEach(async () => {
       await service.connect('ws://localhost:8080/test');
-      mockWebSocket = (global.WebSocket as any).mock.instances[0];
+      mockWebSocket = (global.WebSocket as unknown).mock.instances[0];
     });
 
     it('should join crisis support room', async () => {
@@ -261,7 +261,7 @@ describe('WebSocketService', () => {
   describe('crisis-specific features', () => {
     beforeEach(async () => {
       await service.connect('ws://localhost:8080/crisis-ws');
-      mockWebSocket = (global.WebSocket as any).mock.instances[0];
+      mockWebSocket = (global.WebSocket as unknown).mock.instances[0];
     });
 
     it('should escalate crisis with high priority', async () => {
@@ -330,7 +330,7 @@ describe('WebSocketService', () => {
   describe('connection health and monitoring', () => {
     beforeEach(async () => {
       await service.connect('ws://localhost:8080/test');
-      mockWebSocket = (global.WebSocket as any).mock.instances[0];
+      mockWebSocket = (global.WebSocket as unknown).mock.instances[0];
     });
 
     it('should implement heartbeat mechanism', async () => {
@@ -394,7 +394,7 @@ describe('WebSocketService', () => {
 
       // Connect and verify messages are sent
       await service.connect('ws://localhost:8080/test');
-      mockWebSocket = (global.WebSocket as any).mock.instances[0];
+      mockWebSocket = (global.WebSocket as unknown).mock.instances[0];
 
       await service.flushMessageQueue();
 
@@ -454,7 +454,7 @@ describe('WebSocketService', () => {
   describe('error handling and recovery', () => {
     it('should handle WebSocket errors gracefully', async () => {
       await service.connect('ws://localhost:8080/test');
-      mockWebSocket = (global.WebSocket as any).mock.instances[0];
+      mockWebSocket = (global.WebSocket as unknown).mock.instances[0];
 
       const errorHandler = jest.fn();
       service.onError(errorHandler);
@@ -496,8 +496,8 @@ describe('WebSocketService', () => {
 // Add method stubs for testing
 declare module '../websocketService' {
   interface WebSocketService {
-    connect(url: string): Promise<any>;
-    connectWithAuth(url: string, token: string): Promise<any>;
+    connect(url: string): Promise<unknown>;
+    connectWithAuth(url: string, token: string): Promise<unknown>;
     reconnect(): Promise<void>;
     simulateDisconnection(): void;
     sendCrisisAlert(alert: any): Promise<void>;
@@ -515,7 +515,7 @@ declare module '../websocketService' {
     onConnectionIssue(handler: Function): void;
     simulateConnectionIssue(issue: string): void;
     sendMessage(message: any): Promise<void>;
-    getQueuedMessages(): any[];
+    getQueuedMessages(): unknown[];
     flushMessageQueue(): Promise<void>;
     validateMessage(message: any): boolean;
     sanitizeMessage(message: any): any;

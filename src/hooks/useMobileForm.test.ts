@@ -86,7 +86,7 @@ describe('useMobileForm Hook', () => {
     expect(fieldProps.error).toBe('Invalid email');
     
     // Test onChange handler
-    const mockEvent = { target: { value: 'new@example.com' } } as any;
+    const mockEvent = { target: { value: 'new@example.com' } } as unknown;
     act(() => {
       fieldProps.onChange(mockEvent);
     });
@@ -240,7 +240,7 @@ describe('useMobileForm Hook', () => {
     const onSubmit = jest.fn().mockResolvedValue(undefined);
     const { result } = renderHook(() => useMobileForm({ onSubmit }), { wrapper: Wrapper });
     
-    const mockEvent = { preventDefault: jest.fn() } as any;
+    const mockEvent = { preventDefault: jest.fn() } as unknown;
 
     act(() => {
       result.current.handleSubmit(mockEvent);

@@ -13,7 +13,7 @@ export interface ValidationRule {
   minLength?: number;
   maxLength?: number;
   pattern?: RegExp;
-  custom?: (value: any) => boolean | string;
+  custom?: (value: unknown) => boolean | string;
 }
 
 export interface SecurityConfig {
@@ -390,7 +390,7 @@ class SecurityService {
     }
   }
 
-  getSecurityLogs(): any[] {
+  getSecurityLogs(): unknown[] {
     return JSON.parse(localStorage.getItem('security_logs') || '[]');
   }
 

@@ -25,7 +25,7 @@ describe('CrisisEscalationWorkflowService', () => {
       };
       
       const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
-        crisisAnalysis as any,
+        crisisAnalysis as unknown,
         mockUserId,
         { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
         { conversationId: "test-conversation", messagesSent: 1, sessionDuration: 1000, previousEscalations: 0, riskTrend: "stable" as const }
@@ -46,7 +46,7 @@ describe('CrisisEscalationWorkflowService', () => {
       };
       
       const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
-        crisisAnalysis as any,
+        crisisAnalysis as unknown,
         mockUserId,
         { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
         { conversationId: "test-conversation", messagesSent: 5, sessionDuration: 5000, previousEscalations: 0, riskTrend: "stable" as const }
@@ -67,7 +67,7 @@ describe('CrisisEscalationWorkflowService', () => {
       };
       
       const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
-        crisisAnalysis as any,
+        crisisAnalysis as unknown,
         mockUserId,
         { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
         { conversationId: "test-conversation", messagesSent: 10, sessionDuration: 10000, previousEscalations: 0, riskTrend: "stable" as const }
@@ -88,7 +88,7 @@ describe('CrisisEscalationWorkflowService', () => {
       };
       
       const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
-        crisisAnalysis as any,
+        crisisAnalysis as unknown,
         mockUserId,
         { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
         { conversationId: "test-conversation", messagesSent: 1, sessionDuration: 100, previousEscalations: 0, riskTrend: "stable" as const }
@@ -145,7 +145,7 @@ describe('CrisisEscalationWorkflowService', () => {
       };
       
       const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
-        crisisAnalysis as any,
+        crisisAnalysis as unknown,
         mockUserId,
         { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
         { conversationId: "test-conversation", messagesSent: 5, sessionDuration: 5000, previousEscalations: 0, riskTrend: "stable" as const }
@@ -167,7 +167,7 @@ describe('CrisisEscalationWorkflowService', () => {
       };
       
       const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
-        crisisAnalysis as any,
+        crisisAnalysis as unknown,
         mockUserId,
         { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
         { conversationId: "test-conversation", messagesSent: 5, sessionDuration: 5000, previousEscalations: 0, riskTrend: "stable" as const }
@@ -188,7 +188,7 @@ describe('CrisisEscalationWorkflowService', () => {
       };
       
       const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
-        crisisAnalysis as any,
+        crisisAnalysis as unknown,
         mockUserId,
         { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
         { conversationId: "test-conversation", messagesSent: 5, sessionDuration: 5000, previousEscalations: 0, riskTrend: "stable" as const }
@@ -211,7 +211,7 @@ describe('CrisisEscalationWorkflowService', () => {
       };
       
       const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
-        crisisAnalysis as any,
+        crisisAnalysis as unknown,
         mockUserId,
         { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
         { conversationId: "test-conversation", messagesSent: 10, sessionDuration: 10000, previousEscalations: 0, riskTrend: "stable" as const }
@@ -232,7 +232,7 @@ describe('CrisisEscalationWorkflowService', () => {
       };
       
       const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
-        crisisAnalysis as any,
+        crisisAnalysis as unknown,
         mockUserId,
         { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
         { conversationId: "test-conversation", messagesSent: 1, sessionDuration: 100, previousEscalations: 0, riskTrend: "stable" as const }
@@ -254,7 +254,7 @@ describe('CrisisEscalationWorkflowService', () => {
       };
       
       await crisisEscalationWorkflowService.initiateCrisisEscalation(
-        crisisAnalysis as any,
+        crisisAnalysis as unknown,
         mockUserId,
         { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
         { conversationId: "test-conversation", messagesSent: 5, sessionDuration: 5000, previousEscalations: 0, riskTrend: "stable" as const }
@@ -275,7 +275,7 @@ describe('CrisisEscalationWorkflowService', () => {
       };
       
       const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
-        crisisAnalysis as any,
+        crisisAnalysis as unknown,
         mockUserId,
         { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
         { conversationId: "test-conversation", messagesSent: 5, sessionDuration: 5000, previousEscalations: 0, riskTrend: "stable" as const }
@@ -309,14 +309,14 @@ describe('CrisisEscalationWorkflowService', () => {
       };
       
       const first = await crisisEscalationWorkflowService.initiateCrisisEscalation(
-        crisisAnalysis as any,
+        crisisAnalysis as unknown,
         mockUserId,
         { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
         { conversationId: "test-conversation", messagesSent: 5, sessionDuration: 5000, previousEscalations: 0, riskTrend: "stable" as const }
       );
 
       const second = await crisisEscalationWorkflowService.initiateCrisisEscalation(
-        crisisAnalysis as any,
+        crisisAnalysis as unknown,
         mockUserId,
         { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
         { conversationId: "test-conversation", messagesSent: 6, sessionDuration: 6000, previousEscalations: 0, riskTrend: "stable" as const }
@@ -336,7 +336,7 @@ describe('CrisisEscalationWorkflowService', () => {
       };
       
       const escalation = await crisisEscalationWorkflowService.initiateCrisisEscalation(
-        crisisAnalysis as any,
+        crisisAnalysis as unknown,
         mockUserId,
         { languageCode: 'en', location: { country: mockLocation, hasGeolocation: true }, timeZone: 'America/New_York' },
         { conversationId: "test-conversation", messagesSent: 5, sessionDuration: 5000, previousEscalations: 0, riskTrend: "stable" as const }

@@ -43,9 +43,10 @@ export const useWellnessStore = create<WellnessState>((set, get) => ({
     try {
       const data = await ApiClient.mood.getHistory(userToken);
       set({ history: data });
-    } catch (error: any) {
+    } catch (error) {
       // Provide demo data in development mode
-      if (error.message?.includes('Demo mode') || error.isDevelopmentError || true) { // Always show demo data for now
+      const err = error as { message?: string; isDevelopmentError?: boolean };
+      if (err.message?.includes('Demo mode') || err.isDevelopmentError || true) { // Always show demo data for now
         const demoHistory: MoodCheckIn[] = [];
         // Generate 2 weeks of mood data
         for (let i = 0; i < 14; i++) {
@@ -102,9 +103,10 @@ export const useWellnessStore = create<WellnessState>((set, get) => ({
     try {
       const data = await ApiClient.journal.getEntries(userToken);
       set({ journalEntries: data.sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()) });
-    } catch (error: any) {
+    } catch (error) {
       // Provide demo data in development mode
-      if (error.message?.includes('Demo mode') || error.isDevelopmentError || true) { // Always show demo data for now
+      const err = error as { message?: string; isDevelopmentError?: boolean };
+      if (err.message?.includes('Demo mode') || err.isDevelopmentError || true) { // Always show demo data for now
         set({ 
           journalEntries: [
             {
@@ -174,9 +176,10 @@ export const useWellnessStore = create<WellnessState>((set, get) => ({
             completions: comps,
             trackedHabits: trackedWithStreaks,
         });
-    } catch (error: any) {
+    } catch (error) {
         // Provide demo data in development mode
-        if (error.message?.includes('Demo mode') || error.isDevelopmentError) {
+        const err = error as { message?: string; isDevelopmentError?: boolean };
+        if (err.message?.includes('Demo mode') || err.isDevelopmentError) {
             const demoPredefined = [
                 { id: 'habit-1', name: 'Daily Meditation', description: 'Practice mindfulness for 10 minutes', category: 'Mindfulness' as const, icon: '🧘' },
                 { id: 'habit-2', name: 'Gratitude Journal', description: 'Write 3 things you\'re grateful for', category: 'Self-Care' as const, icon: '📝' },

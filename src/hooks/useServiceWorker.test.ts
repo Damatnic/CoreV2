@@ -37,7 +37,7 @@ const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 describe('useServiceWorker Hook', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (navigator as any).onLine = true;
+    (navigator as unknown).onLine = true;
     
     // Default mock implementations
     (serviceWorkerManager.isOfflineReady as jest.Mock).mockResolvedValue(false);
@@ -354,7 +354,7 @@ describe('useServiceWorker Hook', () => {
 describe('useOfflineStatus Hook', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (navigator as any).onLine = true;
+    (navigator as unknown).onLine = true;
   });
 
   it('should initialize with navigator online status', () => {

@@ -100,20 +100,30 @@ export class ImageOptimizer {
    */
   private initConnectionDetection(): void {
     if ('connection' in navigator) {
-      const connection = (navigator as any).connection;
-      const updateConnectionType = () => {
-        const downlink = connection.downlink || 1;
-        if (downlink < this.config.connectionThresholds.slow) {
-          this.connectionType = 'slow';
-        } else if (downlink < this.config.connectionThresholds.medium) {
-          this.connectionType = 'medium';
-        } else {
-          this.connectionType = 'fast';
-        }
+      const navigatorWithConnection = navigator as any & { 
+        connection?: { 
+          downlink?: number;
+          addEventListener?: (event: string, handler: () => void) => void;
+        } 
       };
-      
-      updateConnectionType();
-      connection.addEventListener('change', updateConnectionType);
+      const connection = navigatorWithConnection.connection;
+      if (connection) {
+        const updateConnectionType = () => {
+          const downlink = connection.downlink || 1;
+          if (downlink < this.config.connectionThresholds.slow) {
+            this.connectionType = 'slow';
+          } else if (downlink < this.config.connectionThresholds.medium) {
+            this.connectionType = 'medium';
+          } else {
+            this.connectionType = 'fast';
+          }
+        };
+        
+        updateConnectionType();
+        if (connection.addEventListener) {
+          connection.addEventListener('change', updateConnectionType);
+        }
+      }
     }
   }
 

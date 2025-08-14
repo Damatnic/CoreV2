@@ -103,6 +103,7 @@ export interface AIChatMessage {
     sender: 'user' | 'ai';
     text: string;
     timestamp: string;
+    metadata?: any; // Added for crisis detection metadata
 }
 
 export interface AIChatSession {

@@ -150,7 +150,7 @@ export const AccessibilitySettingsComponent: React.FC<AccessibilitySettingsProps
         <select
           id="focus-indicator"
           value={settings.focusIndicatorStrength}
-          onChange={(e) => handleSettingChange('focusIndicatorStrength', e.target.value as any)}
+          onChange={(e) => handleSettingChange('focusIndicatorStrength', e.target.value as 'normal' | 'enhanced' | 'maximum')}
           className="setting-select"
         >
           <option value="normal">Normal</option>
@@ -164,7 +164,7 @@ export const AccessibilitySettingsComponent: React.FC<AccessibilitySettingsProps
         <select
           id="color-vision"
           value={settings.colorBlindnessType}
-          onChange={(e) => handleSettingChange('colorBlindnessType', e.target.value as any)}
+          onChange={(e) => handleSettingChange('colorBlindnessType', e.target.value as 'none' | 'deuteranopia' | 'protanopia' | 'tritanopia' | 'monochrome')}
           className="setting-select"
         >
           <option value="none">Default Colors</option>
@@ -223,7 +223,7 @@ export const AccessibilitySettingsComponent: React.FC<AccessibilitySettingsProps
         <select
           id="live-region-politeness"
           value={settings.livRegionPoliteness}
-          onChange={(e) => handleSettingChange('livRegionPoliteness', e.target.value as any)}
+          onChange={(e) => handleSettingChange('livRegionPoliteness', e.target.value as 'assertive' | 'off' | 'polite')}
           className="setting-select"
           disabled={!settings.screenReaderEnabled}
         >
@@ -252,7 +252,7 @@ export const AccessibilitySettingsComponent: React.FC<AccessibilitySettingsProps
             <select
               id="voice-sensitivity"
               value={settings.voiceCommandSensitivity}
-              onChange={(e) => handleSettingChange('voiceCommandSensitivity', e.target.value as any)}
+              onChange={(e) => handleSettingChange('voiceCommandSensitivity', e.target.value as 'low' | 'medium' | 'high')}
               className="setting-select"
               disabled={!settings.voiceNavigationEnabled}
             >

@@ -277,7 +277,7 @@ export class IntelligentPreloadingEngine {
 
     // Predict based on usage patterns
     for (const [resource, pattern] of Object.entries(model.parameters.usagePatterns)) {
-      const contextMatch = this.calculateContextMatch(currentContext, pattern as any);
+      const contextMatch = this.calculateContextMatch(currentContext, pattern as unknown);
       const timeDecay = this.calculateTimeDecay(resource);
       const confidence = contextMatch * timeDecay;
 

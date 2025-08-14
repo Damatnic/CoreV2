@@ -100,7 +100,7 @@ export interface TetherCircle {
   lastActive: number;
 }
 
-type TetherEventHandler = (data: any) => void;
+type TetherEventHandler = (data: unknown) => void;
 
 class AstralTetherService {
   private activeSessions = new Map<string, TetherSession>();

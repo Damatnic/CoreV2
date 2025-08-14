@@ -391,16 +391,20 @@ class PWAService {
    * Check if app is installed as PWA
    */
   private isInstalledAsPWA(): boolean {
+    // Type-safe check for iOS standalone property
+    const navigatorWithStandalone = navigator as Navigator & { standalone?: boolean };
     return this.isRunningStandalone() || 
-           (navigator as any).standalone === true;
+           navigatorWithStandalone.standalone === true;
   }
 
   /**
    * Check if app is running in standalone mode
    */
   private isRunningStandalone(): boolean {
+    // Type-safe check for iOS standalone property
+    const navigatorWithStandalone = window.navigator as Navigator & { standalone?: boolean };
     return window.matchMedia('(display-mode: standalone)').matches ||
-           (window.navigator as any).standalone === true;
+           navigatorWithStandalone.standalone === true;
   }
 
   /**

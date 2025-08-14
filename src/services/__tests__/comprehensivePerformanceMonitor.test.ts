@@ -129,7 +129,7 @@ describe('ComprehensivePerformanceMonitor', () => {
       Object.defineProperty(window, 'innerWidth', { value: 600, writable: true });
       const mobileMonitor = new ComprehensivePerformanceMonitor();
       
-      const budgets = (mobileMonitor as any).getDefaultBudgets();
+      const budgets = (mobileMonitor as unknown).getDefaultBudgets();
       expect(budgets.firstContentfulPaint.target).toBe(2000); // Mobile target
       
       mobileMonitor.destroy();
@@ -153,7 +153,7 @@ describe('ComprehensivePerformanceMonitor', () => {
     test('should have appropriate mobile budgets', () => {
       Object.defineProperty(window, 'innerWidth', { value: 600, writable: true });
       const mobileMonitor = new ComprehensivePerformanceMonitor();
-      const budgets = (mobileMonitor as any).getDefaultBudgets();
+      const budgets = (mobileMonitor as unknown).getDefaultBudgets();
 
       expect(budgets.firstContentfulPaint.target).toBe(2000);
       expect(budgets.largestContentfulPaint.target).toBe(3000);
@@ -166,7 +166,7 @@ describe('ComprehensivePerformanceMonitor', () => {
     test('should have appropriate desktop budgets', () => {
       Object.defineProperty(window, 'innerWidth', { value: 1200, writable: true });
       const desktopMonitor = new ComprehensivePerformanceMonitor();
-      const budgets = (desktopMonitor as any).getDefaultBudgets();
+      const budgets = (desktopMonitor as unknown).getDefaultBudgets();
 
       expect(budgets.firstContentfulPaint.target).toBe(1500);
       expect(budgets.largestContentfulPaint.target).toBe(2500);
@@ -177,7 +177,7 @@ describe('ComprehensivePerformanceMonitor', () => {
     });
 
     test('should have strict crisis detection budgets', () => {
-      const budgets = (monitor as any).getDefaultBudgets();
+      const budgets = (monitor as unknown).getDefaultBudgets();
       
       expect(budgets.crisisDetectionResponseTime.target).toBe(100); // Very strict
       expect(budgets.crisisDetectionResponseTime.critical).toBe(500);
@@ -218,7 +218,7 @@ describe('ComprehensivePerformanceMonitor', () => {
     });
 
     test('should collect current performance metrics', async () => {
-      const metrics = await (monitor as any).collectCurrentMetrics();
+      const metrics = await (monitor as unknown).collectCurrentMetrics();
       
       expect(metrics).toBeDefined();
       expect(metrics.timestamp).toBeDefined();
@@ -229,13 +229,13 @@ describe('ComprehensivePerformanceMonitor', () => {
     });
 
     test('should calculate memory usage', async () => {
-      const metrics = await (monitor as any).collectCurrentMetrics();
+      const metrics = await (monitor as unknown).collectCurrentMetrics();
       
       expect(metrics.memoryUsage).toBeCloseTo(50, 0); // 50MB
     });
 
     test('should calculate bundle size', async () => {
-      const metrics = await (monitor as any).collectCurrentMetrics();
+      const metrics = await (monitor as unknown).collectCurrentMetrics();
       
       expect(metrics.bundleSize).toBe(100000); // Size of .js files
       expect(metrics.totalResourceSize).toBe(150000); // Total size
@@ -243,21 +243,21 @@ describe('ComprehensivePerformanceMonitor', () => {
     });
 
     test('should detect network information', async () => {
-      const metrics = await (monitor as any).collectCurrentMetrics();
+      const metrics = await (monitor as unknown).collectCurrentMetrics();
       
       expect(metrics.networkLatency).toBe(50);
       expect(metrics.bandwidth).toBe(10);
     });
 
     test('should measure crisis detection time', async () => {
-      const crisisTime = await (monitor as any).measureCrisisDetectionTime();
+      const crisisTime = await (monitor as unknown).measureCrisisDetectionTime();
       
       expect(typeof crisisTime).toBe('number');
       expect(crisisTime).toBeGreaterThan(0);
     });
 
     test('should measure chat latency', async () => {
-      const chatLatency = await (monitor as any).measureChatLatency();
+      const chatLatency = await (monitor as unknown).measureChatLatency();
       
       expect(typeof chatLatency).toBe('number');
       expect(chatLatency).toBeGreaterThanOrEqual(10); // Includes 10ms delay
@@ -272,7 +272,7 @@ describe('ComprehensivePerformanceMonitor', () => {
 
       (document.querySelectorAll as jest.Mock).mockReturnValue([mockVideo]);
       
-      const quality = (monitor as any).assessVideoQuality();
+      const quality = (monitor as unknown).assessVideoQuality();
       expect(quality).toBe(100);
     });
 
@@ -283,14 +283,14 @@ describe('ComprehensivePerformanceMonitor', () => {
 
       (document.querySelectorAll as jest.Mock).mockReturnValue([mockVideo]);
       
-      const quality = (monitor as any).assessVideoQuality();
+      const quality = (monitor as unknown).assessVideoQuality();
       expect(quality).toBe(75);
     });
 
     test('should return perfect score with no videos', () => {
       (document.querySelectorAll as jest.Mock).mockReturnValue([]);
       
-      const quality = (monitor as any).assessVideoQuality();
+      const quality = (monitor as unknown).assessVideoQuality();
       expect(quality).toBe(100);
     });
   });
@@ -301,7 +301,7 @@ describe('ComprehensivePerformanceMonitor', () => {
       Object.defineProperty(window, 'caches', { value: {}, writable: true });
       Object.defineProperty(navigator, 'onLine', { value: true, writable: true });
       
-      const score = (monitor as any).checkOfflineCapability();
+      const score = (monitor as unknown).checkOfflineCapability();
       expect(score).toBe(100); // 40 + 30 + 30 = 100
     });
 
@@ -310,14 +310,14 @@ describe('ComprehensivePerformanceMonitor', () => {
       Object.defineProperty(window, 'caches', { value: undefined, writable: true });
       Object.defineProperty(navigator, 'onLine', { value: false, writable: true });
       
-      const score = (monitor as any).checkOfflineCapability();
+      const score = (monitor as unknown).checkOfflineCapability();
       expect(score).toBe(0);
     });
   });
 
   describe('User Experience Scores', () => {
     test('should calculate engagement score based on session duration', () => {
-      const score = (monitor as any).calculateEngagementScore();
+      const score = (monitor as unknown).calculateEngagementScore();
       
       expect(typeof score).toBe('number');
       expect(score).toBeGreaterThanOrEqual(0);
@@ -332,7 +332,7 @@ describe('ComprehensivePerformanceMonitor', () => {
         <meta name="viewport" content="width=device-width">
       `;
 
-      const score = (monitor as any).calculateUsabilityScore();
+      const score = (monitor as unknown).calculateUsabilityScore();
       expect(score).toBe(100); // Base 60 + 15 + 15 + 10 = 100
     });
 
@@ -343,7 +343,7 @@ describe('ComprehensivePerformanceMonitor', () => {
         <a href="/test">Link</a>
       `;
 
-      const score = await (monitor as any).calculateAccessibilityScore();
+      const score = await (monitor as unknown).calculateAccessibilityScore();
       
       expect(typeof score).toBe('number');
       expect(score).toBeGreaterThanOrEqual(0);
@@ -379,9 +379,9 @@ describe('ComprehensivePerformanceMonitor', () => {
         timestamp: Date.now(),
       };
 
-      (monitor as any).checkPerformanceBudgets(mockMetrics);
+      (monitor as unknown).checkPerformanceBudgets(mockMetrics);
       
-      const alerts = (monitor as any).activeAlerts;
+      const alerts = (monitor as unknown).activeAlerts;
       expect(alerts.length).toBeGreaterThan(0);
       
       const fcpAlert = alerts.find((alert: PerformanceAlert) => alert.metric === 'firstContentfulPaint');
@@ -416,9 +416,9 @@ describe('ComprehensivePerformanceMonitor', () => {
         timestamp: Date.now(),
       };
 
-      (monitor as any).checkPerformanceBudgets(mockMetrics);
+      (monitor as unknown).checkPerformanceBudgets(mockMetrics);
       
-      const alerts = (monitor as any).activeAlerts;
+      const alerts = (monitor as unknown).activeAlerts;
       const highSeverityAlerts = alerts.filter((alert: PerformanceAlert) => 
         alert.severity === 'critical' || alert.severity === 'high'
       );
@@ -454,7 +454,7 @@ describe('ComprehensivePerformanceMonitor', () => {
         timestamp: Date.now(),
       };
 
-      const bottlenecks = (monitor as any).detectBottlenecks(mockMetrics);
+      const bottlenecks = (monitor as unknown).detectBottlenecks(mockMetrics);
       
       const bundleBottleneck = bottlenecks.find((b: PerformanceBottleneck) => 
         b.metric === 'bundleSize'
@@ -491,7 +491,7 @@ describe('ComprehensivePerformanceMonitor', () => {
         timestamp: Date.now(),
       };
 
-      const bottlenecks = (monitor as any).detectBottlenecks(mockMetrics);
+      const bottlenecks = (monitor as unknown).detectBottlenecks(mockMetrics);
       
       const memoryBottleneck = bottlenecks.find((b: PerformanceBottleneck) => 
         b.metric === 'memoryUsage'
@@ -528,7 +528,7 @@ describe('ComprehensivePerformanceMonitor', () => {
         timestamp: Date.now(),
       };
 
-      const bottlenecks = (monitor as any).detectBottlenecks(mockMetrics);
+      const bottlenecks = (monitor as unknown).detectBottlenecks(mockMetrics);
       
       const crisisBottleneck = bottlenecks.find((b: PerformanceBottleneck) => 
         b.component === 'Crisis Detection System'
@@ -567,7 +567,7 @@ describe('ComprehensivePerformanceMonitor', () => {
         timestamp: Date.now(),
       };
 
-      (monitor as any).performanceHistory = [mockMetrics];
+      (monitor as unknown).performanceHistory = [mockMetrics];
 
       const recommendations = monitor.generateOptimizationRecommendations();
       
@@ -604,7 +604,7 @@ describe('ComprehensivePerformanceMonitor', () => {
         timestamp: Date.now(),
       };
 
-      (monitor as any).performanceHistory = [mockMetrics];
+      (monitor as unknown).performanceHistory = [mockMetrics];
 
       const recommendations = monitor.generateOptimizationRecommendations();
       
@@ -641,7 +641,7 @@ describe('ComprehensivePerformanceMonitor', () => {
         timestamp: Date.now(),
       };
 
-      (monitor as any).performanceHistory = [mockMetrics];
+      (monitor as unknown).performanceHistory = [mockMetrics];
 
       const recommendations = monitor.generateOptimizationRecommendations();
       
@@ -678,7 +678,7 @@ describe('ComprehensivePerformanceMonitor', () => {
         timestamp: Date.now(),
       };
 
-      (monitor as any).performanceHistory = [mockMetrics];
+      (monitor as unknown).performanceHistory = [mockMetrics];
 
       const recommendations = monitor.generateOptimizationRecommendations();
       
@@ -713,7 +713,7 @@ describe('ComprehensivePerformanceMonitor', () => {
         isCrisisRelated: false,
       };
 
-      (monitor as any).createAlert(alert);
+      (monitor as unknown).createAlert(alert);
       
       const activeAlerts = monitor.getActiveAlerts();
       expect(activeAlerts).toContain(alert);
@@ -746,8 +746,8 @@ describe('ComprehensivePerformanceMonitor', () => {
         isCrisisRelated: false,
       };
 
-      (monitor as any).createAlert(alert1);
-      (monitor as any).createAlert(alert2);
+      (monitor as unknown).createAlert(alert1);
+      (monitor as unknown).createAlert(alert2);
       
       const activeAlerts = monitor.getActiveAlerts();
       expect(activeAlerts.length).toBe(1);
@@ -771,7 +771,7 @@ describe('ComprehensivePerformanceMonitor', () => {
         isCrisisRelated: true,
       };
 
-      (monitor as any).createAlert(alert);
+      (monitor as unknown).createAlert(alert);
       
       expect(mockCallback).toHaveBeenCalledWith(alert);
       
@@ -819,8 +819,8 @@ describe('ComprehensivePerformanceMonitor', () => {
         isCrisisRelated: false,
       };
 
-      (monitor as any).createAlert(alert);
-      (monitor as any).performanceHistory = [mockMetrics];
+      (monitor as unknown).createAlert(alert);
+      (monitor as unknown).performanceHistory = [mockMetrics];
 
       monitor.clearResolvedAlerts();
       
@@ -857,7 +857,7 @@ describe('ComprehensivePerformanceMonitor', () => {
         timestamp: Date.now(),
       };
 
-      (monitor as any).performanceHistory = [mockMetrics];
+      (monitor as unknown).performanceHistory = [mockMetrics];
 
       const report = monitor.generatePerformanceReport();
       
@@ -896,7 +896,7 @@ describe('ComprehensivePerformanceMonitor', () => {
         timestamp: Date.now(),
       };
 
-      (monitor as any).performanceHistory = [excellentMetrics];
+      (monitor as unknown).performanceHistory = [excellentMetrics];
       const report = monitor.generatePerformanceReport();
       
       expect(report).toContain('Excellent (A+)');
@@ -937,7 +937,7 @@ describe('ComprehensivePerformanceMonitor', () => {
         timestamp: Date.now(),
       };
 
-      (monitor as any).addMetricsToHistory(mockMetrics);
+      (monitor as unknown).addMetricsToHistory(mockMetrics);
       
       const history = monitor.getPerformanceHistory();
       expect(history).toContain(mockMetrics);
@@ -971,7 +971,7 @@ describe('ComprehensivePerformanceMonitor', () => {
           accessibilityScore: 80,
           timestamp: Date.now() + i,
         };
-        (monitor as any).addMetricsToHistory(mockMetrics);
+        (monitor as unknown).addMetricsToHistory(mockMetrics);
       }
       
       const history = monitor.getPerformanceHistory();
@@ -1005,7 +1005,7 @@ describe('ComprehensivePerformanceMonitor', () => {
         timestamp: Date.now(),
       };
 
-      (monitor as any).addMetricsToHistory(mockMetrics);
+      (monitor as unknown).addMetricsToHistory(mockMetrics);
       
       const current = monitor.getCurrentMetrics();
       expect(current).toBe(mockMetrics);
@@ -1044,8 +1044,8 @@ describe('ComprehensivePerformanceMonitor', () => {
         timestamp: now - 1 * 60 * 60 * 1000, // 1 hour ago
       };
 
-      (monitor as any).addMetricsToHistory(oldMetrics);
-      (monitor as any).addMetricsToHistory(recentMetrics);
+      (monitor as unknown).addMetricsToHistory(oldMetrics);
+      (monitor as unknown).addMetricsToHistory(recentMetrics);
       
       const recent = monitor.getPerformanceHistory(24); // Last 24 hours
       expect(recent).toContain(recentMetrics);
@@ -1080,8 +1080,8 @@ describe('ComprehensivePerformanceMonitor', () => {
         timestamp: oldTimestamp,
       };
 
-      (monitor as any).addMetricsToHistory(mockMetrics);
-      (monitor as any).cleanupOldData();
+      (monitor as unknown).addMetricsToHistory(mockMetrics);
+      (monitor as unknown).cleanupOldData();
       
       const history = monitor.getPerformanceHistory();
       expect(history).not.toContain(mockMetrics);
@@ -1113,7 +1113,7 @@ describe('ComprehensivePerformanceMonitor', () => {
         throw new Error('Performance API error');
       });
 
-      const metrics = await (monitor as any).collectCurrentMetrics();
+      const metrics = await (monitor as unknown).collectCurrentMetrics();
       
       expect(metrics).toBeDefined();
       expect(metrics.timestamp).toBeDefined();
@@ -1127,7 +1127,7 @@ describe('ComprehensivePerformanceMonitor', () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       
       // This shouldn't throw even if analytics fails
-      await (monitor as any).collectCurrentMetrics();
+      await (monitor as unknown).collectCurrentMetrics();
       
       consoleSpy.mockRestore();
     });
@@ -1164,9 +1164,9 @@ describe('ComprehensivePerformanceMonitor', () => {
       expect(mockPerformanceObserver.disconnect).toHaveBeenCalled();
       
       // Should clear internal data
-      expect((monitor as any).performanceHistory.length).toBe(0);
-      expect((monitor as any).activeAlerts.length).toBe(0);
-      expect((monitor as any).alertCallbacks.length).toBe(0);
+      expect((monitor as unknown).performanceHistory.length).toBe(0);
+      expect((monitor as unknown).activeAlerts.length).toBe(0);
+      expect((monitor as unknown).alertCallbacks.length).toBe(0);
     });
   });
 });

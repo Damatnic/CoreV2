@@ -323,7 +323,7 @@ describe('Toast', () => {
       const toast = createMockToast();
       
       expect(() => {
-        render(<Toast toast={toast} onDismiss={undefined as any} />);
+        render(<Toast toast={toast} onDismiss={undefined as unknown} />);
       }).not.toThrow();
     });
 
@@ -332,7 +332,7 @@ describe('Toast', () => {
         id: null,
         message: undefined,
         type: 'unknown'
-      } as any;
+      } as unknown;
       
       expect(() => {
         render(<Toast toast={malformedToast} onDismiss={mockOnDismiss} />);

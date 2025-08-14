@@ -18,7 +18,7 @@ Object.defineProperty(document, 'createElement', {
 
 // Mock URL constructor for link validation
 const mockURL = jest.fn();
-global.URL = mockURL as any;
+global.URL = mockURL as unknown;
 
 describe('sanitizeHtml', () => {
   beforeEach(() => {
@@ -97,7 +97,7 @@ describe('sanitizeHtml', () => {
     });
 
     it('should return empty string for null input', () => {
-      const result = safeMarkdownToHtml(null as any);
+      const result = safeMarkdownToHtml(null as unknown);
       expect(result).toBe('');
     });
 

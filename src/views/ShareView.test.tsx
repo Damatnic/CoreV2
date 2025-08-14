@@ -18,7 +18,9 @@ describe('ShareView user flow', () => {
 
   test('user can chat with AI, draft a post, and submit it', async () => {
     // Mock AI responses
-    mockedApiClient.ai.chat.mockResolvedValue("That sounds really tough. Could you tell me more?");
+    mockedApiClient.ai.chat.mockResolvedValue({ 
+      response: "That sounds really tough. Could you tell me more?" 
+    });
     mockedApiClient.ai.draftPostFromChat.mockResolvedValue({
       postContent: "This is the drafted post from the AI.",
       category: "Stress",

@@ -27,7 +27,7 @@ describe('dilemmaStore', () => {
 
   test('fetchDilemmas should update state on successful API call', async () => {
     const mockDilemmas = [{ id: '1', content: 'Test Dilemma' }];
-    mockedApiClient.dilemmas.getDilemmas.mockResolvedValue(mockDilemmas as any);
+    mockedApiClient.dilemmas.getDilemmas.mockResolvedValue(mockDilemmas as unknown);
 
     await act(async () => {
       await useDilemmaStore.getState().fetchDilemmas();
@@ -56,11 +56,11 @@ describe('dilemmaStore', () => {
     const newDilemmaData = { content: 'New Post', category: 'General' };
     const userToken = 'test-token';
 
-    mockedApiClient.dilemmas.postDilemma.mockResolvedValue(undefined as any);
+    mockedApiClient.dilemmas.postDilemma.mockResolvedValue(undefined as unknown);
     mockedApiClient.dilemmas.getDilemmas.mockResolvedValue([]);
 
     await act(async () => {
-      await useDilemmaStore.getState().postDilemma(newDilemmaData as any, userToken);
+      await useDilemmaStore.getState().postDilemma(newDilemmaData as unknown, userToken);
     });
 
     expect(mockedApiClient.dilemmas.postDilemma).toHaveBeenCalledWith(newDilemmaData, userToken);
@@ -69,10 +69,10 @@ describe('dilemmaStore', () => {
   
    test('toggleSupport should optimistically update the state and call the API', async () => {
     const initialDilemma = { id: '1', content: 'Test', isSupported: false, supportCount: 0 };
-    useDilemmaStore.setState({ allDilemmas: [initialDilemma] as any });
+    useDilemmaStore.setState({ allDilemmas: [initialDilemma] as unknown });
 
     const updatedDilemmaFromApi = { ...initialDilemma, isSupported: true, supportCount: 1 };
-    mockedApiClient.dilemmas.toggleSupport.mockResolvedValue(updatedDilemmaFromApi as any);
+    mockedApiClient.dilemmas.toggleSupport.mockResolvedValue(updatedDilemmaFromApi as unknown);
 
     await act(async () => {
       await useDilemmaStore.getState().toggleSupport('1');

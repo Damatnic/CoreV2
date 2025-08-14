@@ -3,6 +3,7 @@ import { AppButton } from '../components/AppButton';
 import { Card } from '../components/Card';
 import { HeartIcon  } from '../components/icons.dynamic';
 import { ApiClient } from '../utils/ApiClient';
+import { isError } from '../types/common';
 
 const DONATION_AMOUNTS = [500, 1000, 2500, 5000]; // In cents
 
@@ -34,9 +35,10 @@ export const DonationView: React.FC = () => {
             const { clientSecret } = await ApiClient.payment.createDonationIntent(selectedAmount);
             alert(`Thank you for your donation of $${(selectedAmount / 100).toFixed(2)}! \nClient Secret (for demo): ${clientSecret}`);
             // Here you would use stripe.confirmCardPayment(clientSecret, ...)
-        } catch (error: any) {
+        } catch (error) {
             console.error(error);
-            alert(`Donation failed: ${error.message}`);
+            const errorMessage = isError(error) ? error.message : 'An error occurred';
+            alert(`Donation failed: ${errorMessage}`);
         } finally {
             setIsProcessing(false);
         }

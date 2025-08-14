@@ -174,7 +174,7 @@ export const mockIntersectionObserver = () => {
     unobserve: jest.fn(),
     disconnect: jest.fn()
   });
-  window.IntersectionObserver = mockIntersectionObserver as any;
+  window.IntersectionObserver = mockIntersectionObserver as unknown;
   return mockIntersectionObserver;
 };
 
@@ -185,7 +185,7 @@ export const mockResizeObserver = () => {
     unobserve: jest.fn(),
     disconnect: jest.fn()
   });
-  window.ResizeObserver = mockResizeObserver as any;
+  window.ResizeObserver = mockResizeObserver as unknown;
   return mockResizeObserver;
 };
 
@@ -256,7 +256,7 @@ export class MockWebSocket {
     }
   });
 
-  simulateMessage(data: any) {
+  simulateMessage(data: unknown) {
     if (this.onmessage) {
       this.onmessage(new MessageEvent('message', { data: JSON.stringify(data) }));
     }
@@ -270,7 +270,7 @@ export class MockWebSocket {
 }
 
 export const mockWebSocket = () => {
-  global.WebSocket = MockWebSocket as any;
+  global.WebSocket = MockWebSocket as unknown;
   return MockWebSocket;
 };
 
@@ -302,7 +302,7 @@ export const mockServiceWorker = () => {
 
 // Performance test helpers
 export const mockPerformance = () => {
-  const entries: any[] = [];
+  const entries: unknown[] = [];
   
   Object.defineProperty(window, 'performance', {
     writable: true,

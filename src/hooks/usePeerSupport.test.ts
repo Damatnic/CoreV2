@@ -257,7 +257,7 @@ describe('usePeerSupport Hook', () => {
       maxWaitTime: 30
     };
 
-    let matches: any[];
+    let matches: unknown[];
     await act(async () => {
       matches = await result.current.findPeerSupport(supportRequest);
     });
@@ -288,7 +288,7 @@ describe('usePeerSupport Hook', () => {
       maxWaitTime: 10
     };
 
-    let matches: any[];
+    let matches: unknown[];
     await act(async () => {
       matches = await result.current.findPeerSupport(supportRequest);
     });

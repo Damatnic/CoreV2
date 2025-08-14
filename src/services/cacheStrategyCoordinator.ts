@@ -277,7 +277,7 @@ export class CacheStrategyCoordinator {
               // Check connection quality (if available)
               if ('connection' in navigator) {
                 const conn = (navigator as any).connection;
-                if (conn && (conn.effectiveType === 'slow-2g' || conn.effectiveType === '2g')) {
+                if (conn && ((conn as any).effectiveType === 'slow-2g' || (conn as any).effectiveType === '2g')) {
                   return false;
                 }
               }

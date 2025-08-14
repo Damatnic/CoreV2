@@ -221,7 +221,7 @@ describe('useEnhancedOffline Hook', () => {
       expect(result.current.isInitializing).toBe(false);
     });
 
-    let resources: any[];
+    let resources: unknown[];
     await act(async () => {
       resources = await result.current.getCrisisResources('hotline');
     });
@@ -247,7 +247,7 @@ describe('useEnhancedOffline Hook', () => {
       expect(result.current.isInitializing).toBe(false);
     });
 
-    let resources: any[];
+    let resources: unknown[];
     await act(async () => {
       resources = await result.current.getCrisisResources();
     });
@@ -511,7 +511,7 @@ describe('useEnhancedOffline Hook', () => {
   it('should handle browsers without storage API', async () => {
     // Mock navigator without storage API
     const originalStorage = navigator.storage;
-    delete (navigator as any).storage;
+    delete (navigator as unknown).storage;
 
     const { result } = renderHook(() => useEnhancedOffline(), { wrapper: Wrapper });
 
@@ -523,7 +523,7 @@ describe('useEnhancedOffline Hook', () => {
     expect(result.current.storageUsage.quota).toBe(0);
 
     // Restore storage API
-    (navigator as any).storage = originalStorage;
+    (navigator as unknown).storage = originalStorage;
   });
 
   it('should update storage usage periodically', async () => {

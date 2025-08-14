@@ -112,8 +112,9 @@ export class BundleAnalyzer {
   private static getLoadedChunks(): string[] {
     // Check if webpack is available
     try {
-      if (typeof (window as any).__webpack_require__ !== 'undefined') {
-        const webpackChunks = (window as any).__webpack_require__.cache || {};
+      const windowWithWebpack = window as any & { __webpack_require__?: { cache?: Record<string, any> } };
+      if (typeof windowWithWebpack.__webpack_require__ !== 'undefined') {
+        const webpackChunks = windowWithWebpack.__webpack_require__.cache || {};
         return Object.keys(webpackChunks);
       }
     } catch {
@@ -171,8 +172,9 @@ export class BundleAnalyzer {
 
   // Calculate unused code percentage
   private static calculateUnusedCode(): void {
-    if ('coverage' in window && (window as any).coverage) {
-      const coverage = (window as any).coverage;
+    const windowWithCoverage = window as any & { coverage?: any };
+    if ('coverage' in windowWithCoverage && windowWithCoverage.coverage) {
+      const coverage = windowWithCoverage.coverage;
       let totalLines = 0;
       let coveredLines = 0;
 
@@ -190,7 +192,8 @@ export class BundleAnalyzer {
   // Get current memory usage
   private static getMemoryUsage(): number {
     if ('memory' in performance) {
-      return (performance as any).memory.usedJSHeapSize / 1024 / 1024;
+      const performanceWithMemory = performance as Performance & { memory?: { usedJSHeapSize: number } };
+      return performanceWithMemory.memory!.usedJSHeapSize / 1024 / 1024;
     }
     return 0;
   }
@@ -429,8 +432,9 @@ export class MobileMemoryOptimizer {
   // Get current memory usage for monitoring
   private static getCurrentMemoryUsage(): number {
     if ('memory' in performance) {
-      const memory = (performance as any).memory;
-      return memory.usedJSHeapSize / 1024 / 1024; // Convert to MB
+      const performanceWithMemory = performance as Performance & { memory?: { usedJSHeapSize: number } };
+      const memory = performanceWithMemory.memory;
+      return memory ? memory.usedJSHeapSize / 1024 / 1024 : 0; // Convert to MB
     }
     return 0;
   }
@@ -441,8 +445,9 @@ export class MobileMemoryOptimizer {
     ComponentPreloader.clearCache();
     
     // Force garbage collection if available
-    if ('gc' in window) {
-      (window as any).gc();
+    const windowWithGC = window as any & { gc?: () => void };
+    if ('gc' in windowWithGC && windowWithGC.gc) {
+      windowWithGC.gc();
     }
     
     // Clear unused image caches

@@ -67,7 +67,7 @@ class SimpleAuthService {
   /**
    * Make authenticated API request
    */
-  private async apiRequest(endpoint: string, method = 'GET', body?: any): Promise<any> {
+  private async apiRequest(endpoint: string, method = 'GET', body?: any): Promise<unknown> {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
@@ -107,20 +107,22 @@ class SimpleAuthService {
     try {
       const response = await this.apiRequest('/login', 'POST', { email, password });
       
-      if (response.success && response.token && response.user) {
-        this.token = response.token;
-        this.user = response.user;
+      // Type guard for response
+      const authResponse = response as AuthResponse;
+      if (authResponse.success && authResponse.token && authResponse.user) {
+        this.token = authResponse.token;
+        this.user = authResponse.user;
         this.saveToStorage();
         
         // Dispatch auth event for React components
         window.dispatchEvent(new CustomEvent('auth:login', { detail: this.user }));
       }
       
-      return response;
-    } catch (error: any) {
+      return authResponse;
+    } catch (error) {
       return { 
         success: false, 
-        error: error.message || 'Login failed' 
+        error: error instanceof Error ? error.message : 'Login failed' 
       };
     }
   }
@@ -137,20 +139,22 @@ class SimpleAuthService {
         role 
       });
       
-      if (response.success && response.token && response.user) {
-        this.token = response.token;
-        this.user = response.user;
+      // Type guard for response
+      const authResponse = response as AuthResponse;
+      if (authResponse.success && authResponse.token && authResponse.user) {
+        this.token = authResponse.token;
+        this.user = authResponse.user;
         this.saveToStorage();
         
         // Dispatch auth event for React components
         window.dispatchEvent(new CustomEvent('auth:register', { detail: this.user }));
       }
       
-      return response;
-    } catch (error: any) {
+      return authResponse;
+    } catch (error) {
       return { 
         success: false, 
-        error: error.message || 'Registration failed' 
+        error: error instanceof Error ? error.message : 'Registration failed' 
       };
     }
   }
@@ -189,8 +193,10 @@ class SimpleAuthService {
     try {
       const response = await this.apiRequest('/verify', 'GET');
       
-      if (response.success && response.user) {
-        this.user = response.user;
+      // Type guard for response
+      const authResponse = response as AuthResponse;
+      if (authResponse.success && authResponse.user) {
+        this.user = authResponse.user;
         this.saveToStorage();
         return true;
       }
@@ -220,8 +226,10 @@ class SimpleAuthService {
     try {
       const response = await this.apiRequest('/me', 'GET');
       
-      if (response.success && response.user) {
-        this.user = response.user;
+      // Type guard for response
+      const authResponse = response as AuthResponse;
+      if (authResponse.success && authResponse.user) {
+        this.user = authResponse.user;
         this.saveToStorage();
         return this.user;
       }

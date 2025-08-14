@@ -107,7 +107,7 @@ describe('useConnectionStatus Hook', () => {
 
   it('should handle missing network information gracefully', () => {
     const originalConnection = mockNavigator.connection;
-    delete (mockNavigator as any).connection;
+    delete (mockNavigator as unknown).connection;
     
     const { result } = renderHook(() => useConnectionStatus(), { wrapper: Wrapper });
     
@@ -435,7 +435,7 @@ describe('useConnectionStatus Hook', () => {
 
   it('should handle when service worker is not supported', () => {
     const originalServiceWorker = mockNavigator.serviceWorker;
-    delete (mockNavigator as any).serviceWorker;
+    delete (mockNavigator as unknown).serviceWorker;
     
     const { result } = renderHook(() => useConnectionStatus(), { wrapper: Wrapper });
     

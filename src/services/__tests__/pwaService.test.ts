@@ -32,7 +32,7 @@ describe('PWAService', () => {
       removeEventListener: jest.fn(),
       showNotification: jest.fn(),
       getNotifications: jest.fn().mockResolvedValue([]),
-    } as any;
+    } as unknown;
 
     // Mock navigator
     mockNavigator = {

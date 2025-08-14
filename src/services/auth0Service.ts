@@ -316,7 +316,7 @@ class Auth0Service {
   }
 
   /**
-   * Check if user has any of the specified roles
+   * Check if user has unknown of the specified roles
    */
   async hasAnyRole(roles: UserRole[]): Promise<boolean> {
     const user = await this.getCurrentUser();
@@ -514,13 +514,13 @@ export const authService = {
     // Convert to new auth system
     auth0Service.onAuthStateChange((user) => {
       if (user?.roles?.includes(UserRole.HELPER)) {
-        updater(user as any);
+        updater(user as unknown as Helper);
       }
     });
   },
   
   updateHelperProfile(profile: Helper) {
-    auth0Service.updateProfile(profile as any);
+    auth0Service.updateProfile(profile as Partial<User>);
   },
 };
 

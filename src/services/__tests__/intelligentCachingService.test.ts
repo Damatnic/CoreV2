@@ -519,8 +519,8 @@ declare module '../intelligentCachingService' {
     preloadCriticalResources(resources: string[], userType: string): Promise<void>;
     performMaintenance(): Promise<void>;
     getAdaptiveStrategy(): any;
-    warmCache(resources: any[]): Promise<void>;
-    getCacheAnalytics(): Promise<any>;
+    warmCache(resources: unknown[]): Promise<void>;
+    getCacheAnalytics(): Promise<unknown>;
     handleOfflineRequest(url: string): Promise<void>;
     queueOfflineRequest(url: string): void;
     processQueuedRequests(): Promise<void>;

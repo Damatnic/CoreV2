@@ -13,6 +13,7 @@ import { WellnessInsights } from '../components/WellnessInsights';
 import { EnhancedMoodChart } from '../components/EnhancedMoodChart';
 import { BreathingWidget } from '../components/BreathingWidget';
 import { backendService } from '../services/backendService';
+import { isError } from '../types/common';
 
 const MOOD_EMOJIS = ['😞', '🙁', '😐', '🙂', '😊'];
 const MOOD_TAGS = ['Grateful', 'Anxious', 'Tired', 'Hopeful', 'Stressed', 'Calm', 'Lonely', 'Productive'];
@@ -149,8 +150,9 @@ const CheckInTab: React.FC = () => {
             
             addToast('Your wellness check-in has been saved!', 'success');
             resetForm();
-        } catch (error: any) {
-            addToast(error.message || 'Failed to save check-in.', 'error');
+        } catch (error) {
+            const errorMessage = isError(error) ? error.message : 'Failed to save check-in.';
+            addToast(errorMessage, 'error');
         } finally {
             setIsSubmitting(false);
         }
@@ -301,8 +303,9 @@ const JournalTab: React.FC = () => {
             await postJournalEntry(newEntry);
             setNewEntry('');
             addToast('Journal entry saved.', 'success');
-        } catch (error: any) {
-            addToast(error.message || 'Failed to save journal entry.', 'error');
+        } catch (error) {
+            const errorMessage = isError(error) ? error.message : 'Failed to save journal entry.';
+            addToast(errorMessage, 'error');
         } finally {
             setIsSubmitting(false);
         }

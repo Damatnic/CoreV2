@@ -20,9 +20,9 @@ const mockVideoElement = {
   videoHeight: 720,
   readyState: 4,
   src: '',
-  onloadedmetadata: null as any,
-  onseeked: null as any,
-  onerror: null as any,
+  onloadedmetadata: null as unknown,
+  onseeked: null as unknown,
+  onerror: null as unknown,
 };
 
 const mockCanvasContext = {

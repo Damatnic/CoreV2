@@ -4,13 +4,13 @@ import { TextEncoder, TextDecoder } from 'util';
 
 // Polyfill TextEncoder/TextDecoder for Node environment
 global.TextEncoder = TextEncoder;
-global.TextDecoder = TextDecoder as any;
+global.TextDecoder = TextDecoder as unknown;
 
 // Mock window.scrollTo
 window.scrollTo = jest.fn();
 
 // Mock window.location
-delete (window as any).location;
+delete (window as unknown).location;
 window.location = {
   href: '',
   pathname: '/',
@@ -24,7 +24,7 @@ window.location = {
   reload: jest.fn(),
   replace: jest.fn(),
   assign: jest.fn(),
-  ancestorOrigins: [] as any,
+  ancestorOrigins: [] as unknown,
   toString: () => 'http://localhost/'
 } as Location;
 
@@ -37,7 +37,7 @@ global.IntersectionObserver = class IntersectionObserver {
   takeRecords() {
     return [];
   }
-} as any;
+} as unknown;
 
 // Mock ResizeObserver
 global.ResizeObserver = class ResizeObserver {
@@ -45,7 +45,7 @@ global.ResizeObserver = class ResizeObserver {
   disconnect() {}
   observe() {}
   unobserve() {}
-} as any;
+} as unknown;
 
 // Mock requestAnimationFrame
 global.requestAnimationFrame = (callback) => {
@@ -183,7 +183,7 @@ class MockWebSocket {
   close = jest.fn();
 }
 
-global.WebSocket = MockWebSocket as any;
+global.WebSocket = MockWebSocket as unknown;
 
 // Mock Service Worker
 const mockServiceWorker = {

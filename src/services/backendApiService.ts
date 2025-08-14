@@ -29,7 +29,7 @@ class BackendApiService {
       }
       
       return result;
-    } catch (error: any) {
+    } catch (error) {
       console.error(`API Error (${endpoint}):`, error);
       throw error;
     }
@@ -231,15 +231,18 @@ class BackendApiService {
   dataSync = {
     syncAll: async () => {
       try {
-        // Sync all local data to backend
-        const localData = {
-          wellness: localStorage.getItem('wellnessData'),
-          assessments: localStorage.getItem('assessmentsData'),
-          settings: localStorage.getItem('userSettings')
-        };
-        
+        // Collect local data for sync
         // In production, this would sync with the backend
-        console.log('Data sync initiated');
+        const wellness = localStorage.getItem('wellnessData');
+        const assessments = localStorage.getItem('assessmentsData');
+        const settings = localStorage.getItem('userSettings');
+        
+        // Log sync initiation
+        console.log('Data sync initiated', { 
+          hasWellness: !!wellness, 
+          hasAssessments: !!assessments, 
+          hasSettings: !!settings 
+        });
         
         return {
           success: true,

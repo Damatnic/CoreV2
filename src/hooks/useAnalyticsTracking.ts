@@ -60,15 +60,13 @@ export const useAnalyticsTracking = (options: UseAnalyticsTrackingOptions = {}) 
     if (!trackInteractions) return;
 
     analyticsService.trackEvent(eventName, {
+      ...options?.properties,
+      componentName,
+      featureName,
+      path: location.pathname,
       category: options?.category || 'user_action',
-      properties: {
-        ...options?.properties,
-        componentName,
-        featureName,
-        path: location.pathname
-      },
       sensitivityLevel: options?.sensitivityLevel || 'public'
-    });
+    } as any);
   }, [trackInteractions, componentName, featureName, location.pathname]);
 
   // Track feature usage
@@ -92,17 +90,15 @@ export const useAnalyticsTracking = (options: UseAnalyticsTrackingOptions = {}) 
     if (!trackInteractions) return;
 
     analyticsService.trackEvent(`${action}_${element}`, {
+      element,
+      action,
+      value,
+      componentName,
+      featureName,
+      path: location.pathname,
       category: 'user_action',
-      properties: {
-        element,
-        action,
-        value,
-        componentName,
-        featureName,
-        path: location.pathname
-      },
       sensitivityLevel: 'public'
-    });
+    } as any);
   }, [trackInteractions, componentName, featureName, location.pathname]);
 
   // Track form submission
@@ -112,16 +108,14 @@ export const useAnalyticsTracking = (options: UseAnalyticsTrackingOptions = {}) 
     metadata?: Record<string, any>
   ) => {
     analyticsService.trackEvent('form_submit', {
+      formName,
+      success: success ? 'true' : 'false',
+      ...metadata,
+      componentName,
+      path: location.pathname,
       category: 'user_action',
-      properties: {
-        formName,
-        success,
-        ...metadata,
-        componentName,
-        path: location.pathname
-      },
       sensitivityLevel: 'private'
-    });
+    } as any);
   }, [componentName, location.pathname]);
 
   // Track crisis-related events
@@ -130,15 +124,13 @@ export const useAnalyticsTracking = (options: UseAnalyticsTrackingOptions = {}) 
     metadata?: Record<string, any>
   ) => {
     analyticsService.trackEvent(`crisis_${eventType}`, {
+      ...metadata,
+      componentName,
+      path: location.pathname,
+      timestamp: new Date(),
       category: 'crisis_intervention',
-      properties: {
-        ...metadata,
-        componentName,
-        path: location.pathname,
-        timestamp: Date.now()
-      },
       sensitivityLevel: 'crisis'
-    });
+    } as any);
   }, [componentName, location.pathname]);
 
   // Track wellness activities
@@ -148,16 +140,14 @@ export const useAnalyticsTracking = (options: UseAnalyticsTrackingOptions = {}) 
     outcome?: 'completed' | 'abandoned' | 'skipped'
   ) => {
     analyticsService.trackEvent('wellness_activity', {
+      activity,
+      duration,
+      outcome,
+      componentName,
+      path: location.pathname,
       category: 'wellness_tracking',
-      properties: {
-        activity,
-        duration,
-        outcome,
-        componentName,
-        path: location.pathname
-      },
       sensitivityLevel: 'sensitive'
-    });
+    } as any);
   }, [componentName, location.pathname]);
 
   // Track performance metrics
@@ -167,16 +157,14 @@ export const useAnalyticsTracking = (options: UseAnalyticsTrackingOptions = {}) 
     unit?: string
   ) => {
     analyticsService.trackEvent('performance_metric', {
+      metric,
+      value,
+      unit,
+      componentName,
+      path: location.pathname,
       category: 'performance',
-      properties: {
-        metric,
-        value,
-        unit,
-        componentName,
-        path: location.pathname
-      },
       sensitivityLevel: 'public'
-    });
+    } as any);
   }, [componentName, location.pathname]);
 
   // Track errors
@@ -190,17 +178,15 @@ export const useAnalyticsTracking = (options: UseAnalyticsTrackingOptions = {}) 
     const errorStack = error instanceof Error ? error.stack : undefined;
 
     analyticsService.trackEvent('error', {
+      message: errorMessage,
+      stack: errorStack,
+      ...context,
+      componentName,
+      featureName,
+      path: location.pathname,
       category: 'error',
-      properties: {
-        message: errorMessage,
-        stack: errorStack,
-        ...context,
-        componentName,
-        featureName,
-        path: location.pathname
-      },
       sensitivityLevel: 'private'
-    });
+    } as any);
   }, [trackErrors, componentName, featureName, location.pathname]);
 
   // Track A/B test exposure
@@ -209,15 +195,13 @@ export const useAnalyticsTracking = (options: UseAnalyticsTrackingOptions = {}) 
     variant: string
   ) => {
     analyticsService.trackEvent('experiment_exposure', {
+      experimentName,
+      variant,
+      componentName,
+      path: location.pathname,
       category: 'feature_usage',
-      properties: {
-        experimentName,
-        variant,
-        componentName,
-        path: location.pathname
-      },
       sensitivityLevel: 'public'
-    });
+    } as any);
   }, [componentName, location.pathname]);
 
   // Track search queries (privacy-safe)
@@ -230,17 +214,15 @@ export const useAnalyticsTracking = (options: UseAnalyticsTrackingOptions = {}) 
     const hashedQuery = btoa(query).substring(0, 10);
     
     analyticsService.trackEvent('search', {
+      queryHash: hashedQuery,
+      queryLength: query.length,
+      resultCount,
+      clickedResult,
+      componentName,
+      path: location.pathname,
       category: 'user_action',
-      properties: {
-        queryHash: hashedQuery,
-        queryLength: query.length,
-        resultCount,
-        clickedResult,
-        componentName,
-        path: location.pathname
-      },
       sensitivityLevel: 'private'
-    });
+    } as any);
   }, [componentName, location.pathname]);
 
   // Track session timing
@@ -250,16 +232,13 @@ export const useAnalyticsTracking = (options: UseAnalyticsTrackingOptions = {}) 
     duration: number
   ) => {
     analyticsService.trackEvent('timing', {
-      category: 'performance',
-      properties: {
-        timingCategory: category,
-        timingVariable: variable,
-        duration,
-        componentName,
-        path: location.pathname
-      },
-      sensitivityLevel: 'public'
-    });
+      timingCategory: category,
+      timingVariable: variable,
+      duration,
+      componentName,
+      path: location.pathname,
+      timestamp: new Date()
+    } as any);
   }, [componentName, location.pathname]);
 
   return {
@@ -327,22 +306,18 @@ export const useFeatureAdoption = (featureName: string) => {
 // Export common tracking functions
 export const trackButtonClick = (buttonName: string, metadata?: Record<string, any>) => {
   analyticsService.trackEvent('button_click', {
-    category: 'user_action',
-    properties: {
-      buttonName,
-      ...metadata
-    }
+    buttonName,
+    ...metadata,
+    timestamp: new Date()
   });
 };
 
 export const trackLinkClick = (linkUrl: string, linkText?: string, isExternal?: boolean) => {
   analyticsService.trackEvent('link_click', {
-    category: 'user_action',
-    properties: {
-      linkUrl,
-      linkText,
-      isExternal
-    }
+    linkUrl,
+    linkText,
+    isExternal: isExternal ? 'true' : 'false',
+    timestamp: new Date()
   });
 };
 
@@ -352,11 +327,9 @@ export const trackVideoInteraction = (
   currentTime?: number
 ) => {
   analyticsService.trackEvent('video_interaction', {
-    category: 'user_action',
-    properties: {
-      videoId,
-      action,
-      currentTime
-    }
+    videoId,
+    action,
+    currentTime,
+    timestamp: new Date()
   });
 };

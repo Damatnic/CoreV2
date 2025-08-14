@@ -334,20 +334,28 @@ class RBACService {
 
     // Default filtering based on common patterns
     return data.filter(item => {
+      // Type-safe property checks
+      const itemWithProps = item as any & {
+        isPrivate?: boolean;
+        currentUserId?: string;
+        isFlagged?: boolean;
+        isDeleted?: boolean;
+      };
+      
       // Check if item has privacy settings
-      if ('isPrivate' in item && (item as any).isPrivate) {
+      if ('isPrivate' in itemWithProps && itemWithProps.isPrivate) {
         // Only owner or admin can see private items
-        return this.isResourceOwner((item as any).currentUserId, item);
+        return this.isResourceOwner(itemWithProps.currentUserId, item);
       }
 
       // Check if item is flagged
-      if ('isFlagged' in item && (item as any).isFlagged) {
+      if ('isFlagged' in itemWithProps && itemWithProps.isFlagged) {
         // Only moderators and above can see flagged items
         return userRoles.includes(UserRole.MODERATOR);
       }
 
       // Check if item is deleted
-      if ('isDeleted' in item && (item as any).isDeleted) {
+      if ('isDeleted' in itemWithProps && itemWithProps.isDeleted) {
         // Only admins can see deleted items
         return false;
       }

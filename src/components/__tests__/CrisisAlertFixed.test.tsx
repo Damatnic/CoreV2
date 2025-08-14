@@ -276,7 +276,7 @@ describe('CrisisAlert', () => {
     });
 
     it('should handle undefined severity gracefully', () => {
-      const props = createMockCrisisAlert({ severity: undefined as any });
+      const props = createMockCrisisAlert({ severity: undefined as unknown });
       render(<CrisisAlert {...props} />);
       
       const alert = screen.getByRole('alert');

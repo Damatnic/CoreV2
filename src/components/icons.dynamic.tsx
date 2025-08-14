@@ -136,6 +136,14 @@ export const SunIcon = createIcon('M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-
 export const TagIcon = createIcon('M7.5 5.6L10 7 8.6 4.5C8.2 3.9 7.5 3.9 7.1 4.5L5.5 7l2.5-1.4zm4.5 5.9L8.6 12l2.4-2.4c.6-.6.6-1.5 0-2.1-.6-.6-1.5-.6-2.1 0L6.5 10 9 7.6l3.4 3.4z', 'TagIcon');
 export const UserIcon = createIcon('M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z', 'UserIcon');
 export const HomeIcon = createIcon('M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z', 'HomeIcon');
+export const HistoryIcon = createIcon('M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z', 'HistoryIcon');
+export const TrashIcon = createIcon('M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z', 'TrashIcon');
+export const FilterIcon = createIcon('M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z', 'FilterIcon');
+export const ChevronRightIcon = createIcon('M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z', 'ChevronRightIcon');
+export const WarningIcon = createIcon('M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z', 'WarningIcon');
+export const MoreIcon = createIcon('M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z', 'MoreIcon');
+export const MessageIcon = createIcon('M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM18 14H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z', 'MessageIcon');
+export const CalendarIcon = createIcon('M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z', 'CalendarIcon');
 
 // Less frequently used icons - lazy loaded
 export const BookIcon = createLazyIcon(() => import('./icon-paths/book'), 'BookIcon');

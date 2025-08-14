@@ -17,7 +17,7 @@ const mockWebSocket = {
   readyState: WebSocket.OPEN,
 };
 
-global.WebSocket = jest.fn(() => mockWebSocket) as any;
+global.WebSocket = jest.fn(() => mockWebSocket) as unknown;
 
 // Mock navigator.vibrate
 Object.defineProperty(global.navigator, 'vibrate', {

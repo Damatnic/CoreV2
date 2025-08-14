@@ -78,7 +78,7 @@ class WebSocketService {
   private readonly messageQueue: WebSocketMessage[] = [];
   private readonly listeners = new Map<string, Set<(message: any) => void>>();
   private readonly connectionListeners = new Set<(connected: boolean) => void>();
-  private readonly eventHandlers = new Map<WebSocketEvent, Set<(data: any) => void>>();
+  private readonly eventHandlers = new Map<WebSocketEvent, Set<(data: unknown) => void>>();
   private readonly typingIndicators = new Map<string, Map<string, NodeJS.Timeout>>();
   private readonly presenceData = new Map<string, PresenceData>();
   private readonly roomSubscriptions = new Set<string>();
@@ -344,15 +344,24 @@ class WebSocketService {
     this.emit('presence', presence);
   }
 
-  private handleNotification(data: any) {
+  private handleNotification(data: unknown) {
+    // Type-safe data access
+    const notificationData = data as {
+      title?: string;
+      message?: string;
+      urgency?: 'low' | 'normal' | 'high' | 'crisis';
+      type?: 'message' | 'reminder' | 'alert' | 'crisis' | 'achievement' | 'system';
+      metadata?: any;
+    };
+    
     // Show notification if page is not visible
     if (document.hidden) {
       notificationService.show({
-        title: data.title || 'New Notification',
-        body: data.message || 'You have a new notification',
-        urgency: data.urgency || 'normal',
-        category: data.type || 'system',
-        data: data.metadata
+        title: notificationData.title || 'New Notification',
+        body: notificationData.message || 'You have a new notification',
+        urgency: notificationData.urgency || 'normal',
+        category: notificationData.type || 'system',
+        data: notificationData.metadata
       });
     }
 
@@ -360,11 +369,17 @@ class WebSocketService {
     this.emit('notification', data);
   }
 
-  private handleCrisisAlert(data: any) {
+  private handleCrisisAlert(data: unknown) {
+    // Type-safe data access
+    const alertData = data as {
+      title?: string;
+      message?: string;
+    };
+    
     // Always show crisis notifications
     notificationService.showCrisisNotification(
-      data.title || 'Crisis Alert',
-      data.message || 'Immediate assistance needed',
+      alertData.title || 'Crisis Alert',
+      alertData.message || 'Immediate assistance needed',
       data
     );
 
@@ -497,7 +512,7 @@ class WebSocketService {
   }
 
   // Event handling methods
-  on(event: WebSocketEvent, handler: (data: any) => void): () => void {
+  on(event: WebSocketEvent, handler: (data: unknown) => void): () => void {
     if (!this.eventHandlers.has(event)) {
       this.eventHandlers.set(event, new Set());
     }
@@ -510,15 +525,15 @@ class WebSocketService {
     };
   }
 
-  off(event: WebSocketEvent, handler: (data: any) => void): void {
+  off(event: WebSocketEvent, handler: (data: unknown) => void): void {
     const handlers = this.eventHandlers.get(event);
     if (handlers) {
       handlers.delete(handler);
     }
   }
 
-  once(event: WebSocketEvent, handler: (data: any) => void): () => void {
-    const wrappedHandler = (data: any) => {
+  once(event: WebSocketEvent, handler: (data: unknown) => void): () => void {
+    const wrappedHandler = (data: unknown) => {
       handler(data);
       this.off(event, wrappedHandler);
     };

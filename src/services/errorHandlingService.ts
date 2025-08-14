@@ -157,7 +157,7 @@ class ErrorHandlingService {
   /**
    * Sanitize data object to remove PII
    */
-  private sanitizeData(data: any): any {
+  private sanitizeData(data: unknown): any {
     if (!data) return data;
     
     const sanitized = { ...data };
@@ -166,9 +166,9 @@ class ErrorHandlingService {
     Object.keys(sanitized).forEach(key => {
       const lowerKey = key.toLowerCase();
       if (sensitiveKeys.some(sensitive => lowerKey.includes(sensitive))) {
-        sanitized[key] = '[REDACTED]';
-      } else if (typeof sanitized[key] === 'object') {
-        sanitized[key] = this.sanitizeData(sanitized[key]);
+        (sanitized as any)[key] = '[REDACTED]';
+      } else if (typeof (sanitized as any)[key] === 'object') {
+        (sanitized as any)[key] = this.sanitizeData((sanitized as any)[key]);
       }
     });
     
@@ -737,7 +737,7 @@ class ErrorHandlingService {
   /**
    * Wrap async function with error handling
    */
-  wrapAsync<T extends (...args: any[]) => Promise<any>>(
+  wrapAsync<T extends (...args: unknown[]) => Promise<unknown>>(
     fn: T,
     options?: {
       category?: ErrorCategory;
@@ -749,13 +749,13 @@ class ErrorHandlingService {
     return (async (...args: Parameters<T>) => {
       try {
         return await fn(...args);
-      } catch (error: any) {
+      } catch (error) {
         this.handleError({
-          message: error.message || 'An error occurred',
+          message: (error as any).message || 'An error occurred',
           category: options?.category || 'unknown',
           severity: options?.severity || 'medium',
           timestamp: new Date(),
-          stack: error.stack,
+          stack: (error as any).stack,
           userMessage: options?.userMessage,
           recoverable: true,
           retryable: true

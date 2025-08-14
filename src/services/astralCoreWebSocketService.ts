@@ -85,7 +85,7 @@ export interface WSConnectionState {
 export interface WSSubscription {
   id: string;
   event: WSEventType | string;
-  callback: (data: any) => void;
+  callback: (data: unknown) => void;
   once?: boolean;
 }
 
@@ -241,7 +241,7 @@ class AstralCoreWebSocketService {
   /**
    * Subscribe to WebSocket events
    */
-  on(event: WSEventType | string, callback: (data: any) => void): string {
+  on(event: WSEventType | string, callback: (data: unknown) => void): string {
     const subscriptionId = this.generateSubscriptionId();
     const subscription: WSSubscription = {
       id: subscriptionId,
@@ -260,7 +260,7 @@ class AstralCoreWebSocketService {
   /**
    * Subscribe to event once
    */
-  once(event: WSEventType | string, callback: (data: any) => void): string {
+  once(event: WSEventType | string, callback: (data: unknown) => void): string {
     const subscriptionId = this.generateSubscriptionId();
     const subscription: WSSubscription = {
       id: subscriptionId,
@@ -562,11 +562,12 @@ class AstralCoreWebSocketService {
   /**
    * Handle authentication success
    */
-  private handleAuthSuccess(data: any): void {
+  private handleAuthSuccess(data: unknown): void {
     console.log('Astral Core WS: Authenticated successfully');
     
     this.connectionState.authenticated = true;
-    this.userId = data.userId;
+    const authData = data as any;
+    this.userId = authData?.userId;
 
     // Process queued messages
     this.processMessageQueue();
@@ -583,8 +584,9 @@ class AstralCoreWebSocketService {
   /**
    * Handle authentication failure
    */
-  private handleAuthFailure(data: any): void {
-    console.error('Astral Core WS: Authentication failed', data.error);
+  private handleAuthFailure(data: unknown): void {
+    const errorData = data as any;
+    console.error('Astral Core WS: Authentication failed', errorData?.error);
     
     this.connectionState.authenticated = false;
 
@@ -600,11 +602,12 @@ class AstralCoreWebSocketService {
   /**
    * Handle crisis alert
    */
-  private handleCrisisAlert(data: any): void {
+  private handleCrisisAlert(data: unknown): void {
     // Show notification
+    const alertData = data as any;
     astralCoreNotificationService.showCrisisAlert(
       'Crisis Alert',
-      data.message || 'Someone needs immediate help',
+      alertData?.message || 'Someone needs immediate help',
       [
         { action: 'respond', title: 'Respond' },
         { action: 'forward', title: 'Forward to 988' },
@@ -618,7 +621,7 @@ class AstralCoreWebSocketService {
   /**
    * Handle maintenance notification
    */
-  private handleMaintenance(data: any): void {
+  private handleMaintenance(data: unknown): void {
     console.warn('Astral Core WS: Maintenance scheduled', data);
     
     // Show notification
@@ -626,7 +629,7 @@ class AstralCoreWebSocketService {
       type: NotificationType.SYSTEM_ALERT,
       priority: NotificationPriority.HIGH,
       title: 'Scheduled Maintenance',
-      body: data.message || 'The service will undergo maintenance soon',
+      body: (data as any)?.message || 'The service will undergo maintenance soon',
       requireInteraction: true,
     });
   }
@@ -665,7 +668,7 @@ class AstralCoreWebSocketService {
   /**
    * Handle heartbeat response
    */
-  private handleHeartbeat(data: any): void {
+  private handleHeartbeat(data: unknown): void {
     this.emit('pong', data);
   }
 
@@ -703,7 +706,7 @@ class AstralCoreWebSocketService {
   /**
    * Handle connection error
    */
-  private handleConnectionError(error: any): void {
+  private handleConnectionError(error: unknown): void {
     // Log error
     console.error('Astral Core WS: Connection error', error);
 

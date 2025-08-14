@@ -6,7 +6,7 @@
  */
 
 import { StateCreator } from 'zustand';
-import { persist, createJSONStorage, PersistOptions, devtools, subscribeWithSelector } from 'zustand/middleware';
+import { persist, createJSONStorage, PersistOptions, PersistStorage, devtools, subscribeWithSelector } from 'zustand/middleware';
 
 /**
  * Standard error state interface for all stores
@@ -152,7 +152,7 @@ export const createPersistOptions = <T extends EnhancedState>(
   config: PersistConfig<T>
 ): PersistOptions<T, Partial<T>> => {
   // Choose storage based on config
-  let storage;
+  let storage: PersistStorage<Partial<T>> | undefined;
   switch (config.storage) {
     case 'sessionStorage':
       storage = createJSONStorage(() => sessionStorage);
@@ -169,12 +169,22 @@ export const createPersistOptions = <T extends EnhancedState>(
   return {
     name: `astral-core-${config.name}`,
     version: config.version || 1,
-    storage: storage as any,
+    storage: storage as PersistStorage<Partial<T>>,
     
     // Default partialize - exclude error and loading states
     partialize: config.partialize || ((state) => {
+      const typedState = state as any & {
+        error?: any;
+        errorCode?: any;
+        errorTimestamp?: any;
+        errorRetryCount?: any;
+        isRetrying?: any;
+        isLoading?: any;
+        loadingMessage?: any;
+        loadingProgress?: any;
+      };
       const { error, errorCode, errorTimestamp, errorRetryCount, isRetrying,
-              isLoading, loadingMessage, loadingProgress, ...rest } = state as any;
+              isLoading, loadingMessage, loadingProgress, ...rest } = typedState;
       return rest;
     }),
     
@@ -254,7 +264,7 @@ export const withOptimisticUpdate = <R>(
 /**
  * Debounced update wrapper
  */
-export const createDebouncedUpdate = <T extends (...args: any[]) => any>(
+export const createDebouncedUpdate = <T extends (...args: unknown[]) => any>(
   fn: T,
   delay: number = 500
 ): T => {
@@ -277,13 +287,13 @@ export const createEnhancedStore = <T extends EnhancedState>(
   let enhancedCreator = storeCreator;
   
   // Add subscribeWithSelector for advanced subscriptions
-  enhancedCreator = subscribeWithSelector(enhancedCreator) as any;
+  enhancedCreator = subscribeWithSelector(enhancedCreator) as StateCreator<T>;
   
   // Add devtools in development
   if (enableDevtools) {
     enhancedCreator = devtools(enhancedCreator, {
       name: persistConfig?.name || 'Store'
-    }) as any;
+    }) as StateCreator<T>;
   }
   
   // Add persistence if config provided
@@ -291,10 +301,10 @@ export const createEnhancedStore = <T extends EnhancedState>(
     enhancedCreator = persist(
       enhancedCreator,
       createPersistOptions(persistConfig)
-    ) as any;
+    ) as StateCreator<T>;
   }
   
-  return enhancedCreator as any;
+  return enhancedCreator as StateCreator<T, [], [['zustand/persist', Partial<T>], ['zustand/devtools', never], ['zustand/subscribeWithSelector', never]]>;
 };
 
 /**

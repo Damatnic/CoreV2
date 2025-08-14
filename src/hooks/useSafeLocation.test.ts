@@ -230,7 +230,7 @@ describe('useSafeLocation Hook', () => {
         pathname: '/updated',
         search: '?updated=true',
         hash: '#new',
-        state: { updated: true } as any,
+        state: { updated: true } as unknown,
         key: 'updated'
       }
     };

@@ -238,7 +238,7 @@ describe('roleAccess', () => {
 
     test('should handle helper with undefined role', () => {
       const helper = createMockHelper('Community');
-      delete (helper as any).role;
+      delete (helper as unknown).role;
       
       expect(getUserRole(helper)).toBe('Starkeeper');
     });
@@ -393,7 +393,7 @@ describe('roleAccess', () => {
       expect(result1.allowed).toBe(false);
 
       // Test with undefined view (type-wise this shouldn't happen but test defensive programming)
-      const result2 = validateViewAccess('Admin', undefined as any);
+      const result2 = validateViewAccess('Admin', undefined as unknown);
       expect(result2.allowed).toBe(false);
     });
   });
@@ -435,10 +435,10 @@ describe('roleAccess', () => {
 
   describe('Boundary conditions and error handling', () => {
     test('should handle null and undefined inputs gracefully', () => {
-      expect(() => canAccessView(null as any, 'feed')).not.toThrow();
-      expect(() => isViewDenied(null as any, 'feed')).not.toThrow();
-      expect(() => hasPermission(null as any, 'canCreateContent')).not.toThrow();
-      expect(() => validateViewAccess(null as any, 'feed')).not.toThrow();
+      expect(() => canAccessView(null as unknown, 'feed')).not.toThrow();
+      expect(() => isViewDenied(null as unknown, 'feed')).not.toThrow();
+      expect(() => hasPermission(null as unknown, 'canCreateContent')).not.toThrow();
+      expect(() => validateViewAccess(null as unknown, 'feed')).not.toThrow();
     });
 
     test('should handle malformed helper objects', () => {
@@ -486,7 +486,7 @@ describe('roleAccess', () => {
     });
 
     test('should not create memory leaks with repeated calls', () => {
-      const initialMemory = (performance as any).memory?.usedJSHeapSize;
+      const initialMemory = (performance as unknown).memory?.usedJSHeapSize;
       
       // Perform many operations
       for (let i = 0; i < 10000; i++) {
@@ -496,11 +496,11 @@ describe('roleAccess', () => {
       }
       
       // Force garbage collection if available
-      if ((global as any).gc) {
-        (global as any).gc();
+      if ((global as unknown).gc) {
+        (global as unknown).gc();
       }
       
-      const finalMemory = (performance as any).memory?.usedJSHeapSize;
+      const finalMemory = (performance as unknown).memory?.usedJSHeapSize;
       
       // Memory shouldn't grow significantly (this is a rough check)
       if (initialMemory && finalMemory) {

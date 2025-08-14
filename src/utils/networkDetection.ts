@@ -27,7 +27,15 @@ export interface AdaptiveLoadingConfig {
  * Detects network connection type from navigator.connection
  */
 export const getConnectionType = (): ConnectionType => {
-  const connection = (navigator as any).connection;
+  const navigatorWithConnection = navigator as any & {
+    connection?: {
+      effectiveType?: string;
+      downlink?: number;
+      rtt?: number;
+      saveData?: boolean;
+    }
+  };
+  const connection = navigatorWithConnection.connection;
   if (!connection) {
     return 'unknown';
   }
@@ -52,7 +60,13 @@ export const getConnectionType = (): ConnectionType => {
  * Determines network quality based on downlink and RTT
  */
 export const getNetworkQuality = (): NetworkQuality => {
-  const connection = (navigator as any).connection;
+  const navigatorWithConnection = navigator as any & {
+    connection?: {
+      downlink?: number;
+      rtt?: number;
+    }
+  };
+  const connection = navigatorWithConnection.connection;
   if (!connection) {
     return 'good'; // Default assumption
   }
@@ -79,7 +93,16 @@ export const getNetworkQuality = (): NetworkQuality => {
 export const getAdaptiveLoadingConfig = (): AdaptiveLoadingConfig => {
   const connectionType = getConnectionType();
   const quality = getNetworkQuality();
-  const connection = (navigator as any).connection;
+  const navigatorWithConnection = navigator as any & {
+    connection?: {
+      downlink?: number;
+      rtt?: number;
+      saveData?: boolean;
+      addEventListener?: (event: string, handler: () => void) => void;
+      removeEventListener?: (event: string, handler: () => void) => void;
+    }
+  };
+  const connection = navigatorWithConnection.connection;
   const downlink = connection?.downlink || 1;
   const rtt = connection?.rtt || 300;
   const saveData = connection?.saveData || false;
@@ -139,8 +162,14 @@ export const useAdaptiveLoading = () => {
       setConfig(getAdaptiveLoadingConfig());
     };
 
-    const connection = (navigator as any).connection;
-    if (connection) {
+    const navigatorWithConnection = navigator as any & {
+      connection?: {
+        addEventListener?: (event: string, handler: () => void) => void;
+        removeEventListener?: (event: string, handler: () => void) => void;
+      }
+    };
+    const connection = navigatorWithConnection.connection;
+    if (connection && connection.addEventListener && connection.removeEventListener) {
       connection.addEventListener('change', updateConfig);
       return () => {
         connection.removeEventListener('change', updateConfig);

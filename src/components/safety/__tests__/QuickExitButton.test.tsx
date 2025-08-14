@@ -292,7 +292,7 @@ describe('QuickExitButton', () => {
       positions.forEach(position => {
         const { container } = render(
           <RouterWrapper>
-            <QuickExitButton position={position as any} />
+            <QuickExitButton position={position as unknown} />
           </RouterWrapper>
         );
 

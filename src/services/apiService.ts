@@ -43,7 +43,7 @@ export interface ApiError {
 class ApiService {
   private config: ApiConfig;
   private cache: Map<string, { data: any; timestamp: number }> = new Map();
-  private pendingRequests: Map<string, Promise<any>> = new Map();
+  private pendingRequests: Map<string, Promise<unknown>> = new Map();
   private interceptors = {
     request: [] as Array<(config: ApiRequestConfig) => ApiRequestConfig | Promise<ApiRequestConfig>>,
     response: [] as Array<(response: ApiResponse) => ApiResponse | Promise<ApiResponse>>,
@@ -141,7 +141,7 @@ class ApiService {
       // Check for pending request to prevent duplicate calls
       const pending = this.pendingRequests.get(cacheKey);
       if (pending) {
-        return pending;
+        return pending as Promise<ApiResponse<T>>;
       }
     }
 
@@ -206,7 +206,7 @@ class ApiService {
         if (contentType && contentType.includes('application/json')) {
           data = await response.json();
         } else {
-          data = await response.text() as any;
+          data = await response.text() as unknown as T;
         }
 
         // Handle HTTP errors
@@ -240,20 +240,30 @@ class ApiService {
           ok: response.ok
         };
 
-      } catch (error: any) {
-        // Handle network errors
-        if (error.name === 'AbortError') {
-          lastError = {
-            message: 'Request timeout',
-            code: 'TIMEOUT'
-          };
-        } else if (error instanceof TypeError && error.message === 'Failed to fetch') {
-          lastError = {
-            message: 'Network error',
-            code: 'NETWORK_ERROR'
-          };
+      } catch (error) {
+        // Handle network errors with proper type guards
+        if (error instanceof Error) {
+          if (error.name === 'AbortError') {
+            lastError = {
+              message: 'Request timeout',
+              code: 'TIMEOUT'
+            };
+          } else if (error instanceof TypeError && error.message === 'Failed to fetch') {
+            lastError = {
+              message: 'Network error',
+              code: 'NETWORK_ERROR'
+            };
+          } else {
+            lastError = {
+              message: error.message,
+              code: 'UNKNOWN_ERROR'
+            };
+          }
         } else {
-          lastError = error;
+          lastError = {
+            message: typeof error === 'string' ? error : 'Unknown error occurred',
+            code: 'UNKNOWN_ERROR'
+          };
         }
 
         // Retry on network errors

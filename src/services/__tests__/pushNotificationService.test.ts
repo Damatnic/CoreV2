@@ -150,7 +150,7 @@ describe('PushNotificationService', () => {
     });
 
     it('should handle service worker unavailability', async () => {
-      delete (navigator as any).serviceWorker;
+      delete (navigator as unknown).serviceWorker;
 
       const result = await pushNotificationService.initialize();
 

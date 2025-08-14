@@ -4,6 +4,7 @@ import { Card } from '../components/Card';
 import { ApiClient } from '../utils/ApiClient';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
+import { isError } from '../types/common';
 
 const lessons = [
     {
@@ -76,8 +77,9 @@ export const HelperTrainingView: React.FC<{
                         onConfirm: onTrainingComplete,
                     });
                 }
-            } catch (err: any) {
-                addToast(err.message || "Failed to submit quiz results.", 'error');
+            } catch (err) {
+                const errorMessage = isError(err) ? err.message : "Failed to submit quiz results.";
+                addToast(errorMessage, 'error');
             } finally {
                 setIsSubmitting(false);
             }

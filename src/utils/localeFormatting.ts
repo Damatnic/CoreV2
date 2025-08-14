@@ -408,11 +408,15 @@ export function formatDuration(
     
     // Join with appropriate conjunction
     if ('ListFormat' in Intl) {
-      const listFormatter = new (Intl as any).ListFormat(currentLocale, { style: 'long', type: 'conjunction' });
-      return listFormatter.format(parts);
-    } else {
-      return parts.join(', ');
+      const IntlWithListFormat = Intl as any & {
+        ListFormat?: new (locale: string, options?: any) => { format: (list: string[]) => string }
+      };
+      if (IntlWithListFormat.ListFormat) {
+        const listFormatter = new IntlWithListFormat.ListFormat(currentLocale, { style: 'long', type: 'conjunction' });
+        return listFormatter.format(parts);
+      }
     }
+    return parts.join(', ');
   }
 }
 
@@ -429,11 +433,15 @@ export function formatList(
   
   try {
     if ('ListFormat' in Intl) {
-      const formatter = new (Intl as any).ListFormat(currentLocale, { style, type });
-      return formatter.format(items);
-    } else {
-      throw new Error('ListFormat not supported');
+      const IntlWithListFormat = Intl as any & {
+        ListFormat?: new (locale: string, options?: any) => { format: (list: string[]) => string }
+      };
+      if (IntlWithListFormat.ListFormat) {
+        const formatter = new IntlWithListFormat.ListFormat(currentLocale, { style, type });
+        return formatter.format(items);
+      }
     }
+    throw new Error('ListFormat not supported');
   } catch (error) {
     // Fallback for unsupported locales
     if (type === 'conjunction') {

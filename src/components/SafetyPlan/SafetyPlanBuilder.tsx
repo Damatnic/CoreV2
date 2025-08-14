@@ -229,7 +229,7 @@ export const SafetyPlanBuilder: React.FC<SafetyPlanBuilderProps> = ({
         </div>
 
         <div className="plan-sections">
-          {steps.map((step) => {
+          {steps.map((step: any) => {
             const items = plan[step.key as keyof SafetyPlanData];
             if (!items || (Array.isArray(items) && items.length === 0)) return null;
 
@@ -242,7 +242,7 @@ export const SafetyPlanBuilder: React.FC<SafetyPlanBuilderProps> = ({
                 
                 {step.isComplex ? (
                   <div className="contact-list">
-                    {(items as any[]).map((item, index) => (
+                    {(items as Array<{ name: string; phone: string; relationship?: string; role?: string }>).map((item, index) => (
                       <div key={index} className="contact-card">
                         <div className="contact-name">{item.name}</div>
                         <div className="contact-role">{item.relationship || item.role}</div>
@@ -316,7 +316,7 @@ export const SafetyPlanBuilder: React.FC<SafetyPlanBuilderProps> = ({
         {currentStepData.isComplex ? (
           <ComplexInput
             stepKey={currentStepData.key as 'supportPeople' | 'professionals'}
-            items={plan[currentStepData.key as keyof SafetyPlanData] as any[]}
+            items={plan[currentStepData.key as keyof SafetyPlanData] as unknown[]}
             onAdd={(item) => handleAddContact(currentStepData.key as 'supportPeople' | 'professionals', item)}
             onRemove={(index) => handleRemoveContact(currentStepData.key as 'supportPeople' | 'professionals', index)}
           />
@@ -386,7 +386,7 @@ const SimpleInput: React.FC<{
       </div>
 
       <div className="items-list">
-        {items.map((item, index) => (
+        {items.map((item: any, index) => (
           <div key={index} className="item">
             <span>{item}</span>
             <button className="remove-btn" onClick={() => onRemove(index)}>×</button>
@@ -400,8 +400,8 @@ const SimpleInput: React.FC<{
 // Complex Input Component for contacts
 const ComplexInput: React.FC<{
   stepKey: 'supportPeople' | 'professionals';
-  items: any[];
-  onAdd: (item: any) => void;
+  items: unknown[];
+  onAdd: (item: unknown) => void;
   onRemove: (index: number) => void;
 }> = ({ stepKey, items, onAdd, onRemove }) => {
   const [name, setName] = useState('');
@@ -445,7 +445,7 @@ const ComplexInput: React.FC<{
       </div>
 
       <div className="contacts-grid">
-        {items.map((item, index) => (
+        {items.map((item: any, index) => (
           <div key={index} className="contact-item">
             <div className="contact-info">
               <strong>{item.name}</strong>
@@ -467,7 +467,7 @@ const PrintView: React.FC<{ plan: SafetyPlanData; steps: any[] }> = ({ plan, ste
       <h1>My Safety Plan</h1>
       <p className="print-date">Date: {new Date(plan.lastUpdated).toLocaleDateString()}</p>
       
-      {steps.map((step) => {
+      {steps.map((step: any) => {
         const items = plan[step.key as keyof SafetyPlanData];
         if (!items || (Array.isArray(items) && items.length === 0)) return null;
 
@@ -476,7 +476,7 @@ const PrintView: React.FC<{ plan: SafetyPlanData; steps: any[] }> = ({ plan, ste
             <h2>{step.icon} {step.title}</h2>
             {step.isComplex ? (
               <div className="print-contacts">
-                {(items as any[]).map((item, index) => (
+                {(items as Array<{ name: string; phone: string; relationship?: string; role?: string }>).map((item, index) => (
                   <div key={index}>
                     <strong>{item.name}</strong> ({item.relationship || item.role}): {item.phone}
                   </div>

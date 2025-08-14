@@ -3,7 +3,7 @@
  * Centralized error management with user-friendly messaging and crisis support
  */
 
-import { astralCoreNotificationService, NotificationType, NotificationPriority } from './astralCoreNotificationService';
+import { astralCoreNotificationService, NotificationType, NotificationPriority, Notification } from './astralCoreNotificationService';
 import { apiClient } from './apiClient';
 import { getEnvVar, isProd, isDev } from '../utils/envConfig';
 
@@ -244,8 +244,8 @@ class AstralCoreErrorService {
   /**
    * Handle authentication error
    */
-  handleAuthError(error: any): AstralCoreError {
-    const astralError = this.handle(error, {
+  handleAuthError(error: unknown): AstralCoreError {
+    const astralError = this.handle(error as Error | AstralCoreError, {
       notify: true,
       fallback: () => {
         // Redirect to login
@@ -289,8 +289,8 @@ class AstralCoreErrorService {
   /**
    * Handle critical error
    */
-  handleCriticalError(error: any): AstralCoreError {
-    const astralError = this.handle(error, {
+  handleCriticalError(error: unknown): AstralCoreError {
+    const astralError = this.handle(error as Error | AstralCoreError, {
       notify: true,
       report: true,
     });
@@ -389,14 +389,15 @@ class AstralCoreErrorService {
   /**
    * Normalize error to AstralCoreError
    */
-  private normalizeError(error: any): AstralCoreError {
+  private normalizeError(error: unknown): AstralCoreError {
     if (this.isAstralError(error)) {
       return error;
     }
 
-    const type = this.determineErrorType(error);
-    const code = error.code || error.name || 'UNKNOWN_ERROR';
-    const message = error.message || 'An unknown error occurred';
+    const errorObj = error as any;
+    const type = this.determineErrorType(errorObj);
+    const code = errorObj?.code || errorObj?.name || 'UNKNOWN_ERROR';
+    const message = errorObj?.message || 'An unknown error occurred';
 
     return {
       id: this.generateErrorId(),
@@ -405,8 +406,8 @@ class AstralCoreErrorService {
       code,
       message,
       userMessage: this.getUserMessage(code),
-      details: error.details || error,
-      stack: error.stack,
+      details: errorObj?.details || error,
+      stack: errorObj?.stack,
       timestamp: new Date(),
       recoverable: this.isRecoverable(code, type),
       retryable: this.isRetryable(code, type),
@@ -417,21 +418,23 @@ class AstralCoreErrorService {
   /**
    * Check if error is AstralCoreError
    */
-  private isAstralError(error: any): error is AstralCoreError {
-    return error?.id && 
-           error?.type && 
-           error?.severity &&
-           error?.code &&
-           error?.timestamp;
+  private isAstralError(error: unknown): error is AstralCoreError {
+    const e = error as any;
+    return e?.id && 
+           e?.type && 
+           e?.severity &&
+           e?.code &&
+           e?.timestamp;
   }
 
   /**
    * Determine error type
    */
   private determineErrorType(error: any): ErrorType {
-    if (error.code) {
-      if (error.code.includes('AUTH')) return ErrorType.AUTHENTICATION;
-      if (error.code.includes('PERM')) return ErrorType.AUTHORIZATION;
+    if (error?.code) {
+      const code = String(error.code);
+      if (code.includes('AUTH')) return ErrorType.AUTHENTICATION;
+      if (code.includes('PERM')) return ErrorType.AUTHORIZATION;
       if (error.code.includes('NETWORK')) return ErrorType.NETWORK;
       if (error.code.includes('CRISIS')) return ErrorType.CRISIS;
       if (error.code.includes('RATE')) return ErrorType.RATE_LIMIT;
@@ -635,9 +638,9 @@ class AstralCoreErrorService {
    * Notify user of error
    */
   private notifyUser(error: AstralCoreError): void {
-    const notificationOptions: any = {
-      type: 'system_alert',
-      priority: error.severity === ErrorSeverity.CRITICAL ? 'urgent' : 'normal',
+    const notificationOptions: Partial<Notification> = {
+      type: NotificationType.SYSTEM_ALERT,
+      priority: error.severity === ErrorSeverity.CRITICAL ? NotificationPriority.URGENT : NotificationPriority.NORMAL,
       title: 'Error',
       body: error.userMessage,
     };
@@ -647,6 +650,7 @@ class AstralCoreErrorService {
       notificationOptions.actions = error.actions.map(a => ({
         action: a.label.toLowerCase().replace(/\s+/g, '-'),
         title: a.label,
+        icon: undefined,
       }));
     }
 

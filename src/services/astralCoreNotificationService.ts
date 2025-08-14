@@ -331,8 +331,9 @@ class AstralCoreNotificationService {
   /**
    * Handle push event
    */
-  private async handlePushEvent(event: any): Promise<void> {
-    const data = event.data?.json() || {};
+  private async handlePushEvent(event: Event): Promise<void> {
+    const pushEvent = event as any;
+    const data = pushEvent.data?.json() || {};
     
     // Create notification from push data
     const notification: Partial<Notification> = {
@@ -351,11 +352,12 @@ class AstralCoreNotificationService {
   /**
    * Handle notification click
    */
-  private handleNotificationClick(event: any): void {
-    event.notification.close();
+  private handleNotificationClick(event: Event): void {
+    const notificationEvent = event as any;
+    notificationEvent.notification?.close();
 
-    const action = event.action;
-    const data = event.notification.data;
+    const action = notificationEvent.action;
+    const data = notificationEvent.notification?.data;
 
     // Handle different actions
     switch (action) {
@@ -505,14 +507,17 @@ class AstralCoreNotificationService {
   /**
    * Snooze notification
    */
-  private async snoozeNotification(data: any): Promise<void> {
+  private async snoozeNotification(data: unknown): Promise<void> {
     // Schedule notification for 15 minutes later
-    setTimeout(() => {
-      this.show({
-        ...data,
-        title: `[Snoozed] ${data.title}`,
-      });
-    }, 15 * 60 * 1000);
+    const notificationData = data as Partial<Notification>;
+    if (notificationData) {
+      setTimeout(() => {
+        this.show({
+          ...notificationData,
+          title: `[Snoozed] ${notificationData.title || 'Notification'}`,
+        });
+      }, 15 * 60 * 1000);
+    }
   }
 
   /**
@@ -531,8 +536,9 @@ class AstralCoreNotificationService {
    */
   private trackNotification(notification: Notification): void {
     // Send analytics event
-    if ((window as any).gtag) {
-      (window as any).gtag('event', 'notification_shown', {
+    const windowWithGtag = window as any;
+    if (windowWithGtag.gtag) {
+      windowWithGtag.gtag('event', 'notification_shown', {
         notification_type: notification.type,
         notification_priority: notification.priority,
       });

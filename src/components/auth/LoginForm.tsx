@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import simpleAuthService from '../../services/simpleAuthService';
 import { useNavigate } from 'react-router-dom';
+import { isError } from '../../types/common';
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -39,8 +40,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       } else {
         setError(response.error || 'Login failed');
       }
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred');
+    } catch (err) {
+      setError(isError(err) ? err.message : 'An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -64,7 +65,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       } else {
         setError('Demo login failed. Please try again.');
       }
-    } catch (err: any) {
+    } catch (err) {
       setError('Demo login failed. Please try again.');
     } finally {
       setIsLoading(false);

@@ -38,7 +38,7 @@ export const Card: React.FC<CardProps> = ({
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (onClick && (event.key === 'Enter' || event.key === ' ')) {
       event.preventDefault();
-      onClick(event as any);
+      onClick(event as any as React.MouseEvent<HTMLDivElement>);
     }
   };
   

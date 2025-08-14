@@ -50,7 +50,7 @@ describe('CulturalAssessmentService', () => {
 
   describe('Cultural Expression Patterns', () => {
     test('should have comprehensive expression patterns for different cultures', () => {
-      const patterns = (service as any).culturalExpressionPatterns;
+      const patterns = (service as unknown).culturalExpressionPatterns;
       
       // Western patterns
       expect(patterns.western.depression.emotional).toContain('sad');
@@ -113,23 +113,23 @@ describe('CulturalAssessmentService', () => {
       const service = new CulturalAssessmentService();
       
       // Very high sensitivity for self-harm questions
-      expect((service as any).determineSensitivityLevel('hurting yourself')).toBe('very-high');
-      expect((service as any).determineSensitivityLevel('better off dead')).toBe('very-high');
+      expect((service as unknown).determineSensitivityLevel('hurting yourself')).toBe('very-high');
+      expect((service as unknown).determineSensitivityLevel('better off dead')).toBe('very-high');
       
       // High sensitivity for self-worth questions
-      expect((service as any).determineSensitivityLevel('failure')).toBe('high');
-      expect((service as any).determineSensitivityLevel('bad about yourself')).toBe('high');
+      expect((service as unknown).determineSensitivityLevel('failure')).toBe('high');
+      expect((service as unknown).determineSensitivityLevel('bad about yourself')).toBe('high');
       
       // Medium sensitivity for mood questions
-      expect((service as any).determineSensitivityLevel('depressed')).toBe('medium');
-      expect((service as any).determineSensitivityLevel('anxious')).toBe('medium');
+      expect((service as unknown).determineSensitivityLevel('depressed')).toBe('medium');
+      expect((service as unknown).determineSensitivityLevel('anxious')).toBe('medium');
       
       // Low sensitivity for general questions
-      expect((service as any).determineSensitivityLevel('trouble sleeping')).toBe('low');
+      expect((service as unknown).determineSensitivityLevel('trouble sleeping')).toBe('low');
     });
 
     test('should identify stigma considerations', () => {
-      const considerations = (service as any).getStigmaConsiderations(
+      const considerations = (service as unknown).getStigmaConsiderations(
         'feeling depressed or hopeless',
         'collectivist'
       );
@@ -139,7 +139,7 @@ describe('CulturalAssessmentService', () => {
     });
 
     test('should identify suicide stigma considerations', () => {
-      const considerations = (service as any).getStigmaConsiderations(
+      const considerations = (service as unknown).getStigmaConsiderations(
         'thoughts of hurting yourself',
         'Arabic'
       );
@@ -209,45 +209,45 @@ describe('CulturalAssessmentService', () => {
     });
 
     test('should apply somatic bias adjustment for relevant cultures', () => {
-      const somaticBias = (service as any).calculateSomaticBias([], 'Chinese');
+      const somaticBias = (service as unknown).calculateSomaticBias([], 'Chinese');
       expect(somaticBias).toBe(0.1); // 10% adjustment
       
-      const noSomaticBias = (service as any).calculateSomaticBias([], 'Western');
+      const noSomaticBias = (service as unknown).calculateSomaticBias([], 'Western');
       expect(noSomaticBias).toBe(0);
     });
 
     test('should apply expressiveness adjustment for indirect cultures', () => {
-      const adjustment = (service as any).calculateExpressivenessAdjustment([], {
+      const adjustment = (service as unknown).calculateExpressivenessAdjustment([], {
         communicationStyle: 'indirect'
       });
       expect(adjustment).toBe(0.15); // 15% adjustment
       
-      const noAdjustment = (service as any).calculateExpressivenessAdjustment([], {
+      const noAdjustment = (service as unknown).calculateExpressivenessAdjustment([], {
         communicationStyle: 'direct'
       });
       expect(noAdjustment).toBe(0);
     });
 
     test('should apply stigma adjustment based on stigma level', () => {
-      const highStigmaAdjustment = (service as any).calculateStigmaAdjustment('phq-9', {
+      const highStigmaAdjustment = (service as unknown).calculateStigmaAdjustment('phq-9', {
         mentalHealthStigma: 0.8
       });
       expect(highStigmaAdjustment).toBe(0.16); // 0.8 * 0.2 = 0.16
       
-      const lowStigmaAdjustment = (service as any).calculateStigmaAdjustment('phq-9', {
+      const lowStigmaAdjustment = (service as unknown).calculateStigmaAdjustment('phq-9', {
         mentalHealthStigma: 0.2
       });
       expect(lowStigmaAdjustment).toBe(0.04); // 0.2 * 0.2 = 0.04
     });
 
     test('should calculate adjusted PHQ-9 severity thresholds', () => {
-      const severity = (service as any).calculatePhq9Severity(10, 0.7); // High stigma
+      const severity = (service as unknown).calculatePhq9Severity(10, 0.7); // High stigma
       // Adjusted thresholds: minimal: 5.4, mild: 10.4, moderate: 15.4, moderatelySevere: 20.4
       expect(severity).toBe('mild'); // Score 10 falls in mild range with adjustment
     });
 
     test('should calculate adjusted GAD-7 severity thresholds', () => {
-      const severity = (service as any).calculateGad7Severity(8, 0.5); // Medium stigma
+      const severity = (service as unknown).calculateGad7Severity(8, 0.5); // Medium stigma
       // Adjusted thresholds: minimal: 4.5, mild: 9.5, moderate: 14.5
       expect(severity).toBe('mild'); // Score 8 falls in mild range with adjustment
     });
@@ -255,7 +255,7 @@ describe('CulturalAssessmentService', () => {
 
   describe('Cultural Recommendations', () => {
     test('should generate Hispanic/Latino cultural recommendations', async () => {
-      const recommendations = (service as any).getCulturalRecommendations(
+      const recommendations = (service as unknown).getCulturalRecommendations(
         'moderate',
         'hispanic_latino',
         'religious'
@@ -267,7 +267,7 @@ describe('CulturalAssessmentService', () => {
     });
 
     test('should generate Arabic cultural recommendations', async () => {
-      const recommendations = (service as any).getCulturalRecommendations(
+      const recommendations = (service as unknown).getCulturalRecommendations(
         'moderate',
         'arabic',
         'traditional'
@@ -279,7 +279,7 @@ describe('CulturalAssessmentService', () => {
     });
 
     test('should generate Chinese cultural recommendations', async () => {
-      const recommendations = (service as any).getCulturalRecommendations(
+      const recommendations = (service as unknown).getCulturalRecommendations(
         'mild',
         'chinese',
         'professional'
@@ -291,27 +291,27 @@ describe('CulturalAssessmentService', () => {
     });
 
     test('should provide language-specific crisis resources', () => {
-      const spanishResources = (service as any).getCulturalResources('hispanic_latino', 'es');
+      const spanishResources = (service as unknown).getCulturalResources('hispanic_latino', 'es');
       expect(spanishResources).toContain('National Suicide Prevention Lifeline en Español: 1-888-628-9454');
       expect(spanishResources).toContain('Crisis Text Line: Text HOLA to 741741');
       
-      const arabicResources = (service as any).getCulturalResources('arabic', 'ar');
+      const arabicResources = (service as unknown).getCulturalResources('arabic', 'ar');
       expect(arabicResources).toContain('Arab Community Center for Economic and Social Services (ACCESS)');
       expect(arabicResources).toContain('Muslim Mental Health resources');
       
-      const chineseResources = (service as any).getCulturalResources('chinese', 'zh');
+      const chineseResources = (service as unknown).getCulturalResources('chinese', 'zh');
       expect(chineseResources).toContain('Asian Mental Health Collective');
     });
 
     test('should provide culturally appropriate family guidance', () => {
-      const familyInclusiveGuidance = (service as any).getFamilyGuidance(
+      const familyInclusiveGuidance = (service as unknown).getFamilyGuidance(
         'moderate',
         'hispanic_latino',
         'family-inclusive'
       );
       expect(familyInclusiveGuidance).toContain('family support is often crucial for healing');
       
-      const communityOrientedGuidance = (service as any).getFamilyGuidance(
+      const communityOrientedGuidance = (service as unknown).getFamilyGuidance(
         'mild',
         'arabic',
         'community-oriented'
@@ -320,10 +320,10 @@ describe('CulturalAssessmentService', () => {
     });
 
     test('should generate base recommendations by severity', () => {
-      const minimalRec = (service as any).getBaseRecommendations('minimal', 'phq-9');
+      const minimalRec = (service as unknown).getBaseRecommendations('minimal', 'phq-9');
       expect(minimalRec).toContain('minimal depression symptoms');
       
-      const severeRec = (service as any).getBaseRecommendations('severe', 'gad-7');
+      const severeRec = (service as unknown).getBaseRecommendations('severe', 'gad-7');
       expect(severeRec).toContain('severe anxiety symptoms');
       expect(severeRec).toContain('strongly recommend seeking professional help');
     });
@@ -458,7 +458,7 @@ describe('CulturalAssessmentService', () => {
       };
 
       // Should not throw even if analytics fails
-      await (service as any).recordCulturalAnalytics(assessment, result, 15000);
+      await (service as unknown).recordCulturalAnalytics(assessment, result, 15000);
       
       expect(consoleSpy).toHaveBeenCalledWith(
         '[Cultural Assessment] Failed to record analytics:',
@@ -471,8 +471,8 @@ describe('CulturalAssessmentService', () => {
 
   describe('Helper Methods', () => {
     test('should generate unique assessment IDs', () => {
-      const id1 = (service as any).generateAssessmentId();
-      const id2 = (service as any).generateAssessmentId();
+      const id1 = (service as unknown).generateAssessmentId();
+      const id2 = (service as unknown).generateAssessmentId();
       
       expect(id1).toMatch(/^cultural_assessment_\d+_[a-z0-9]+$/);
       expect(id2).toMatch(/^cultural_assessment_\d+_[a-z0-9]+$/);
@@ -481,13 +481,13 @@ describe('CulturalAssessmentService', () => {
 
     test('should anonymize user tokens', () => {
       const token = 'user-123-very-long-token';
-      const anonymized = (service as any).anonymizeUserToken(token);
+      const anonymized = (service as unknown).anonymizeUserToken(token);
       
       expect(anonymized).toBe('user-123_anonymized');
     });
 
     test('should get cultural adaptations used', () => {
-      const adaptations = (service as any).getCulturalAdaptationsUsed('phq-9', 'Chinese');
+      const adaptations = (service as unknown).getCulturalAdaptationsUsed('phq-9', 'Chinese');
       
       expect(adaptations).toContain('phq-9_cultural_adaptation');
       expect(adaptations).toContain('Chinese_context_applied');
@@ -496,7 +496,7 @@ describe('CulturalAssessmentService', () => {
     });
 
     test('should analyze cultural expression patterns', () => {
-      const patterns = (service as any).analyzeExpressionPatterns(
+      const patterns = (service as unknown).analyzeExpressionPatterns(
         ['I feel sad', 'I worry too much'],
         'Western'
       );
@@ -505,7 +505,7 @@ describe('CulturalAssessmentService', () => {
     });
 
     test('should get relevant expression patterns for questions', () => {
-      const patterns = (service as any).getRelevantExpressionPatterns(
+      const patterns = (service as unknown).getRelevantExpressionPatterns(
         'feeling down or depressed',
         {
           depression: {
@@ -524,7 +524,7 @@ describe('CulturalAssessmentService', () => {
     });
 
     test('should generate alternative phrasings', () => {
-      const alternatives = (service as any).generateAlternativePhrasings(
+      const alternatives = (service as unknown).generateAlternativePhrasings(
         'feeling depressed',
         {},
         'en'
@@ -538,7 +538,7 @@ describe('CulturalAssessmentService', () => {
 
   describe('Base Assessment Questions', () => {
     test('should provide complete PHQ-9 questions', () => {
-      const questions = (service as any).getBaseAssessmentQuestions('phq-9');
+      const questions = (service as unknown).getBaseAssessmentQuestions('phq-9');
       
       expect(questions).toHaveLength(9);
       expect(questions[0].text).toContain('Little interest or pleasure');
@@ -553,7 +553,7 @@ describe('CulturalAssessmentService', () => {
     });
 
     test('should provide complete GAD-7 questions', () => {
-      const questions = (service as any).getBaseAssessmentQuestions('gad-7');
+      const questions = (service as unknown).getBaseAssessmentQuestions('gad-7');
       
       expect(questions).toHaveLength(7);
       expect(questions[0].text).toContain('Feeling nervous, anxious');
@@ -585,8 +585,8 @@ describe('CulturalAssessmentService', () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       
       // Mock an error in the adaptation process
-      const originalGetBaseQuestions = (service as any).getBaseAssessmentQuestions;
-      (service as any).getBaseAssessmentQuestions = jest.fn(() => {
+      const originalGetBaseQuestions = (service as unknown).getBaseAssessmentQuestions;
+      (service as unknown).getBaseAssessmentQuestions = jest.fn(() => {
         throw new Error('Question adaptation error');
       });
 
@@ -594,7 +594,7 @@ describe('CulturalAssessmentService', () => {
       expect(consoleSpy).toHaveBeenCalled();
       
       // Restore
-      (service as any).getBaseAssessmentQuestions = originalGetBaseQuestions;
+      (service as unknown).getBaseAssessmentQuestions = originalGetBaseQuestions;
       consoleSpy.mockRestore();
     });
 
@@ -618,7 +618,7 @@ describe('CulturalAssessmentService', () => {
     });
 
     test('should handle missing cultural patterns gracefully', () => {
-      const patterns = (service as any).getRelevantExpressionPatterns(
+      const patterns = (service as unknown).getRelevantExpressionPatterns(
         'unknown question type',
         undefined
       );

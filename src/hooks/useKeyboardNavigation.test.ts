@@ -79,10 +79,10 @@ describe('useKeyboardNavigation Hook', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    containerRef = { current: mockContainer as any };
+    containerRef = { current: mockContainer as unknown };
     
     // Reset active element
-    (document as any).activeElement = null;
+    (document as unknown).activeElement = null;
     
     // Default focusable elements
     mockContainer.querySelectorAll.mockReturnValue([
@@ -153,7 +153,7 @@ describe('useKeyboardNavigation Hook', () => {
 
   it('should focus next element with wrapping', () => {
     const elements = mockContainer.querySelectorAll();
-    (document as any).activeElement = elements[0];
+    (document as unknown).activeElement = elements[0];
 
     const { result } = renderHook(() => useKeyboardNavigation(containerRef, { wrap: true }), { wrapper: Wrapper });
 
@@ -166,7 +166,7 @@ describe('useKeyboardNavigation Hook', () => {
 
   it('should wrap to first element when at end', () => {
     const elements = mockContainer.querySelectorAll();
-    (document as any).activeElement = elements[elements.length - 1];
+    (document as unknown).activeElement = elements[elements.length - 1];
 
     const { result } = renderHook(() => useKeyboardNavigation(containerRef, { wrap: true }), { wrapper: Wrapper });
 
@@ -179,7 +179,7 @@ describe('useKeyboardNavigation Hook', () => {
 
   it('should not wrap when disabled', () => {
     const elements = mockContainer.querySelectorAll();
-    (document as any).activeElement = elements[elements.length - 1];
+    (document as unknown).activeElement = elements[elements.length - 1];
 
     const { result } = renderHook(() => useKeyboardNavigation(containerRef, { wrap: false }), { wrapper: Wrapper });
 
@@ -193,7 +193,7 @@ describe('useKeyboardNavigation Hook', () => {
 
   it('should focus previous element', () => {
     const elements = mockContainer.querySelectorAll();
-    (document as any).activeElement = elements[1];
+    (document as unknown).activeElement = elements[1];
 
     const { result } = renderHook(() => useKeyboardNavigation(containerRef), { wrapper: Wrapper });
 
@@ -227,7 +227,7 @@ describe('useKeyboardNavigation Hook', () => {
     };
 
     mockContainer.contains.mockReturnValue(true);
-    (document as any).activeElement = elements[0];
+    (document as unknown).activeElement = elements[0];
 
     renderHook(() => useKeyboardNavigation(containerRef), { wrapper: Wrapper });
 
@@ -252,7 +252,7 @@ describe('useKeyboardNavigation Hook', () => {
     };
 
     mockContainer.contains.mockReturnValue(true);
-    (document as any).activeElement = elements[1];
+    (document as unknown).activeElement = elements[1];
 
     renderHook(() => useKeyboardNavigation(containerRef), { wrapper: Wrapper });
 
@@ -276,7 +276,7 @@ describe('useKeyboardNavigation Hook', () => {
     };
 
     mockContainer.contains.mockReturnValue(true);
-    (document as any).activeElement = elements[0];
+    (document as unknown).activeElement = elements[0];
 
     renderHook(() => useKeyboardNavigation(containerRef), { wrapper: Wrapper });
 
@@ -337,7 +337,7 @@ describe('useKeyboardNavigation Hook', () => {
     };
 
     mockContainer.contains.mockReturnValue(true);
-    (document as any).activeElement = elements[0];
+    (document as unknown).activeElement = elements[0];
 
     renderHook(() => useKeyboardNavigation(containerRef, { onActivate }), { wrapper: Wrapper });
 
@@ -368,7 +368,7 @@ describe('useKeyboardNavigation Hook', () => {
     };
 
     mockContainer.contains.mockReturnValue(true);
-    (document as any).activeElement = elements[0];
+    (document as unknown).activeElement = elements[0];
 
     renderHook(() => useKeyboardNavigation(containerRef, { orientation: 'horizontal' }), { wrapper: Wrapper });
 
@@ -422,7 +422,7 @@ describe('useFocusTrap Hook', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    containerRef = { current: mockContainer as any };
+    containerRef = { current: mockContainer as unknown };
     
     mockContainer.querySelectorAll.mockReturnValue([
       createMockElement('button'),
@@ -457,7 +457,7 @@ describe('useFocusTrap Hook', () => {
       preventDefault: jest.fn()
     };
 
-    (document as any).activeElement = elements[elements.length - 1]; // Last element
+    (document as unknown).activeElement = elements[elements.length - 1]; // Last element
 
     renderHook(() => useFocusTrap(containerRef, true), { wrapper: Wrapper });
 
@@ -480,7 +480,7 @@ describe('useFocusTrap Hook', () => {
       preventDefault: jest.fn()
     };
 
-    (document as any).activeElement = elements[0]; // First element
+    (document as unknown).activeElement = elements[0]; // First element
 
     renderHook(() => useFocusTrap(containerRef, true), { wrapper: Wrapper });
 
@@ -497,7 +497,7 @@ describe('useFocusTrap Hook', () => {
 
   it('should restore focus on unmount', () => {
     const previousElement = createMockElement('button');
-    (document as any).activeElement = previousElement;
+    (document as unknown).activeElement = previousElement;
 
     const { unmount } = renderHook(() => useFocusTrap(containerRef, true, { restoreFocus: true }), { wrapper: Wrapper });
 
@@ -508,7 +508,7 @@ describe('useFocusTrap Hook', () => {
 
   it('should not restore focus when disabled', () => {
     const previousElement = createMockElement('button');
-    (document as any).activeElement = previousElement;
+    (document as unknown).activeElement = previousElement;
 
     const { unmount } = renderHook(() => useFocusTrap(containerRef, true, { restoreFocus: false }), { wrapper: Wrapper });
 
@@ -614,7 +614,7 @@ describe('useRovingTabindex Hook', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    containerRef = { current: mockContainer as any };
+    containerRef = { current: mockContainer as unknown };
     
     mockContainer.querySelectorAll.mockReturnValue([
       createMockElement('button', { setAttribute: jest.fn() }),

@@ -32,7 +32,7 @@ export const CrisisAlertBanner: React.FC<{
     <div className={getBannerClass()} data-testid="crisis-alert-banner">
       <div className="crisis-alert-content">
         <div className="crisis-alert-header">
-          <h3>You're Not Alone - Help is Available 24/7</h3>
+          <h3>You&apos;re Not Alone - Help is Available 24/7</h3>
           {onClose && (
             <button 
               className="crisis-alert-close" 
@@ -63,7 +63,7 @@ export const CrisisAlertBanner: React.FC<{
         </div>
         
         <p className="crisis-alert-message">
-          If you're thinking about suicide, are worried about a friend or loved one, 
+          If you&apos;re thinking about suicide, are worried about a friend or loved one, 
           or would like emotional support, help is available.
         </p>
         

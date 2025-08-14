@@ -6,6 +6,7 @@ import { Card } from '../components/Card';
 import { ApiClient } from '../utils/ApiClient';
 import { CertifiedIcon  } from '../components/icons.dynamic';
 import { useNotification } from '../contexts/NotificationContext';
+import { isError } from '../types/common';
 
 export const HelperApplicationView: React.FC<{
     setActiveView: (view: View) => void;
@@ -21,8 +22,9 @@ export const HelperApplicationView: React.FC<{
             await ApiClient.helpers.submitApplication(helperProfile.id);
             await reloadProfile();
             addToast("Your application has been submitted for review! You'll be notified of the outcome.", 'info');
-        } catch (err: any) {
-            addToast(err.message || "Failed to submit application.", 'error');
+        } catch (err) {
+            const errorMessage = isError(err) ? err.message : "Failed to submit application.";
+            addToast(errorMessage, 'error');
         } finally {
             setIsSubmitting(false);
         }

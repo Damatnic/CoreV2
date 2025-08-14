@@ -26,7 +26,7 @@ const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 describe('useAIChat Hook', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (authState.userToken as any) = 'test-token';
+    (authState.userToken as unknown) = 'test-token';
   });
 
   it('should initialize with empty session', () => {
@@ -113,7 +113,7 @@ describe('useAIChat Hook', () => {
   });
 
   it('should not send message when user is not authenticated', async () => {
-    (authState.userToken as any) = null;
+    (authState.userToken as unknown) = null;
     (ApiClient.ai.loadChatHistory as jest.Mock).mockResolvedValue([]);
     
     const { result } = renderHook(() => useAIChat(), { wrapper: Wrapper });

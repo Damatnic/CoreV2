@@ -362,7 +362,7 @@ class ComprehensivePerformanceMonitor {
       // Memory usage
       if ('memory' in performance) {
         const memory = (performance as any).memory;
-        metrics.memoryUsage = memory.usedJSHeapSize / 1024 / 1024; // MB
+        metrics.memoryUsage = (memory as any).usedJSHeapSize / 1024 / 1024; // MB
       }
 
       // Bundle size estimation
@@ -386,8 +386,8 @@ class ComprehensivePerformanceMonitor {
       // Network information
       const connection = (navigator as any).connection;
       if (connection) {
-        metrics.networkLatency = connection.rtt || 0;
-        metrics.bandwidth = connection.downlink || 0;
+        metrics.networkLatency = (connection as any).rtt || 0;
+        metrics.bandwidth = (connection as any).downlink || 0;
       }
 
       // Mental health platform specific metrics

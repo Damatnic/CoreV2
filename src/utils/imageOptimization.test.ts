@@ -28,14 +28,14 @@ describe('imageOptimization', () => {
       getImageData: jest.fn(() => ({
         data: [255, 128, 64, 255], // RGBA values
       })),
-    } as any;
+    } as unknown;
 
     mockCanvas = {
       width: 0,
       height: 0,
       getContext: jest.fn(() => mockContext),
       toDataURL: jest.fn(() => 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//2Q=='),
-    } as any;
+    } as unknown;
 
     // Mock document.createElement for canvas
     const originalCreateElement = document.createElement.bind(document);
@@ -51,8 +51,8 @@ describe('imageOptimization', () => {
       observe: jest.fn(),
       unobserve: jest.fn(),
       disconnect: jest.fn(),
-    })) as any;
-    (global as any).IntersectionObserver = mockIntersectionObserver;
+    })) as unknown;
+    (global as unknown).IntersectionObserver = mockIntersectionObserver;
 
     // Mock navigator.connection
     mockConnection = {
@@ -152,7 +152,7 @@ describe('imageOptimization', () => {
       });
 
       test('should handle missing IntersectionObserver', () => {
-        delete (global as any).IntersectionObserver;
+        delete (global as unknown).IntersectionObserver;
         
         expect(() => {
           new ImageOptimizer();
@@ -167,7 +167,7 @@ describe('imageOptimization', () => {
       });
 
       test('should handle missing navigator.connection', () => {
-        delete (navigator as any).connection;
+        delete (navigator as unknown).connection;
         
         expect(() => {
           new ImageOptimizer();
@@ -181,21 +181,21 @@ describe('imageOptimization', () => {
         const slowOptimizer = new ImageOptimizer();
         
         // Access private property through type assertion
-        expect((slowOptimizer as any).connectionType).toBe('slow');
+        expect((slowOptimizer as unknown).connectionType).toBe('slow');
       });
 
       test('should detect medium connection', () => {
         mockConnection.downlink = 3;
         const mediumOptimizer = new ImageOptimizer();
         
-        expect((mediumOptimizer as any).connectionType).toBe('medium');
+        expect((mediumOptimizer as unknown).connectionType).toBe('medium');
       });
 
       test('should detect fast connection', () => {
         mockConnection.downlink = 10;
         const fastOptimizer = new ImageOptimizer();
         
-        expect((fastOptimizer as any).connectionType).toBe('fast');
+        expect((fastOptimizer as unknown).connectionType).toBe('fast');
       });
 
       test('should update connection type on change', () => {
@@ -207,7 +207,7 @@ describe('imageOptimization', () => {
         mockConnection.downlink = 10;
         changeHandler();
         
-        expect((optimizer as any).connectionType).toBe('fast');
+        expect((optimizer as unknown).connectionType).toBe('fast');
       });
     });
 
@@ -331,17 +331,17 @@ describe('imageOptimization', () => {
         });
 
         // Test slow connection
-        (optimizer as any).connectionType = 'slow';
+        (optimizer as unknown).connectionType = 'slow';
         const slowFormat = optimizer.getOptimalFormat(optimizedImage);
         expect(slowFormat.width).toBe(320); // thumbnail size
 
         // Test medium connection
-        (optimizer as any).connectionType = 'medium';
+        (optimizer as unknown).connectionType = 'medium';
         const mediumFormat = optimizer.getOptimalFormat(optimizedImage);
         expect(mediumFormat.width).toBe(480); // small size
 
         // Test fast connection
-        (optimizer as any).connectionType = 'fast';
+        (optimizer as unknown).connectionType = 'fast';
         const fastFormat = optimizer.getOptimalFormat(optimizedImage);
         expect(fastFormat.width).toBe(720); // medium size
       });
@@ -413,7 +413,7 @@ describe('imageOptimization', () => {
         const mockImg = document.createElement('img') as HTMLImageElement;
         const mockObserve = jest.fn();
         
-        (optimizer as any).intersectionObserver = {
+        (optimizer as unknown).intersectionObserver = {
           observe: mockObserve,
         };
 
@@ -424,11 +424,11 @@ describe('imageOptimization', () => {
       });
 
       test('should fallback without IntersectionObserver', () => {
-        (optimizer as any).intersectionObserver = null;
+        (optimizer as unknown).intersectionObserver = null;
         
         const mockImg = document.createElement('img') as HTMLImageElement;
         const loadOptimizedImageSpy = jest.spyOn(
-          optimizer as any,
+          optimizer as unknown,
           'loadOptimizedImage'
         );
 
@@ -486,18 +486,18 @@ describe('imageOptimization', () => {
           alt: 'Test image',
         });
 
-        expect((optimizer as any).cache.size).toBeGreaterThan(0);
+        expect((optimizer as unknown).cache.size).toBeGreaterThan(0);
 
         optimizer.clearCache();
 
-        expect((optimizer as any).cache.size).toBe(0);
+        expect((optimizer as unknown).cache.size).toBe(0);
       });
     });
 
     describe('Private Methods', () => {
       test('should generate proper image ID', () => {
         const url = 'https://example.com/test-image.jpg';
-        const id = (optimizer as any).generateImageId(url);
+        const id = (optimizer as unknown).generateImageId(url);
 
         expect(typeof id).toBe('string');
         expect(id.length).toBe(16);
@@ -505,7 +505,7 @@ describe('imageOptimization', () => {
       });
 
       test('should generate blur placeholder', () => {
-        const placeholder = (optimizer as any).generatePlaceholder('https://example.com/test.jpg');
+        const placeholder = (optimizer as unknown).generatePlaceholder('https://example.com/test.jpg');
 
         expect(placeholder).toContain('data:image/jpeg;base64,');
         expect(mockCanvas.getContext).toHaveBeenCalledWith('2d');
@@ -515,7 +515,7 @@ describe('imageOptimization', () => {
       test('should handle canvas context creation failure', () => {
         mockCanvas.getContext = jest.fn(() => null);
 
-        const placeholder = (optimizer as any).generatePlaceholder('https://example.com/test.jpg');
+        const placeholder = (optimizer as unknown).generatePlaceholder('https://example.com/test.jpg');
 
         expect(placeholder).toContain('data:image/jpeg;base64,');
       });
@@ -525,24 +525,24 @@ describe('imageOptimization', () => {
           dataset: { imageId: 'test-id' },
           classList: { add: jest.fn() },
           src: '',
-        } as any;
+        } as unknown;
 
         const optimizedImage = optimizer.generateOptimizedImages('https://example.com/test.jpg', {
           alt: 'Test image',
         });
         
         // Add to cache with known ID
-        (optimizer as any).cache.set('test-id', optimizedImage);
+        (optimizer as unknown).cache.set('test-id', optimizedImage);
 
         // Mock Image constructor
         const mockImage = {
-          onload: null as any,
-          onerror: null as any,
+          onload: null as unknown,
+          onerror: null as unknown,
           src: '',
         };
-        (global as any).Image = jest.fn(() => mockImage);
+        (global as unknown).Image = jest.fn(() => mockImage);
 
-        (optimizer as any).loadOptimizedImage(mockImg);
+        (optimizer as unknown).loadOptimizedImage(mockImg);
 
         // Simulate successful load
         mockImage.onload();
@@ -556,22 +556,22 @@ describe('imageOptimization', () => {
           dataset: { imageId: 'test-id' },
           classList: { add: jest.fn() },
           src: '',
-        } as any;
+        } as unknown;
 
         const optimizedImage = optimizer.generateOptimizedImages('https://example.com/test.jpg', {
           alt: 'Test image',
         });
         
-        (optimizer as any).cache.set('test-id', optimizedImage);
+        (optimizer as unknown).cache.set('test-id', optimizedImage);
 
         const mockImage = {
-          onload: null as any,
-          onerror: null as any,
+          onload: null as unknown,
+          onerror: null as unknown,
           src: '',
         };
-        (global as any).Image = jest.fn(() => mockImage);
+        (global as unknown).Image = jest.fn(() => mockImage);
 
-        (optimizer as any).loadOptimizedImage(mockImg);
+        (optimizer as unknown).loadOptimizedImage(mockImg);
 
         // Simulate load error
         mockImage.onerror();
@@ -647,10 +647,10 @@ describe('imageOptimization', () => {
       const mockImg = {
         dataset: { imageId: 'nonexistent' },
         classList: { add: jest.fn() },
-      } as any;
+      } as unknown;
 
       expect(() => {
-        (imageOptimizer as any).loadOptimizedImage(mockImg);
+        (imageOptimizer as unknown).loadOptimizedImage(mockImg);
       }).not.toThrow();
     });
 
@@ -658,10 +658,10 @@ describe('imageOptimization', () => {
       const mockImg = {
         dataset: {},
         classList: { add: jest.fn() },
-      } as any;
+      } as unknown;
 
       expect(() => {
-        (imageOptimizer as any).loadOptimizedImage(mockImg);
+        (imageOptimizer as unknown).loadOptimizedImage(mockImg);
       }).not.toThrow();
     });
   });
@@ -689,7 +689,7 @@ describe('imageOptimization', () => {
       
       const ids = new Set();
       for (let i = 0; i < 1000; i++) {
-        const id = (imageOptimizer as any).generateImageId(`https://example.com/image-${i}.jpg`);
+        const id = (imageOptimizer as unknown).generateImageId(`https://example.com/image-${i}.jpg`);
         ids.add(id);
       }
       
@@ -701,7 +701,7 @@ describe('imageOptimization', () => {
     });
 
     test('should not leak memory with cache', () => {
-      const initialCacheSize = (imageOptimizer as any).cache.size;
+      const initialCacheSize = (imageOptimizer as unknown).cache.size;
       
       // Generate many images
       for (let i = 0; i < 1000; i++) {
@@ -710,10 +710,10 @@ describe('imageOptimization', () => {
         });
       }
       
-      expect((imageOptimizer as any).cache.size).toBe(initialCacheSize + 1000);
+      expect((imageOptimizer as unknown).cache.size).toBe(initialCacheSize + 1000);
       
       imageOptimizer.clearCache();
-      expect((imageOptimizer as any).cache.size).toBe(0);
+      expect((imageOptimizer as unknown).cache.size).toBe(0);
     });
   });
 
@@ -724,7 +724,7 @@ describe('imageOptimization', () => {
           return null;
         }
         return document.createElement(tagName);
-      }) as any;
+      }) as unknown;
 
       expect(() => {
         new ImageOptimizer();
@@ -740,7 +740,7 @@ describe('imageOptimization', () => {
         return 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//2Q==';
       });
 
-      const supportsWebP = (imageOptimizer as any).supportsWebP();
+      const supportsWebP = (imageOptimizer as unknown).supportsWebP();
       expect(supportsWebP).toBe(true);
 
       // Mock no WebP support
@@ -748,7 +748,7 @@ describe('imageOptimization', () => {
         'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//2Q=='
       );
 
-      const doesNotSupportWebP = (imageOptimizer as any).supportsWebP();
+      const doesNotSupportWebP = (imageOptimizer as unknown).supportsWebP();
       expect(doesNotSupportWebP).toBe(false);
     });
   });

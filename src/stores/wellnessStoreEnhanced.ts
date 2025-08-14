@@ -19,8 +19,7 @@ import {
   WithEnhancedState,
   withRetry,
   withOptimisticUpdate,
-  StoreCache,
-  createDebouncedUpdate
+  StoreCache
 } from './storeEnhancements';
 
 interface WellnessData {
@@ -60,10 +59,17 @@ type EnhancedWellnessState = WithEnhancedState<WellnessData & WellnessActions>;
 // Cache for API responses
 const wellnessCache = new StoreCache<any>(300); // 5 minute cache
 
-// Debounced sync function
-const debouncedSync = createDebouncedUpdate((syncFn: () => Promise<void>) => {
-  syncFn();
-}, 2000);
+// Create a properly typed debounced sync wrapper
+let syncTimeout: NodeJS.Timeout | null = null;
+const debouncedSync = (syncFn: () => Promise<void>) => {
+  if (syncTimeout) {
+    clearTimeout(syncTimeout);
+  }
+  syncTimeout = setTimeout(() => {
+    syncFn();
+    syncTimeout = null;
+  }, 2000);
+};
 
 export const useEnhancedWellnessStore = create<EnhancedWellnessState>()(
   persist(
@@ -491,7 +497,7 @@ export const useEnhancedWellnessStore = create<EnhancedWellnessState>()(
         }));
         
         // Try to sync after a delay
-        debouncedSync(() => get().syncOfflineData());
+        debouncedSync(async () => await get().syncOfflineData());
       },
       
       refreshAll: async () => {

@@ -26,6 +26,15 @@ interface NotificationPayload {
   requireInteraction?: boolean;
 }
 
+interface NotificationPreferences {
+  quietHours?: {
+    start: number;
+    end: number;
+  };
+  enabled?: boolean;
+  types?: string[];
+}
+
 class PushNotificationService {
   private subscription: PushSubscription | null = null;
   private isSupported: boolean = false;
@@ -180,7 +189,7 @@ class PushNotificationService {
   /**
    * Get user notification preferences
    */
-  public async getNotificationPreferences(userId: string): Promise<any> {
+  public async getNotificationPreferences(userId: string): Promise<NotificationPreferences> {
     // Try to get from memory first
     let preferences = this.notificationPreferences.get(`${userId}_preferences`);
     

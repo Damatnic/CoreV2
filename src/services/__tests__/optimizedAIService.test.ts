@@ -307,7 +307,7 @@ describe('AIServiceManager', () => {
 
       const storedData = aiService.getStoredData();
       
-      expect(storedData.some((item: any) => 
+      expect(storedData.some((item: unknown) => 
         item.includes('depression') || item.includes('medication')
       )).toBe(false);
     });
@@ -358,21 +358,21 @@ declare module '../optimizedAIService' {
   interface AIServiceManager {
     initialize(): Promise<void>;
     loadCrisisDetectionModel(): Promise<void>;
-    detectCrisis(text: string): Promise<any>;
-    analyzeSentiment(text: string): Promise<any>;
-    generateCrisisResponse(text: string, context: any): Promise<any>;
-    generateSupportiveResponse(text: string, context: any): Promise<any>;
-    generateContextualResponse(text: string, context: any): Promise<any>;
-    optimizeForMobile(): Promise<any>;
-    quantizeModel(model: any): Promise<any>;
+    detectCrisis(text: string): Promise<unknown>;
+    analyzeSentiment(text: string): Promise<unknown>;
+    generateCrisisResponse(text: string, context: any): Promise<unknown>;
+    generateSupportiveResponse(text: string, context: any): Promise<unknown>;
+    generateContextualResponse(text: string, context: any): Promise<unknown>;
+    optimizeForMobile(): Promise<unknown>;
+    quantizeModel(model: any): Promise<unknown>;
     batchPredict(texts: string[]): Promise<any[]>;
     getPerformanceMetrics(): any;
-    evaluateModelAccuracy(testData: any[]): Promise<any>;
+    evaluateModelAccuracy(testData: unknown[]): Promise<unknown>;
     getResourceUsage(): any;
-    detectCrisisWithFallback(text: string): Promise<any>;
+    detectCrisisWithFallback(text: string): Promise<unknown>;
     anonymizeInput(text: string): string;
-    getStoredData(): any[];
+    getStoredData(): unknown[];
     isModelDataEncrypted(): boolean;
-    generateCulturallyAdaptedResponse(text: string, culture: string, options?: any): Promise<any>;
+    generateCulturallyAdaptedResponse(text: string, culture: string, options?: any): Promise<unknown>;
   }
 }

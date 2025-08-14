@@ -30,8 +30,11 @@
       "Bash(netlify dev:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(npm ls:*)",
+      "Bash(timeout 10 npm run dev:vite:*)"
     ],
-    "deny": []
+    "deny": [],
+    "defaultMode": "acceptEdits"
   }
 }

@@ -334,7 +334,7 @@ export class CrisisStressTestingSystem {
   ): Promise<void> {
     const startTime = Date.now();
     const concurrentClicks = 1000;
-    const promises: Promise<any>[] = [];
+    const promises: Promise<unknown>[] = [];
 
     console.log(`🔴 Simulating ${concurrentClicks} concurrent emergency button presses...`);
 
@@ -381,12 +381,12 @@ export class CrisisStressTestingSystem {
         body: { userId: `test-user-${index}`, timestamp: startTime }
       });
 
-      if (!response.success) {
+      if (!(response as any).success) {
         throw new Error('Emergency alert failed');
       }
 
       // Verify alert was processed
-      await this.verifyEmergencyAlertProcessed(response.alertId);
+      await this.verifyEmergencyAlertProcessed((response as any).alertId);
       
       const responseTime = Date.now() - startTime;
       if (responseTime > 100) { // 100ms threshold for emergency button
@@ -851,7 +851,7 @@ export class CrisisStressTestingSystem {
 
   // Helper methods for crisis testing simulation
 
-  private async simulateAPICall(_endpoint: string, _options: any): Promise<any> {
+  private async simulateAPICall(_endpoint: string, _options: any): Promise<unknown> {
     // Simulate API call with realistic timing and potential failures
     const delay = Math.random() * 100 + 50; // 50-150ms random delay
     await this.wait(delay);
@@ -918,7 +918,7 @@ export class CrisisStressTestingSystem {
     });
   }
 
-  private async submitForCrisisAnalysis(message: any): Promise<any> {
+  private async submitForCrisisAnalysis(message: any): Promise<unknown> {
     const delay = Math.random() * 50 + 25; // 25-75ms processing time
     await this.wait(delay);
     
@@ -932,13 +932,14 @@ export class CrisisStressTestingSystem {
     };
   }
 
-  private evaluateCrisisDetectionAccuracy(messages: any[], results: PromiseSettledResult<any>[]): number {
+  private evaluateCrisisDetectionAccuracy(messages: unknown[], results: PromiseSettledResult<any>[]): number {
     let correct = 0;
     let total = 0;
     
     results.forEach((result, index) => {
       if (result.status === 'fulfilled') {
-        const expected = messages[index].hasCrisisKeywords;
+        const message = messages[index] as any;
+        const expected = message.hasCrisisKeywords;
         const actual = result.value.isCrisis;
         if (expected === actual) correct++;
         total++;
@@ -963,7 +964,7 @@ export class CrisisStressTestingSystem {
     return ['emergency-chat', 'crisis-text-line', 'backup-hotline'];
   }
 
-  private async requestCrisisResource(resourceId: string): Promise<any> {
+  private async requestCrisisResource(resourceId: string): Promise<unknown> {
     const delay = Math.random() * 500 + 100; // 100-600ms response time
     await this.wait(delay);
     

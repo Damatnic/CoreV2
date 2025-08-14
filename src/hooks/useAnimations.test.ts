@@ -70,7 +70,7 @@ describe('useScrollAnimation Hook', () => {
   });
 
   it('should update visibility when intersection changes', () => {
-    let callback: (entries: any[]) => void;
+    let callback: (entries: unknown[]) => void;
     mockIntersectionObserver.mockImplementation((cb) => {
       callback = cb;
       return { observe: mockObserve, unobserve: mockUnobserve };
@@ -203,7 +203,7 @@ describe('useRippleEffect Hook', () => {
       },
       clientX: 50,
       clientY: 80
-    } as any;
+    } as unknown;
 
     act(() => {
       result.current.createRipple(mockEvent);
@@ -226,7 +226,7 @@ describe('useRippleEffect Hook', () => {
       },
       clientX: 0,
       clientY: 0
-    } as any;
+    } as unknown;
 
     act(() => {
       result.current.createRipple(mockEvent);
@@ -251,7 +251,7 @@ describe('useRippleEffect Hook', () => {
       },
       clientX: 0,
       clientY: 0
-    } as any;
+    } as unknown;
 
     act(() => {
       result.current.createRipple(mockEvent);
@@ -654,7 +654,7 @@ describe('useReducedMotion Hook', () => {
   });
 
   it('should update when media query changes', () => {
-    let changeHandler: (event: any) => void;
+    let changeHandler: (event: Event) => void;
     const mockMatchMedia = jest.fn(() => ({
       matches: false,
       addEventListener: jest.fn((event, handler) => {

@@ -30,20 +30,20 @@ export interface UserDataExport {
     profile: any;
   };
   moodData?: {
-    analyses: any[];
+    analyses: unknown[];
     patterns: any;
     trends: any;
   };
   activityData?: {
-    posts: any[];
-    interactions: any[];
+    posts: unknown[];
+    interactions: unknown[];
     gamification: any;
   };
   chatHistory?: {
-    aiSessions: any[];
-    peerChats: any[];
+    aiSessions: unknown[];
+    peerChats: unknown[];
   };
-  reflections?: any[];
+  reflections?: unknown[];
 }
 
 class DataExportService {
@@ -142,21 +142,23 @@ class DataExportService {
     }
   }
 
-  private filterByDateRange(data: any[], dateRange?: { start: Date; end: Date }): any[] {
+  private filterByDateRange(data: unknown[], dateRange?: { start: Date; end: Date }): unknown[] {
     if (!dateRange || !Array.isArray(data)) return data;
 
     return data.filter(item => {
-      const itemDate = new Date(item.timestamp || item.createdAt || item.date);
+      const record = item as any;
+      const itemDate = new Date(record.timestamp || record.createdAt || record.date);
       return itemDate >= dateRange.start && itemDate <= dateRange.end;
     });
   }
 
-  private calculateMoodPatterns(moodData: any[]): any {
+  private calculateMoodPatterns(moodData: unknown[]): any {
     if (!moodData.length) return null;
 
     const moodCounts: Record<string, number> = {};
     moodData.forEach(analysis => {
-      moodCounts[analysis.primary] = (moodCounts[analysis.primary] || 0) + 1;
+      const mood = analysis as any;
+      moodCounts[mood.primary] = (moodCounts[mood.primary] || 0) + 1;
     });
 
     return {
@@ -166,21 +168,21 @@ class DataExportService {
         .map(([mood, count]) => ({ mood, frequency: count / moodData.length })),
       totalEntries: moodData.length,
       dateRange: {
-        start: Math.min(...moodData.map(d => d.timestamp)),
-        end: Math.max(...moodData.map(d => d.timestamp))
+        start: Math.min(...moodData.map(d => (d as any).timestamp)),
+        end: Math.max(...moodData.map(d => (d as any).timestamp))
       }
     };
   }
 
-  private calculateMoodTrends(moodData: any[]): any {
+  private calculateMoodTrends(moodData: unknown[]): any {
     if (moodData.length < 2) return null;
 
-    const sortedData = [...moodData].sort((a, b) => a.timestamp - b.timestamp);
+    const sortedData = [...moodData].sort((a, b) => (a as any).timestamp - (b as any).timestamp);
     const recentData = sortedData.slice(-7); // Last 7 entries
     const olderData = sortedData.slice(-14, -7); // Previous 7 entries
 
-    const getAverageIntensity = (data: any[]) => 
-      data.reduce((sum, item) => sum + (item.intensity || 0), 0) / data.length;
+    const getAverageIntensity = (data: unknown[]) => 
+      data.reduce((sum: number, item) => sum + ((item as any).intensity || 0), 0) / data.length;
 
     return {
       recentAverageIntensity: getAverageIntensity(recentData),
@@ -190,14 +192,14 @@ class DataExportService {
     };
   }
 
-  private calculateTrendDirection(data: any[]): 'improving' | 'declining' | 'stable' {
+  private calculateTrendDirection(data: unknown[]): 'improving' | 'declining' | 'stable' {
     if (data.length < 4) return 'stable';
 
     const first_half = data.slice(0, Math.floor(data.length / 2));
     const second_half = data.slice(Math.floor(data.length / 2));
 
-    const firstAvg = first_half.reduce((sum, item) => sum + (item.intensity || 0), 0) / first_half.length;
-    const secondAvg = second_half.reduce((sum, item) => sum + (item.intensity || 0), 0) / second_half.length;
+    const firstAvg = first_half.reduce((sum: number, item) => sum + ((item as any).intensity || 0), 0) / first_half.length;
+    const secondAvg = second_half.reduce((sum: number, item) => sum + ((item as any).intensity || 0), 0) / second_half.length;
 
     const difference = secondAvg - firstAvg;
     
@@ -206,12 +208,12 @@ class DataExportService {
     return 'stable';
   }
 
-  private calculateVolatility(data: any[]): number {
+  private calculateVolatility(data: unknown[]): number {
     if (data.length < 2) return 0;
 
     let changes = 0;
     for (let i = 1; i < data.length; i++) {
-      if (data[i].primary !== data[i - 1].primary) {
+      if ((data[i] as any).primary !== (data[i - 1] as any).primary) {
         changes++;
       }
     }
@@ -236,9 +238,10 @@ class DataExportService {
       csvContent += 'Date,Primary Mood,Secondary Mood,Intensity,Confidence,Keywords\n';
       
       data.moodData.analyses.forEach(analysis => {
-        const date = new Date(analysis.timestamp).toISOString().split('T')[0];
-        const keywords = (analysis.keywords || []).join('; ');
-        csvContent += `${date},${analysis.primary},${analysis.secondary || ''},${analysis.intensity},${analysis.confidence},"${keywords}"\n`;
+        const mood = analysis as any;
+        const date = new Date(mood.timestamp).toISOString().split('T')[0];
+        const keywords = (mood.keywords || []).join('; ');
+        csvContent += `${date},${mood.primary},${mood.secondary || ''},${mood.intensity},${mood.confidence},"${keywords}"\n`;
       });
       csvContent += '\n';
     }
@@ -249,9 +252,10 @@ class DataExportService {
       csvContent += 'Date,Content,Mood,Support Count\n';
       
       data.activityData.posts.forEach(post => {
-        const date = new Date(post.timestamp || post.createdAt).toISOString().split('T')[0];
-        const content = (post.content || '').replace(/"/g, '""').substring(0, 100);
-        csvContent += `${date},"${content}",${post.mood || ''},${post.supportCount || 0}\n`;
+        const postData = post as any;
+        const date = new Date(postData.timestamp || postData.createdAt).toISOString().split('T')[0];
+        const content = (postData.content || '').replace(/"/g, '""').substring(0, 100);
+        csvContent += `${date},"${content}",${postData.mood || ''},${postData.supportCount || 0}\n`;
       });
       csvContent += '\n';
     }

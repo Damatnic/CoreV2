@@ -37,7 +37,7 @@ export interface CrisisAnalysisResult {
   comparative: number;
   escalationRequired: boolean;
   emergencyServicesRequired: boolean;
-  interventionRecommendations?: any[];
+  interventionRecommendations?: unknown[];
   escalationResponse?: any;
   riskAssessment?: any;
   enhanced: boolean;
@@ -168,7 +168,14 @@ export class CrisisDetectionIntegrationService {
     // Collect recommended actions
     const recommendedActions = crisisResults
       .flatMap(r => r.interventionRecommendations || [])
-      .map(rec => rec.action || rec.description || rec)
+      .map(rec => {
+        // Type guard for recommendation object
+        if (typeof rec === 'object' && rec !== null) {
+          const recObj = rec as any;
+          return recObj.action || recObj.description || String(rec);
+        }
+        return String(rec);
+      })
       .filter((action, index, array) => array.indexOf(action) === index); // Remove duplicates
     
     return {

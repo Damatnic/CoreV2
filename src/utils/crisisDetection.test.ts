@@ -309,7 +309,7 @@ describe('crisisDetection', () => {
       });
 
       it('should return default resources for null', () => {
-        const resources = getCrisisResources(null as any);
+        const resources = getCrisisResources(null as unknown);
         
         expect(resources.name).toBe('International Crisis Lines');
       });

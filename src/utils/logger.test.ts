@@ -32,7 +32,7 @@ describe('Logger', () => {
     console.error = jest.fn();
     
     // Mock window.Sentry
-    (global as any).window = {
+    (global as unknown).window = {
       Sentry: mockSentry,
     };
     
@@ -51,7 +51,7 @@ describe('Logger', () => {
     process.env.NODE_ENV = originalEnv;
     
     // Clean up global mocks
-    delete (global as any).window;
+    delete (global as unknown).window;
   });
 
   describe('development environment', () => {
@@ -170,7 +170,7 @@ describe('Logger', () => {
     });
 
     it('should not send to Sentry when window.Sentry is unavailable', () => {
-      delete (global as any).window.Sentry;
+      delete (global as unknown).window.Sentry;
       
       const error = new Error('Test error');
       logger.error('Error occurred', error);
@@ -335,7 +335,7 @@ describe('Logger', () => {
     });
 
     it('should handle circular references safely', () => {
-      const circularObj: any = { name: 'circular' };
+      const circularObj = { name: 'circular' };
       circularObj.self = circularObj;
 
       expect(() => {
@@ -410,7 +410,7 @@ describe('Logger', () => {
 
     it('should handle console method unavailability', () => {
       const originalLog = console.log;
-      delete (console as any).log;
+      delete (console as unknown).log;
       
       expect(() => {
         logger.debug('Test message');

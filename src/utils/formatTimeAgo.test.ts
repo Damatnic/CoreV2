@@ -287,10 +287,10 @@ describe('formatTimeAgo', () => {
 
     it('should handle null and undefined inputs', () => {
       expect(() => {
-        formatTimeAgo(null as any);
-        formatTimeAgo(undefined as any);
-        formatChatTimestamp(null as any);
-        formatChatTimestamp(undefined as any);
+        formatTimeAgo(null as unknown);
+        formatTimeAgo(undefined as unknown);
+        formatChatTimestamp(null as unknown);
+        formatChatTimestamp(undefined as unknown);
       }).not.toThrow();
     });
 

@@ -1,217 +1,232 @@
-# Deployment Checklist - CoreV2 Mental Health Platform
+# CoreV2 Deployment Checklist
 
-## 🚀 Pre-Deployment (Development Team)
+## Phase 5.3 - Deploy & Test
+**Created:** 2025-08-14  
+**Deployment Specialist:** Active
 
-### Code Quality ✅
-- [x] All unit tests passing
-- [x] Integration tests passing  
-- [x] TypeScript compilation successful (0 errors in production code)
-- [x] ESLint checks passing
-- [x] Code review completed
-- [x] Bundle size optimized (<500KB initial)
+---
 
-### Build Verification ✅
-- [x] Production build successful (`npm run build`)
-- [x] Service worker verified
-- [x] PWA manifest validated
-- [x] Crisis resources included
-- [x] Offline functionality confirmed
+## Pre-Deployment Verification ✅
 
-### Security Review ✅
-- [x] No hardcoded secrets
-- [x] Environment variables documented
-- [x] Dependencies updated (156 packages removed)
-- [x] Security vulnerabilities addressed (28 found, dev dependencies only)
-- [x] CORS configuration reviewed
-- [x] Input sanitization active
-
-## 🔧 Infrastructure Setup
-
-### Netlify Configuration
-- [ ] Netlify account created
-- [ ] Repository connected
-- [ ] Build settings configured:
-  - Build command: `npm run build`
+### Build Configuration
+- [x] **netlify.toml** configured correctly
+  - Build command: `npm run build:netlify-simple`
   - Publish directory: `dist`
-  - Functions directory: `netlify/functions`
-- [ ] netlify.toml verified
+  - Node version: 18.17.0
+  - Headers configured for PWA, crisis resources, and security
+  - Redirects for SPA routing and HTTPS
+  
+- [x] **package.json** scripts verified
+  - `build` command works locally
+  - `build:netlify-simple` configured for Netlify
+  - All dependencies installed correctly
 
-### Environment Variables
-- [ ] Auth0 credentials set:
-  - [ ] VITE_AUTH0_DOMAIN
-  - [ ] VITE_AUTH0_CLIENT_ID
-  - [ ] VITE_AUTH0_REDIRECT_URI
-  - [ ] VITE_AUTH0_AUDIENCE
-- [ ] Database URL configured
-- [ ] Sentry DSN added (optional)
-- [ ] Analytics ID configured (optional)
-- [ ] Feature flags set
+### Environment Variables Documentation
+- [x] Development environment variables documented (development.env)
+- [x] Production environment variables documented (production.env)
+- [x] Staging environment variables documented (staging.env)
+- [ ] All sensitive values replaced with placeholders in documentation
 
-### Database (Neon)
-- [ ] Neon account created
-- [ ] Database provisioned
-- [ ] Connection pooling enabled
-- [ ] Schema migrated (db-init.sql)
-- [ ] Connection tested
-- [ ] Backup strategy in place
+---
 
-### Auth0 Setup
-- [ ] Application created (SPA type)
-- [ ] Callback URLs configured
-- [ ] Logout URLs configured
-- [ ] Web origins set
-- [ ] Social connections enabled
-- [ ] Rules/Actions configured
+## Required Environment Variables for Netlify
 
-## 📋 Deployment Steps
+### Critical Variables (Must Set)
+```env
+# Environment
+NODE_ENV=production
 
-### Initial Deployment
-- [ ] Create feature branch for deployment
-- [ ] Update version number in package.json
-- [ ] Run final test suite
-- [ ] Build production bundle
-- [ ] Deploy to staging environment
-- [ ] Perform smoke tests on staging
+# JWT Security (Generate new secrets!)
+JWT_SECRET=[minimum-32-character-secret]
+SESSION_SECRET=[minimum-32-character-secret]
 
-### Production Deployment
-- [ ] Merge to main branch
-- [ ] Verify CI/CD pipeline passes
-- [ ] Monitor deployment logs
-- [ ] Check build output
-- [ ] Verify deployment successful
+# Encryption Keys (Generate new!)
+ENCRYPTION_KEY=[32-characters-exactly]
+ENCRYPTION_IV=[16-characters-exactly]
 
-## ✅ Post-Deployment Verification
+# Crisis Detection
+CRISIS_DETECTION_ENABLED=true
+CRISIS_HOTLINE=988
+CRISIS_TEXT_LINE=741741
 
-### Functional Testing
-- [ ] Homepage loads correctly
-- [ ] Authentication flow works
-- [ ] Crisis detection active
-- [ ] API endpoints responding
-- [ ] Database queries working
-- [ ] Offline mode functional
-- [ ] Service worker registered
-- [ ] PWA installable
+# Build Variables
+VITE_BUILD_MODE=production
+```
 
-### Performance Testing
-- [ ] Lighthouse score >90
-- [ ] Core Web Vitals passing:
-  - [ ] LCP < 2.5s
-  - [ ] FID < 100ms
-  - [ ] CLS < 0.1
-- [ ] Initial bundle size <500KB
-- [ ] Time to Interactive <3s
+### Optional Variables (For Full Features)
+```env
+# Database (When ready)
+DATABASE_URL=[neon-database-url]
 
-### Security Verification
-- [ ] SSL certificate valid
-- [ ] Security headers set
-- [ ] CSP policy active
-- [ ] No console errors
-- [ ] No exposed secrets
+# Auth0 (If using authentication)
+VITE_AUTH0_DOMAIN=[your-domain]
+VITE_AUTH0_CLIENT_ID=[your-client-id]
+
+# Analytics (Optional)
+SENTRY_DSN=[your-sentry-dsn]
+GA_TRACKING_ID=[your-ga-id]
+
+# Push Notifications (Future)
+VITE_VAPID_PUBLIC_KEY=[generate-vapid-key]
+```
+
+---
+
+## Deployment Steps
+
+### 1. Initial Setup
+- [ ] Create Netlify account (if not exists)
+- [ ] Connect GitHub repository to Netlify
+- [ ] Set site name (e.g., astralcorev2)
+
+### 2. Configure Build Settings
+- [ ] Build command: `npm run build:netlify-simple`
+- [ ] Publish directory: `dist`
+- [ ] Node version: Set to 18.17.0 in environment
+
+### 3. Set Environment Variables
+- [ ] Go to Site Settings → Environment Variables
+- [ ] Add all critical variables (see above)
+- [ ] Generate secure random values for secrets
+- [ ] Save configuration
+
+### 4. Deploy to Staging
+- [ ] Trigger initial deploy
+- [ ] Monitor build logs for errors
+- [ ] Verify build completes successfully
+- [ ] Check deployed site URL
+
+### 5. Test Core Features
+- [ ] **Homepage** loads correctly
+- [ ] **Navigation** works (all menu items)
+- [ ] **Crisis Resources** page accessible
+- [ ] **Offline mode** works (disconnect internet and test)
+- [ ] **PWA Installation** prompt appears
+- [ ] **Service Worker** registered successfully
+
+### 6. Test Mental Health Features
+- [ ] **Mood Tracker** interface works
+- [ ] **Journal** creation and viewing
+- [ ] **Breathing Exercise** animations run
+- [ ] **Safety Plan** form submits
+- [ ] **Crisis Chat** interface loads
+- [ ] **Community Feed** displays
+
+### 7. Mobile Testing
+- [ ] Site responsive on mobile devices
+- [ ] Touch targets adequately sized
+- [ ] Forms usable on mobile
+- [ ] PWA installs on mobile
+- [ ] Performance acceptable on 3G
+
+### 8. Accessibility Testing
+- [ ] Keyboard navigation works
+- [ ] Screen reader compatible
+- [ ] Color contrast passes WCAG
+- [ ] Focus indicators visible
+- [ ] Alt text for images
+
+### 9. Performance Verification
+- [ ] Lighthouse score > 90
+- [ ] First Contentful Paint < 2s
+- [ ] Time to Interactive < 5s
+- [ ] Bundle size reasonable
+- [ ] Images optimized
+
+### 10. Security Checks
+- [ ] HTTPS enforced
+- [ ] Security headers present
+- [ ] No exposed API keys
+- [ ] CSP headers configured
 - [ ] Rate limiting active
 
-### Monitoring Setup
-- [ ] Sentry alerts configured
-- [ ] Uptime monitoring active
-- [ ] Performance monitoring enabled
-- [ ] Error tracking functional
-- [ ] Analytics collecting data
+---
 
-## 🚨 Emergency Procedures
-
-### Rollback Plan
-- [ ] Previous deployment ID noted
-- [ ] Rollback procedure documented
-- [ ] Database rollback scripts ready
-- [ ] Team contacts available
-- [ ] Status page ready to update
-
-### Incident Response
-- [ ] On-call schedule confirmed
-- [ ] Escalation path defined
-- [ ] Communication channels ready
-- [ ] Incident template prepared
-- [ ] Stakeholders notified
-
-## 📝 Documentation
-
-### Updates Completed
-- [x] README.md updated
-- [x] Environment variables documented
-- [x] Deployment guide created
-- [x] API documentation current
-- [ ] Release notes prepared
-- [ ] User guide updated
-
-### Communication
-- [ ] Team notified of deployment
-- [ ] Stakeholders informed
-- [ ] Status page updated
-- [ ] Release announcement drafted
-- [ ] Support team briefed
-
-## 🎯 Sign-offs
-
-### Required Approvals
-- [ ] Development Lead: _____________
-- [ ] QA Lead: _____________
-- [ ] Security Review: _____________
-- [ ] Product Owner: _____________
-- [ ] DevOps: _____________
-
-### Deployment Authorization
-- [ ] Deployment window confirmed
-- [ ] Change request approved
-- [ ] Risk assessment completed
-- [ ] Rollback plan approved
-- [ ] Go/No-Go decision: _____________
-
-## 📊 Success Criteria
+## Post-Deployment Monitoring
 
 ### Immediate (First Hour)
-- [ ] No critical errors in logs
-- [ ] Error rate <1%
-- [ ] Response time <500ms
-- [ ] All health checks passing
-- [ ] No user complaints
+- [ ] Check Netlify function logs
+- [ ] Monitor browser console for errors
+- [ ] Test critical user paths
+- [ ] Verify offline functionality
+- [ ] Check service worker caching
 
-### Short Term (First 24 Hours)
-- [ ] Error rate stable
-- [ ] Performance metrics stable
-- [ ] No security incidents
-- [ ] User feedback positive
-- [ ] All features functional
+### First 24 Hours
+- [ ] Monitor error tracking (if configured)
+- [ ] Check performance metrics
+- [ ] Review user feedback
+- [ ] Test on various devices
+- [ ] Verify crisis resources load
 
-### Long Term (First Week)
-- [ ] User adoption increasing
-- [ ] Performance maintained
-- [ ] No major incidents
-- [ ] Positive user feedback
-- [ ] Business metrics improving
-
-## 📞 Contacts
-
-### Emergency Contacts
-- DevOps Lead: ___________
-- Security Team: ___________
-- Database Admin: ___________
-- Product Owner: ___________
-- On-Call Engineer: ___________
-
-### External Support
-- Netlify Support: support@netlify.com
-- Auth0 Support: support@auth0.com
-- Neon Support: support@neon.tech
+### Ongoing
+- [ ] Set up uptime monitoring
+- [ ] Configure error alerting
+- [ ] Plan regular security audits
+- [ ] Schedule performance reviews
+- [ ] Document any issues found
 
 ---
 
-**Deployment Date**: ___________
-**Version**: 1.0.0
-**Deployed By**: ___________
-**Status**: ⬜ Pending / ⬜ In Progress / ⬜ Complete
+## Known Issues & Fixes
 
-## Notes
-_Space for deployment notes, issues encountered, and resolutions:_
+### Issue: Build fails with workbox error
+**Status:** FIXED
+**Solution:** Using simplified build script (`build:netlify-simple`)
+
+### Issue: Service worker not registering
+**Status:** MONITORING
+**Solution:** Verify sw.js is in dist folder and headers are correct
+
+### Issue: Environment variables not loading
+**Status:** PREVENTED
+**Solution:** Use VITE_ prefix for client-side variables
 
 ---
 
-*This checklist must be completed and signed off before production deployment.*
+## Rollback Plan
+
+If critical issues found:
+1. Revert to previous deploy in Netlify dashboard
+2. Identify root cause in staging environment
+3. Fix issues and test thoroughly
+4. Redeploy when stable
+
+---
+
+## Success Criteria
+
+- [x] Build completes without errors
+- [ ] All pages load correctly
+- [ ] Mobile experience smooth
+- [ ] Offline mode functional
+- [ ] Crisis resources always accessible
+- [ ] No critical errors in console
+- [ ] Performance metrics acceptable
+- [ ] Security headers in place
+
+---
+
+## Contact & Support
+
+- **Netlify Status:** https://www.netlifystatus.com/
+- **Netlify Support:** https://www.netlify.com/support/
+- **Project Repository:** https://github.com/Damatnic/CoreV2
+- **Crisis Resources:** Always accessible at /crisis
+
+---
+
+## Final Verification
+
+Before marking deployment complete:
+- [ ] All checklist items reviewed
+- [ ] No blocking issues remain
+- [ ] Performance acceptable
+- [ ] Security configured
+- [ ] Documentation updated
+- [ ] Team notified of deployment
+
+---
+
+**Deployment Status:** 🔄 IN PROGRESS
+
+*Last Updated: 2025-08-14*

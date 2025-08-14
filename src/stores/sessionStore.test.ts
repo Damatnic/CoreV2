@@ -23,7 +23,7 @@ describe('sessionStore', () => {
 
   test('fetchHelpSessions should update state on successful API call', async () => {
     const mockSessions = [{ id: 's1', dilemmaId: 'd1' }];
-    mockedApiClient.helpSessions.getForUser.mockResolvedValue(mockSessions as any);
+    mockedApiClient.helpSessions.getForUser.mockResolvedValue(mockSessions as unknown);
 
     await act(async () => {
       await useSessionStore.getState().fetchHelpSessions();
@@ -36,10 +36,10 @@ describe('sessionStore', () => {
   test('toggleFavorite should call the API and update the session in the store', async () => {
     const initialSession = { id: 's1', isFavorited: false };
     authState.userToken = 'user123'; // Set userToken for this test
-    useSessionStore.setState({ helpSessions: [initialSession] as any });
+    useSessionStore.setState({ helpSessions: [initialSession] as unknown });
     
     const updatedSession = { ...initialSession, isFavorited: true };
-    mockedApiClient.helpSessions.toggleFavorite.mockResolvedValue(updatedSession as any);
+    mockedApiClient.helpSessions.toggleFavorite.mockResolvedValue(updatedSession as unknown);
     
     await act(async () => {
       await useSessionStore.getState().toggleFavorite('s1');
@@ -52,9 +52,9 @@ describe('sessionStore', () => {
   test('sendKudos should optimistically update and then call the API', async () => {
     const initialSession = { id: 's1', kudosGiven: false };
     authState.userToken = 'user123'; // Set userToken for this test
-    useSessionStore.setState({ helpSessions: [initialSession] as any });
+    useSessionStore.setState({ helpSessions: [initialSession] as unknown });
 
-    mockedApiClient.helpSessions.sendKudos.mockResolvedValue({} as any);
+    mockedApiClient.helpSessions.sendKudos.mockResolvedValue({} as unknown);
 
     await act(async () => {
       await useSessionStore.getState().sendKudos('s1');
@@ -68,7 +68,7 @@ describe('sessionStore', () => {
   test('sendKudos should revert optimistic update on API failure', async () => {
     const initialSession = { id: 's1', kudosGiven: false };
     authState.userToken = 'user123'; // Set userToken for this test
-    useSessionStore.setState({ helpSessions: [initialSession] as any });
+    useSessionStore.setState({ helpSessions: [initialSession] as unknown });
 
     mockedApiClient.helpSessions.sendKudos.mockRejectedValue(new Error('API Error'));
 

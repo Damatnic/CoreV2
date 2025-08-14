@@ -8,12 +8,13 @@ import React from 'react';
 import errorHandlingService from './errorHandlingService';
 import apiService from './apiService';
 import { auth0Service } from './auth0Service';
+import { EventProperties, AnyObject } from '../types/common';
 
 export interface AnalyticsEvent {
   id: string; // Unique event identifier
   name: string;
   category: 'user_action' | 'page_view' | 'feature_usage' | 'performance' | 'error' | 'crisis_intervention' | 'wellness_tracking';
-  properties?: Record<string, any>;
+  properties?: EventProperties;
   timestamp: number;
   sessionId: string;
   userId?: string; // Only if consent given
@@ -246,10 +247,10 @@ class AnalyticsService {
     };
   }
 
-  private anonymizeProperties(properties?: Record<string, any>): Record<string, any> | undefined {
+  private anonymizeProperties(properties?: EventProperties): EventProperties | undefined {
     if (!properties) return undefined;
 
-    const anonymized: Record<string, any> = {};
+    const anonymized: EventProperties = {};
     
     Object.entries(properties).forEach(([key, value]) => {
       // Keep only non-personal data
@@ -347,7 +348,7 @@ class AnalyticsService {
   private determineSensitivityLevel(
     name: string, 
     category: AnalyticsEvent['category'], 
-    properties?: Record<string, any>
+    properties?: EventProperties
   ): AnalyticsEvent['sensitivityLevel'] {
     // Crisis intervention gets highest sensitivity
     if (category === 'crisis_intervention' || name.includes('crisis')) {
@@ -375,7 +376,7 @@ class AnalyticsService {
   private createEvent(
     name: string, 
     category: AnalyticsEvent['category'], 
-    properties?: Record<string, any>
+    properties?: EventProperties
   ): AnalyticsEvent {
     const sensitivityLevel = this.determineSensitivityLevel(name, category, properties);
     
@@ -392,10 +393,10 @@ class AnalyticsService {
     };
   }
 
-  private sanitizeProperties(properties?: Record<string, any>): Record<string, any> | undefined {
+  private sanitizeProperties(properties?: EventProperties): EventProperties | undefined {
     if (!properties) return undefined;
 
-    const sanitized: Record<string, any> = {};
+    const sanitized: EventProperties = {};
     
     Object.entries(properties).forEach(([key, value]) => {
       // Remove potentially sensitive data
@@ -410,9 +411,11 @@ class AnalyticsService {
       } else if (typeof value === 'number' || typeof value === 'boolean') {
         sanitized[key] = value;
       } else if (Array.isArray(value)) {
-        sanitized[key] = value.map(item => 
+        // Arrays are not directly assignable to EventProperties values
+        // Convert to a JSON string for analytics purposes
+        sanitized[key] = JSON.stringify(value.map(item => 
           typeof item === 'string' ? this.sanitizeString(item) : item
-        );
+        ));
       }
     });
 
@@ -499,7 +502,7 @@ class AnalyticsService {
   }
 
   // Public API
-  track(name: string, category: AnalyticsEvent['category'], properties?: Record<string, any>) {
+  track(name: string, category: AnalyticsEvent['category'], properties?: EventProperties) {
     if (!this.config.enabled || !this.hasRequiredConsent()) return;
 
     const event = this.createEvent(name, category, properties);
@@ -530,15 +533,15 @@ class AnalyticsService {
   }
 
   trackPageView(path: string, title?: string) {
-    const properties: Record<string, any> = {
+    const properties: EventProperties = {
       path,
       title: title || document.title,
       referrer: document.referrer,
       language: navigator.language,
-      viewport: {
+      viewport: JSON.stringify({
         width: window.innerWidth,
         height: window.innerHeight
-      }
+      })
     };
 
     // Add device data only if consented and privacy settings allow
@@ -549,7 +552,7 @@ class AnalyticsService {
     this.track('page_view', 'page_view', properties);
   }
 
-  trackFeatureUsage(feature: string, action: string, properties?: Record<string, any>) {
+  trackFeatureUsage(feature: string, action: string, properties?: EventProperties) {
     this.track(`${feature}_${action}`, 'feature_usage', {
       feature,
       action,
@@ -557,7 +560,7 @@ class AnalyticsService {
     });
   }
 
-  trackEvent(eventName: string, properties?: Record<string, any>) {
+  trackEvent(eventName: string, properties?: EventProperties) {
     this.track(eventName, 'user_action', properties);
   }
 
@@ -570,7 +573,7 @@ class AnalyticsService {
     });
   }
 
-  trackUserAction(action: string, element?: string, properties?: Record<string, any>) {
+  trackUserAction(action: string, element?: string, properties?: EventProperties) {
     this.track(action, 'user_action', {
       element,
       ...properties
@@ -586,7 +589,7 @@ class AnalyticsService {
   }
 
   // Crisis intervention specific tracking
-  trackCrisisIntervention(action: string, properties?: Record<string, any>) {
+  trackCrisisIntervention(action: string, properties?: EventProperties) {
     this.track(action, 'crisis_intervention', {
       timestamp: Date.now(),
       urgent: true,
@@ -595,7 +598,7 @@ class AnalyticsService {
   }
 
   // Wellness tracking
-  trackWellnessActivity(activity: string, properties?: Record<string, any>) {
+  trackWellnessActivity(activity: string, properties?: EventProperties) {
     this.track(activity, 'wellness_tracking', {
       timestamp: Date.now(),
       ...properties
@@ -923,27 +926,37 @@ export class WebVitalsTracker {
       const webVitals = (window as any)['web-vitals'];
       
       // Track Core Web Vitals
-      webVitals.getCLS((metric: any) => this.reportWebVital('CLS', metric));
-      webVitals.getFID((metric: any) => this.reportWebVital('FID', metric));
-      webVitals.getFCP((metric: any) => this.reportWebVital('FCP', metric));
-      webVitals.getLCP((metric: any) => this.reportWebVital('LCP', metric));
-      webVitals.getTTFB((metric: any) => this.reportWebVital('TTFB', metric));
+      if (typeof webVitals?.getCLS === 'function') {
+        webVitals.getCLS((metric: AnyObject) => this.reportWebVital('CLS', metric));
+      }
+      if (typeof webVitals?.getFID === 'function') {
+        webVitals.getFID((metric: AnyObject) => this.reportWebVital('FID', metric));
+      }
+      if (typeof webVitals?.getFCP === 'function') {
+        webVitals.getFCP((metric: AnyObject) => this.reportWebVital('FCP', metric));
+      }
+      if (typeof webVitals?.getLCP === 'function') {
+        webVitals.getLCP((metric: AnyObject) => this.reportWebVital('LCP', metric));
+      }
+      if (typeof webVitals?.getTTFB === 'function') {
+        webVitals.getTTFB((metric: AnyObject) => this.reportWebVital('TTFB', metric));
+      }
     }
   }
 
-  private reportWebVital(name: string, metric: any) {
+  private reportWebVital(name: string, metric: AnyObject) {
     this.analytics.track(`web_vital_${name}`, 'performance', {
-      value: metric.value,
-      rating: metric.rating,
-      delta: metric.delta,
-      id: metric.id
+      value: metric.value as number,
+      rating: metric.rating as string,
+      delta: metric.delta as number,
+      id: metric.id as string
     });
   }
 }
 
 // A/B Testing support
 export class ABTestingManager {
-  private readonly experiments: Map<string, any> = new Map();
+  private readonly experiments: Map<string, string> = new Map();
   private readonly analytics: AnalyticsService;
 
   constructor(analytics: AnalyticsService) {
@@ -956,7 +969,9 @@ export class ABTestingManager {
     if (stored) {
       const experiments = JSON.parse(stored);
       Object.entries(experiments).forEach(([key, value]) => {
-        this.experiments.set(key, value);
+        if (typeof value === 'string') {
+          this.experiments.set(key, value);
+        }
       });
     }
   }
@@ -964,7 +979,7 @@ export class ABTestingManager {
   getVariant(experimentId: string, variants: string[]): string {
     // Check if user already has a variant
     if (this.experiments.has(experimentId)) {
-      return this.experiments.get(experimentId);
+      return this.experiments.get(experimentId) || variants[0];
     }
 
     // Assign random variant
@@ -1004,7 +1019,7 @@ export class ABTestingManager {
 export class SessionRecorder {
   private readonly analytics: AnalyticsService;
   private recording: boolean = false;
-  private events: any[] = [];
+  private events: Array<{ type: string; timestamp: number; target: { tagName?: string; className?: string; value?: string } }> = [];
   private startTime: number = 0;
 
   constructor(analytics: AnalyticsService) {
@@ -1057,11 +1072,11 @@ export class SessionRecorder {
         duration: Date.now() - this.startTime,
         eventCount: this.events.length,
         // Don't send actual events, just metadata
-        metadata: {
+        metadata: JSON.stringify({
           clicks: this.events.filter(e => e.type === 'click').length,
           inputs: this.events.filter(e => e.type === 'input').length,
           scrolls: this.events.filter(e => e.type === 'scroll').length
-        }
+        })
       });
     }
   }
@@ -1099,8 +1114,8 @@ export const astralCoreAnalytics = getAnalyticsService();
 
 // Initialize with Auth0 user when authenticated
 if (typeof window !== 'undefined') {
-  window.addEventListener('auth-success', (event: any) => {
-    const user = event.detail?.user || auth0Service.getCurrentUser();
+  window.addEventListener('auth-success', (event: Event) => {
+    const user = (event as CustomEvent).detail?.user || auth0Service.getCurrentUser();
     if (user?.sub) {
       astralCoreAnalytics.setUserId(user.sub);
       astralCoreAnalytics.track('user_authenticated', 'user_action', {

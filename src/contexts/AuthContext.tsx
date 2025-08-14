@@ -22,7 +22,7 @@ if (import.meta.env.DEV && (!import.meta.env.VITE_AUTH0_DOMAIN || !import.meta.e
 // This should match one of the "Allowed Callback URLs" in your Auth0 Application settings
 const REDIRECT_URI = AuthSession.makeRedirectUri();
 
-interface AuthContextType {
+export interface AuthContextType {
   isAuthenticated: boolean;
   user: any; // The decoded JWT payload
   helperProfile: Helper | null;
@@ -35,6 +35,7 @@ interface AuthContextType {
   userToken: string | null;
   isAnonymous?: boolean; // Added for test compatibility
   authState?: any; // Added for test compatibility
+  register?: () => Promise<void>; // Added for test compatibility
 }
 
 // Global state object to bridge context and stores

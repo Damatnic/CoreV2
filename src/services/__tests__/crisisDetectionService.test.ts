@@ -76,7 +76,7 @@ describe('EnhancedCrisisDetectionService', () => {
       expect(emptyResult.severityLevel).toBe('none');
 
       // Test for null - should handle gracefully after our fix
-      const nullResult = crisisDetectionService.analyzeCrisisContent(null as any);
+      const nullResult = crisisDetectionService.analyzeCrisisContent(null as unknown);
       expect(nullResult.hasCrisisIndicators).toBe(false);
       expect(nullResult.severityLevel).toBe('none');
     });
@@ -252,9 +252,9 @@ describe('EnhancedCrisisDetectionService', () => {
         '',
         '   ',
         '\n\t',
-        123 as any,
-        {} as any,
-        [] as any
+        123 as unknown,
+        {} as unknown,
+        [] as unknown
       ];
 
       malformedInputs.forEach(input => {

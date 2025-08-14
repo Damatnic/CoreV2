@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface WellnessContextType {
   wellnessData: any;
-  setWellnessData: (data: any) => void;
+  setWellnessData: (data: unknown) => void;
 }
 
 const WellnessContext = createContext<WellnessContextType | undefined>(undefined);

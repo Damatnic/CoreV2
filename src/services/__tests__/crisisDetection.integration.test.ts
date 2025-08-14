@@ -85,7 +85,7 @@ describe('Crisis Detection Service - Integration Tests', () => {
   describe('Multilingual Crisis Detection', () => {
     it('should have support for multiple languages', () => {
       // Test that the service has multilingual capabilities
-      const service = astralCoreCrisisDetection as any;
+      const service = astralCoreCrisisDetection as unknown;
       expect(service.supportedLanguages).toBeDefined();
       expect(service.supportedLanguages.length).toBeGreaterThan(1);
     });
@@ -147,7 +147,7 @@ describe('Crisis Detection Service - Edge Cases', () => {
   });
 
   it('should handle null/undefined gracefully', () => {
-    const result = astralCoreCrisisDetection.analyzeCrisisContent(null as any);
+    const result = astralCoreCrisisDetection.analyzeCrisisContent(null as unknown);
     
     expect(result.hasCrisisIndicators).toBe(false);
     expect(result.severityLevel).toBe('none');

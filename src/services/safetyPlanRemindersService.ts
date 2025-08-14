@@ -280,7 +280,7 @@ class SafetyPlanRemindersService {
   /**
    * Create a new safety plan
    */
-  async createSafetyPlan(planData: any): Promise<any> {
+  async createSafetyPlan(planData: any): Promise<unknown> {
     const plan = {
       id: `plan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       userId: planData.userId || 'default_user',
@@ -367,7 +367,7 @@ class SafetyPlanRemindersService {
   /**
    * Create an adaptive safety plan
    */
-  async createAdaptivePlan(userId: string, userPatterns: any): Promise<any> {
+  async createAdaptivePlan(userId: string, userPatterns: any): Promise<unknown> {
     const adaptivePlan = {
       id: `adaptive_plan_${Date.now()}`,
       userId,
@@ -389,7 +389,7 @@ class SafetyPlanRemindersService {
   /**
    * Handle crisis events
    */
-  async handleCrisisEvent(crisisEvent: any): Promise<any> {
+  async handleCrisisEvent(crisisEvent: any): Promise<unknown> {
     const response = {
       eventId: crisisEvent.id,
       severity: crisisEvent.severity,
@@ -490,7 +490,7 @@ class SafetyPlanRemindersService {
   /**
    * Get engagement metrics for a plan
    */
-  async getEngagementMetrics(planId: string): Promise<any> {
+  async getEngagementMetrics(planId: string): Promise<unknown> {
     return {
       planId,
       totalInteractions: 45,
@@ -546,7 +546,7 @@ class SafetyPlanRemindersService {
   /**
    * Get progress report for a plan
    */
-  async getProgressReport(planId: string): Promise<any> {
+  async getProgressReport(planId: string): Promise<unknown> {
     return {
       planId,
       period: '30_days',
@@ -577,7 +577,7 @@ class SafetyPlanRemindersService {
   /**
    * Analyze usage patterns
    */
-  async analyzePatterns(planId: string): Promise<any> {
+  async analyzePatterns(planId: string): Promise<unknown> {
     return {
       planId,
       patterns: {
@@ -608,7 +608,7 @@ class SafetyPlanRemindersService {
   /**
    * Create personalized safety plan
    */
-  async createPersonalizedPlan(userId: string, preferences: any): Promise<any> {
+  async createPersonalizedPlan(userId: string, preferences: any): Promise<unknown> {
     const plan = {
       id: `personalized_plan_${Date.now()}`,
       userId,
@@ -642,7 +642,7 @@ class SafetyPlanRemindersService {
   /**
    * Optimize safety plan based on usage and feedback
    */
-  async optimizePlan(planId: string): Promise<any> {
+  async optimizePlan(planId: string): Promise<unknown> {
     const analysis = await this.analyzePatterns(planId);
     
     return {
@@ -676,7 +676,7 @@ class SafetyPlanRemindersService {
   /**
    * Activate emergency protocol
    */
-  async activateEmergencyProtocol(userId: string): Promise<any> {
+  async activateEmergencyProtocol(userId: string): Promise<unknown> {
     const protocol = {
       userId,
       protocolId: `emergency_${Date.now()}`,
@@ -698,14 +698,14 @@ class SafetyPlanRemindersService {
   /**
    * Activate immediate response
    */
-  async activateImmediate(userId: string): Promise<any> {
+  async activateImmediate(userId: string): Promise<unknown> {
     return await this.activateEmergencyProtocol(userId);
   }
 
   /**
    * Share safety plan
    */
-  async sharePlan(planId: string, shareOptions: any): Promise<any> {
+  async sharePlan(planId: string, shareOptions: any): Promise<unknown> {
     return {
       planId,
       shareId: `share_${Date.now()}`,
@@ -719,7 +719,7 @@ class SafetyPlanRemindersService {
   /**
    * Update safety plan
    */
-  async updatePlan(planId: string, updates: any): Promise<any> {
+  async updatePlan(planId: string, updates: any): Promise<unknown> {
     return {
       planId,
       updates,
@@ -732,7 +732,7 @@ class SafetyPlanRemindersService {
   /**
    * Get sync status of plan
    */
-  async getSyncStatus(planId: string): Promise<any> {
+  async getSyncStatus(planId: string): Promise<unknown> {
     return {
       planId,
       lastSynced: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
@@ -745,7 +745,7 @@ class SafetyPlanRemindersService {
   /**
    * Check review status of plan
    */
-  async checkReviewStatus(planId: string): Promise<any> {
+  async checkReviewStatus(planId: string): Promise<unknown> {
     return {
       planId,
       reviewStatus: 'current',

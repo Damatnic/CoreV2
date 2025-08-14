@@ -375,13 +375,13 @@ export const analyzeBundleSize = async (
 
 // Performance-aware component preloader
 export class ComponentPreloader {
-  private static preloadCache = new Map<string, Promise<any>>();
-  private static preloadQueue: Array<{ name: string; importFn: () => Promise<any>; priority: number }> = [];
+  private static preloadCache = new Map<string, Promise<unknown>>();
+  private static preloadQueue: Array<{ name: string; importFn: () => Promise<unknown>; priority: number }> = [];
   private static isProcessing = false;
 
   static addToQueue(
     name: string, 
-    importFn: () => Promise<any>, 
+    importFn: () => Promise<unknown>, 
     priority: 'low' | 'medium' | 'high' = 'medium'
   ): void {
     const priorityValue = priority === 'high' ? 3 : priority === 'medium' ? 2 : 1;

@@ -94,8 +94,8 @@ const _callApi = async (endpoint: string, options: RequestInit = {}) => {
     
     // If in development and Netlify Functions aren't available, skip the API call entirely
     if (isDevelopment && netlifyFunctionsAvailable === false) {
-        const devError = new Error('Demo mode - API skipped');
-        (devError as any).isDevelopmentError = true;
+        const devError = new Error('Demo mode - API skipped') as Error & { isDevelopmentError?: boolean };
+        devError.isDevelopmentError = true;
         throw devError;
     }
     
@@ -302,8 +302,9 @@ export const ApiClient = {
         getDilemmas: async (): Promise<Dilemma[]> => {
             try {
                 return await _callApi('/dilemmas');
-            } catch (error: any) {
-                if (error.isDevelopmentError || error.message?.includes('Demo mode')) {
+            } catch (error) {
+                const err = error as { isDevelopmentError?: boolean; message?: string };
+                if (err.isDevelopmentError || err.message?.includes('Demo mode')) {
                     // Return demo data in development
                     const userType = getDemoUserType() || 'user';
                     const demoData = demoDataService.getDemoData(userType);
@@ -378,8 +379,9 @@ export const ApiClient = {
             // This is one of the few non-authed endpoints
             try {
                 return await _callApi('/helpers/online-count', { headers: { 'Authorization': '' } });
-            } catch (error: any) {
-                if (error.isDevelopmentError || error.message?.includes('Demo mode')) {
+            } catch (error) {
+                const err = error as { isDevelopmentError?: boolean; message?: string };
+                if (err.isDevelopmentError || err.message?.includes('Demo mode')) {
                     return 12; // Demo count
                 }
                 throw error;
@@ -399,7 +401,7 @@ export const ApiClient = {
         getApplications: (): Promise<Helper[]> => {
              return _callApi('/admin/applications');
         },
-        getApplicantDetails: (helperId: string): Promise<any> => {
+        getApplicantDetails: (helperId: string): Promise<unknown> => {
             return _callApi(`/admin/applicants/${helperId}`);
         },
         updateApplicationStatus: (helperId: string, status: Helper['applicationStatus'], _actingHelper: Helper, notes?: string): Promise<Helper> => {
@@ -483,34 +485,57 @@ export const ApiClient = {
         },
     },
     ai: {
-        chat: async (messages: AIChatMessage[], systemInstruction: string): Promise<string> => {
-            const response = await _callApi('/ai', {
-                method: 'POST',
-                body: JSON.stringify({ messages, systemInstruction }),
-            });
-            if (!response || !response.text) {
-                throw new Error("Received an invalid response from the AI service.");
-            }
-            return response.text;
-        },
-        sendMessageToAI: async (messages: AIChatMessage[], systemInstruction: string): Promise<string> => {
-            // Alias for chat method to match test expectations
-            return ApiClient.ai.chat(messages, systemInstruction);
-        },
-        resetAIChat: () => {
-             _callApi('/ai/reset', { method: 'POST' });
-        },
-        saveChatHistory: async (messages: AIChatMessage[]): Promise<void> => {
-             _callApi('/ai/history', { method: 'POST', body: JSON.stringify({ messages }) });
-        },
-        loadChatHistory: async (): Promise<AIChatMessage[]> => {
+        chat: async (messages: AIChatMessage[], userId?: string, provider?: 'openai' | 'claude'): Promise<{ response: string; metadata?: any }> => {
             try {
-                return await _callApi('/ai/history');
-            } catch (error: any) {
-                if (error.isDevelopmentError || error.message?.includes('Demo mode')) {
+                const response = await _callApi('/api-ai/chat', {
+                    method: 'POST',
+                    body: JSON.stringify({ messages, userId, provider: provider || 'openai' }),
+                });
+                return response;
+            } catch (error) {
+                console.error('AI chat error:', error);
+                return {
+                    response: "I'm having trouble connecting right now. Please try again in a moment.",
+                    metadata: { error: true }
+                };
+            }
+        },
+        sendMessageToAI: async (messages: AIChatMessage[]): Promise<string> => {
+            // Legacy compatibility - convert to new format
+            const result = await ApiClient.ai.chat(messages);
+            return result.response;
+        },
+        resetAIChat: async (userId: string) => {
+            return _callApi('/api-ai/clear', { 
+                method: 'POST',
+                body: JSON.stringify({ userId })
+            });
+        },
+        saveChatHistory: async (userId: string, messages: AIChatMessage[]): Promise<void> => {
+            return _callApi('/api-ai/history', { 
+                method: 'POST', 
+                body: JSON.stringify({ userId, messages }) 
+            });
+        },
+        loadChatHistory: async (userId: string): Promise<AIChatMessage[]> => {
+            try {
+                const response = await _callApi(`/api-ai/history?userId=${userId}`);
+                return response.messages || [];
+            } catch (error) {
+                const err = error as { isDevelopmentError?: boolean; message?: string };
+                if (err.isDevelopmentError || err.message?.includes('Demo mode')) {
                     return [];
                 }
-                throw error;
+                console.error('Failed to load chat history:', error);
+                return [];
+            }
+        },
+        getProviders: async (): Promise<{ providers: string[]; default: string | null }> => {
+            try {
+                return await _callApi('/api-ai/providers');
+            } catch (error) {
+                console.error('Failed to get AI providers:', error);
+                return { providers: [], default: null };
             }
         },
         draftPostFromChat: async (messages: AIChatMessage[]): Promise<{ postContent: string, category: string }> => {

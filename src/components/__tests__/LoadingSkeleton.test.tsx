@@ -219,7 +219,7 @@ describe('LoadingSkeleton', () => {
       };
       
       Object.entries(variantLabels).forEach(([variant, label]) => {
-        const { unmount } = render(<LoadingSkeleton variant={variant as any} />);
+        const { unmount } = render(<LoadingSkeleton variant={variant as unknown} />);
         
         expect(screen.getByLabelText(label)).toBeInTheDocument();
         
@@ -236,7 +236,7 @@ describe('LoadingSkeleton', () => {
       };
       
       Object.entries(screenReaderTexts).forEach(([variant, text]) => {
-        const { unmount } = render(<LoadingSkeleton variant={variant as any} />);
+        const { unmount } = render(<LoadingSkeleton variant={variant as unknown} />);
         
         expect(screen.getByText(text)).toBeInTheDocument();
         expect(screen.getByText(text)).toHaveClass('sr-only');
@@ -306,7 +306,7 @@ describe('LoadingSkeleton', () => {
     });
 
     it('should handle invalid variant and default to post', () => {
-      const { container } = render(<LoadingSkeleton variant={'invalid' as any} />);
+      const { container } = render(<LoadingSkeleton variant={'invalid' as unknown} />);
       
       expect(container.querySelector('.post-skeleton')).toBeInTheDocument();
       expect(screen.getByLabelText('Loading post')).toBeInTheDocument();
@@ -315,9 +315,9 @@ describe('LoadingSkeleton', () => {
     it('should handle undefined props gracefully', () => {
       const { container } = render(
         <LoadingSkeleton 
-          variant={undefined as any} 
-          count={undefined as any} 
-          className={undefined as any}
+          variant={undefined as unknown} 
+          count={undefined as unknown} 
+          className={undefined as unknown}
         />
       );
       

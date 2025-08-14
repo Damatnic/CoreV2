@@ -37,7 +37,7 @@ const BreathingGuide: React.FC<BreathingGuideProps> = ({ pattern, isActive }) =>
       const currentIndex = phases.indexOf(currentPhase);
       const nextIndex = (currentIndex + 1) % phases.length;
       currentPhase = phases[nextIndex];
-      setPhase(currentPhase as any);
+      setPhase(currentPhase as 'inhale' | 'hold' | 'exhale' | 'pause');
       
       const duration = currentPattern[currentPhase as keyof typeof currentPattern] * 1000;
       

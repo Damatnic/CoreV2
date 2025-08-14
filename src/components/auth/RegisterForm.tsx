@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import simpleAuthService from '../../services/simpleAuthService';
 import { useNavigate } from 'react-router-dom';
+import { isError } from '../../types/common';
 
 interface RegisterFormProps {
   onSuccess?: () => void;
@@ -91,8 +92,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       } else {
         setError(response.error || 'Registration failed');
       }
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred');
+    } catch (err) {
+      setError(isError(err) ? err.message : 'An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }

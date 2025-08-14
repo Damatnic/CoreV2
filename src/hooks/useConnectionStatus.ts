@@ -221,7 +221,7 @@ export const useConnectionStatus = () => {
             setConnectionStatus(prev => ({
               ...prev,
               isServiceWorkerRegistered: true,
-              serviceWorkerStatus: sw.state as any
+              serviceWorkerStatus: sw.state as 'waiting' | 'active' | 'installing' | 'redundant' | 'not_registered'
             }));
           };
 

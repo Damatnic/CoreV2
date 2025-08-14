@@ -181,16 +181,18 @@ export const viewport = {
 export const device = {
   isTouchDevice: (): boolean => {
     if (typeof window === 'undefined') return false;
+    const navigatorWithMsTouch = navigator as any & { msMaxTouchPoints?: number };
     return (
       'ontouchstart' in window ||
       navigator.maxTouchPoints > 0 ||
-      (navigator as any).msMaxTouchPoints > 0
+      (navigatorWithMsTouch.msMaxTouchPoints || 0) > 0
     );
   },
   
   isIOS: (): boolean => {
     if (typeof navigator === 'undefined') return false;
-    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    const windowWithMSStream = window as any & { MSStream?: any };
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !windowWithMSStream.MSStream;
   },
   
   isAndroid: (): boolean => {
@@ -207,9 +209,10 @@ export const device = {
   
   isStandalone: (): boolean => {
     if (typeof window === 'undefined') return false;
+    const navigatorWithStandalone = window.navigator as any & { standalone?: boolean };
     return (
       (window.matchMedia('(display-mode: standalone)').matches) ||
-      ((window.navigator as any).standalone) ||
+      (navigatorWithStandalone.standalone || false) ||
       document.referrer.includes('android-app://')
     );
   },

@@ -4,6 +4,7 @@ import { ApiClient } from '../utils/ApiClient';
 import { AppButton } from '../components/AppButton';
 import { AppInput, AppTextArea } from '../components/AppInput';
 import { View } from '../types';
+import { isError } from '../types/common';
 
 const EXPERTISE_OPTIONS = [
     'Anxiety & Stress',
@@ -86,23 +87,25 @@ export const CreateHelperProfileView: React.FC<{
             
             // Profile is created, trigger a reload in the parent component
             onProfileCreated();
-        } catch (err: any) {
+        } catch (err) {
             console.error("Profile creation error:", err);
             
             // Provide specific error messages based on error type
             let errorMessage = 'An error occurred while creating your profile.';
             
-            if (err.message?.includes('duplicate') || err.message?.includes('exists')) {
-                errorMessage = 'This display name is already taken. Please choose a different one.';
-                document.getElementById('displayName')?.focus();
-            } else if (err.message?.includes('network') || err.message?.includes('fetch')) {
-                errorMessage = 'Network error. Please check your connection and try again.';
-            } else if (err.message?.includes('unauthorized') || err.message?.includes('401')) {
-                errorMessage = 'Your session has expired. Please log in again.';
-            } else if (err.message?.includes('rate') || err.message?.includes('429')) {
-                errorMessage = 'Too many attempts. Please wait a moment and try again.';
-            } else if (err.message) {
-                errorMessage = err.message;
+            if (isError(err)) {
+                if (err.message?.includes('duplicate') || err.message?.includes('exists')) {
+                    errorMessage = 'This display name is already taken. Please choose a different one.';
+                    document.getElementById('displayName')?.focus();
+                } else if (err.message?.includes('network') || err.message?.includes('fetch')) {
+                    errorMessage = 'Network error. Please check your connection and try again.';
+                } else if (err.message?.includes('unauthorized') || err.message?.includes('401')) {
+                    errorMessage = 'Your session has expired. Please log in again.';
+                } else if (err.message?.includes('rate') || err.message?.includes('429')) {
+                    errorMessage = 'Too many attempts. Please wait a moment and try again.';
+                } else if (err.message) {
+                    errorMessage = err.message;
+                }
             }
             
             setError(errorMessage);

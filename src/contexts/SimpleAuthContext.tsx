@@ -72,8 +72,8 @@ export const SimpleAuthProvider: React.FC<{ children: ReactNode }> = ({ children
         addToast(response.error || 'Login failed', 'error');
         return false;
       }
-    } catch (error: any) {
-      addToast(error.message || 'Login failed', 'error');
+    } catch (error) {
+      addToast((error as Error).message || 'Login failed', 'error');
       return false;
     }
   }, [addToast]);
@@ -96,8 +96,8 @@ export const SimpleAuthProvider: React.FC<{ children: ReactNode }> = ({ children
         addToast(response.error || 'Registration failed', 'error');
         return false;
       }
-    } catch (error: any) {
-      addToast(error.message || 'Registration failed', 'error');
+    } catch (error) {
+      addToast((error as Error).message || 'Registration failed', 'error');
       return false;
     }
   }, [addToast]);

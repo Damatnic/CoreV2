@@ -165,7 +165,7 @@ class MoodAnalysisService {
 
   public analyzeMood(text: string): MoodAnalysis {
     const words = this.tokenize(text.toLowerCase());
-    const moodScores: Record<MoodType, number> = {} as any;
+    const moodScores: Record<MoodType, number> = {} as Record<MoodType, number>;
     const detectedKeywords: string[] = [];
     
     // Initialize scores

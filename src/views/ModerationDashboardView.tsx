@@ -7,6 +7,7 @@ import { ApiClient } from '../utils/ApiClient';
 import { Card } from '../components/Card';
 import { useDilemmaStore } from '../stores/dilemmaStore';
 import { useNotification } from '../contexts/NotificationContext';
+import { isError } from '../types/common';
 
 export const ModerationDashboardView: React.FC = () => {
     const { reportedDilemmas, dismissReport, removePost } = useDilemmaStore();
@@ -22,9 +23,10 @@ export const ModerationDashboardView: React.FC = () => {
         try {
             await dismissReport(dilemmaId);
             addToast('Report dismissed.', 'info');
-        } catch (error: any) {
+        } catch (error) {
             console.error(error);
-            addToast(error.message || 'Failed to dismiss report. Please try again.', 'error');
+            const errorMessage = isError(error) ? error.message : 'Failed to dismiss report. Please try again.';
+            addToast(errorMessage, 'error');
         }
     };
 
@@ -32,9 +34,10 @@ export const ModerationDashboardView: React.FC = () => {
         try {
             await removePost(dilemmaId);
             addToast('Post removed.', 'success');
-        } catch (error: any) {
+        } catch (error) {
             console.error(error);
-            addToast(error.message || 'Failed to remove post. Please try again.', 'error');
+            const errorMessage = isError(error) ? error.message : 'Failed to remove post. Please try again.';
+            addToast(errorMessage, 'error');
         }
     };
 
@@ -47,8 +50,9 @@ export const ModerationDashboardView: React.FC = () => {
         try {
             const status = await ApiClient.moderation.getUserStatus(searchUserId.trim());
             setSearchedUserStatus(status);
-        } catch (err: any) {
-            setSearchError(err.message || "Failed to find user.");
+        } catch (err) {
+            const errorMessage = isError(err) ? err.message : "Failed to find user.";
+            setSearchError(errorMessage);
         } finally {
             setIsSearching(false);
         }
@@ -60,8 +64,9 @@ export const ModerationDashboardView: React.FC = () => {
             const updatedStatus = await ApiClient.moderation.issueWarning(userId);
             setSearchedUserStatus(updatedStatus);
             alert("Warning issued.");
-        } catch (err: any) {
-            alert(err.message || "Failed to issue warning.");
+        } catch (err) {
+            const errorMessage = isError(err) ? err.message : "Failed to issue warning.";
+            alert(errorMessage);
         }
     }
     
@@ -74,8 +79,9 @@ export const ModerationDashboardView: React.FC = () => {
             const updatedStatus = await ApiClient.moderation.banUser(userId, reason, duration ? parseInt(duration) : undefined);
             setSearchedUserStatus(updatedStatus);
             alert("User has been banned.");
-        } catch(err: any) {
-            alert(err.message || "Failed to ban user.");
+        } catch (err) {
+            const errorMessage = isError(err) ? err.message : "Failed to ban user.";
+            alert(errorMessage);
         }
     }
 

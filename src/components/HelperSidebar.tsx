@@ -1,5 +1,5 @@
 import React from 'react';
-import { Helper, ActiveView } from '../types';
+import { Helper, ActiveView, View } from '../types';
 import { DashboardIcon,
   LogoutIcon,
   SettingsIcon,
@@ -36,13 +36,13 @@ const NavItem = React.memo<NavItemProps>(({
 }) => {
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    onClick ? onClick() : setActiveView({ view: view as any });
+    onClick ? onClick() : setActiveView({ view: view as View });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      onClick ? onClick() : setActiveView({ view: view as any });
+      onClick ? onClick() : setActiveView({ view: view as View });
     }
   };
 

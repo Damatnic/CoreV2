@@ -53,7 +53,7 @@ export interface UsePrivacyAnalyticsReturn {
     limitations: string[];
   } | null>;
   
-  exportData: () => Promise<any>;
+  exportData: () => Promise<unknown>;
   refreshInsights: () => Promise<void>;
   resetPrivacyBudget: () => void;
 }

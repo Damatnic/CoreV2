@@ -415,7 +415,7 @@ describe('useCrisisStressTesting Hook', () => {
       result.current.actions.toggleScenario('scenario-2');
     });
 
-    const mockResults: any[] = [];
+    const mockResults: unknown[] = [];
     (crisisStressTestingSystem.runCrisisStressTests as jest.Mock).mockResolvedValue(mockResults);
 
     await act(async () => {

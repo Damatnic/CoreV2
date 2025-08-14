@@ -1504,7 +1504,7 @@ export class DemoDataService {
 
     // ===== COMMUNITY CONTENT METHODS =====
 
-    getWellnessChallenges(): any[] {
+    getWellnessChallenges(): unknown[] {
         return [
             {
                 id: 'challenge-mindfulness-001',
@@ -1667,7 +1667,7 @@ export class DemoDataService {
         ];
     }
 
-    getGroupDiscussions(): any[] {
+    getGroupDiscussions(): unknown[] {
         return [
             {
                 id: 'discussion-anxiety-001',
@@ -1876,7 +1876,7 @@ export class DemoDataService {
         ];
     }
 
-    getCommunityForumPosts(): any[] {
+    getCommunityForumPosts(): unknown[] {
         return [
             {
                 id: 'forum-anxiety-tips-001',
@@ -2101,7 +2101,7 @@ export class DemoDataService {
         ];
     }
 
-    getCommunityEvents(): any[] {
+    getCommunityEvents(): unknown[] {
         return [
             {
                 id: 'event-mindfulness-workshop-001',
@@ -2238,7 +2238,7 @@ export class DemoDataService {
         ];
     }
 
-    getPeerConnections(): any[] {
+    getPeerConnections(): unknown[] {
         return [
             {
                 id: 'connection-accountability-001',
@@ -2294,7 +2294,7 @@ export class DemoDataService {
         ];
     }
 
-    getCommunityUsers(): any[] {
+    getCommunityUsers(): unknown[] {
         return [
             {
                 id: 'user-community-001',

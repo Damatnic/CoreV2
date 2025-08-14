@@ -212,7 +212,7 @@ class EnhancedCrisisDetectionService {
 
     return {
       hasCrisisIndicators: triggeredKeywords.length > 0,
-      severityLevel: maxSeverity as any,
+      severityLevel: maxSeverity as CrisisAnalysisResult['severityLevel'],
       detectedCategories: Array.from(detectedCategories),
       confidence,
       recommendedActions,
@@ -685,5 +685,6 @@ class AstralCoreCrisisDetectionService extends EnhancedCrisisDetectionService {}
 // Singleton instance for Astral Core
 export const astralCoreCrisisDetection = new AstralCoreCrisisDetectionService();
 export const crisisDetectionService = astralCoreCrisisDetection; // Backward compatibility
+export const enhancedCrisisDetectionService = astralCoreCrisisDetection; // Alias for components using this name
 export default astralCoreCrisisDetection;
 export type { CrisisAnalysisResult, CrisisIndicator, CrisisEscalationAction };

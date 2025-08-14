@@ -27,10 +27,10 @@ describe('chatStore', () => {
     const mockDilemma = { id: dilemmaId, assignedHelperId: 'h1' };
     const mockSession = { id: 's1', dilemmaId };
     
-    mockedApiClient.chat.getMessages.mockResolvedValue(mockMessages as any);
+    mockedApiClient.chat.getMessages.mockResolvedValue(mockMessages as unknown);
     mockedDilemmaStore.getState.mockReturnValue({ getDilemmaById: () => mockDilemma });
     mockedSessionStore.getState.mockReturnValue({ getHelpSessionByDilemmaId: () => mockSession });
-    mockedApiClient.helpers.getById.mockResolvedValue({ id: 'h1', displayName: 'Helper' } as any);
+    mockedApiClient.helpers.getById.mockResolvedValue({ id: 'h1', displayName: 'Helper' } as unknown);
 
     await act(async () => {
       await useChatStore.getState().startChat(dilemmaId, 'seeker');
@@ -58,12 +58,12 @@ describe('chatStore', () => {
           perspective: 'seeker',
           unread: false,
           isTyping: false
-        } as any 
+        } as unknown 
       }
     });
     
     mockedDilemmaStore.getState.mockReturnValue({ getDilemmaById: () => ({ userToken: 'user123' }) });
-    mockedApiClient.chat.sendMessage.mockResolvedValue(mockSavedMessage as any);
+    mockedApiClient.chat.sendMessage.mockResolvedValue(mockSavedMessage as unknown);
 
     await act(async () => {
       await useChatStore.getState().sendMessage(dilemmaId, text);
@@ -89,7 +89,7 @@ describe('chatStore', () => {
           perspective: 'seeker',
           unread: false,
           isTyping: false
-        } as any 
+        } as unknown 
       }
     });
     

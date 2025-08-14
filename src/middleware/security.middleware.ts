@@ -66,11 +66,11 @@ export const securityHeadersMiddleware = () => {
       preload: securityConfig.securityHeaders.hsts.preload,
     } : false,
     frameguard: securityConfig.securityHeaders.xFrameOptions.enabled ? {
-      action: securityConfig.securityHeaders.xFrameOptions.value.toLowerCase() as any,
+      action: securityConfig.securityHeaders.xFrameOptions.value.toLowerCase() as unknown,
     } : false,
     noSniff: securityConfig.securityHeaders.xContentTypeOptions.nosniff,
     referrerPolicy: securityConfig.securityHeaders.referrerPolicy.enabled ? {
-      policy: securityConfig.securityHeaders.referrerPolicy.policy as any,
+      policy: securityConfig.securityHeaders.referrerPolicy.policy as unknown,
     } : false,
     permittedCrossDomainPolicies: { permittedPolicies: 'none' },
     crossOriginEmbedderPolicy: true,
@@ -87,7 +87,7 @@ export const securityHeadersMiddleware = () => {
  * Rate Limiting Middleware Factory
  */
 export const createRateLimiter = (config: typeof securityConfig.rateLimiting.global) => {
-  const limiterConfig: any = {
+  const limiterConfig = {
     windowMs: config.windowMs,
     max: config.maxRequests,
     message: 'Too many requests from this IP, please try again later.',
@@ -163,12 +163,12 @@ export const jwtAuthMiddleware = (req: Request, res: Response, next: NextFunctio
 
   try {
     const decoded = jwt.verify(token, securityConfig.session.jwt.secret, {
-      algorithms: [securityConfig.session.jwt.algorithm as any],
+      algorithms: [securityConfig.session.jwt.algorithm as unknown],
       issuer: securityConfig.session.jwt.issuer,
       audience: securityConfig.session.jwt.audience,
     });
     
-    (req as any).user = decoded;
+    (req as unknown).user = decoded;
     next();
   } catch (error) {
     return res.status(401).json({ error: 'Invalid or expired token' });
@@ -179,7 +179,7 @@ export const jwtAuthMiddleware = (req: Request, res: Response, next: NextFunctio
  * Session Validation Middleware
  */
 export const sessionValidationMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  const session = (req as any).session;
+  const session = (req as unknown).session;
   
   if (!session || !session.userId) {
     return res.status(401).json({ error: 'Valid session required' });
@@ -190,7 +190,7 @@ export const sessionValidationMiddleware = (req: Request, res: Response, next: N
   const timeout = securityConfig.session.security.sessionTimeout;
   
   if (Date.now() - lastActivity > timeout) {
-    session.destroy((err: any) => {
+    session.destroy((err: unknown) => {
       if (err) console.error('Session destruction error:', err);
     });
     return res.status(401).json({ error: 'Session expired' });
@@ -246,7 +246,7 @@ export const inputSanitizationMiddleware = (req: Request, _res: Response, next: 
       return obj.map(sanitize);
     }
     if (obj && typeof obj === 'object') {
-      const sanitized: any = {};
+      const sanitized = {};
       for (const key in obj) {
         if (obj.hasOwnProperty(key)) {
           sanitized[key] = sanitize(obj[key]);
@@ -279,7 +279,7 @@ export const sqlInjectionProtectionMiddleware = (req: Request, res: Response, ne
     /(\bAND\b\s*\d+\s*=\s*\d+)/gi,
   ];
 
-  const checkForSQLInjection = (value: any): boolean => {
+  const checkForSQLInjection = (value: unknown): boolean => {
     if (typeof value === 'string') {
       return sqlPatterns.some(pattern => pattern.test(value));
     }
@@ -356,17 +356,17 @@ export const crisisOverrideMiddleware = (req: Request, _res: Response, next: Nex
     // Log crisis access
     console.log('CRISIS OVERRIDE ACTIVATED', {
       ip: req.ip,
-      user: (req as any).user?.id,
+      user: (req as unknown).user?.id,
       timestamp: new Date().toISOString(),
       endpoint: req.path,
     });
     
     // Bypass certain security checks for crisis situations
-    (req as any).crisisMode = true;
+    (req as unknown).crisisMode = true;
     
     // Skip rate limiting for crisis
     if (securityConfig.crisis.emergencyOverrides.bypassRateLimiting) {
-      (req as any).skipRateLimit = true;
+      (req as unknown).skipRateLimit = true;
     }
   }
   
@@ -390,7 +390,7 @@ export const httpsEnforcementMiddleware = (req: Request, res: Response, next: Ne
 
   if (!isHttps) {
     // Special handling for crisis endpoints - allow HTTP but log warning
-    if (req.path.includes('/crisis') || (req as any).crisisMode) {
+    if (req.path.includes('/crisis') || (req as unknown).crisisMode) {
       console.warn('⚠️ Crisis endpoint accessed over HTTP', {
         ip: req.ip,
         path: req.path,
@@ -429,7 +429,7 @@ export const tlsVersionCheckMiddleware = (req: Request, res: Response, next: Nex
   }
 
   // Get TLS version from the connection
-  const tlsSocket = (req as any).socket;
+  const tlsSocket = (req as unknown).socket;
   if (tlsSocket && tlsSocket.getPeerCertificate) {
     const tlsVersion = tlsSocket.getProtocol ? tlsSocket.getProtocol() : null;
     
@@ -464,7 +464,7 @@ export const certificatePinningMiddleware = (req: Request, res: Response, next: 
     return next();
   }
 
-  const tlsSocket = (req as any).socket;
+  const tlsSocket = (req as unknown).socket;
   if (tlsSocket && tlsSocket.getPeerCertificate) {
     const cert = tlsSocket.getPeerCertificate();
     
@@ -506,10 +506,10 @@ export const auditLoggingMiddleware = (req: Request, res: Response, next: NextFu
       path: req.path,
       ip: req.ip,
       userAgent: req.headers['user-agent'],
-      userId: (req as any).user?.id,
+      userId: (req as unknown).user?.id,
       statusCode: res.statusCode,
       duration,
-      crisisMode: (req as any).crisisMode || false,
+      crisisMode: (req as unknown).crisisMode || false,
     };
     
     // Log to audit system (implement your audit logging)
@@ -535,7 +535,7 @@ function validateDeviceFingerprint(fingerprint: string, req: Request): boolean {
   return fingerprint === expectedFingerprint;
 }
 
-function logAuditEvent(event: any): void {
+function logAuditEvent(event: Event): void {
   // Implement audit logging logic
   console.log('AUDIT:', JSON.stringify(event));
 }

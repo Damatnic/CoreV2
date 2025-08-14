@@ -4,6 +4,7 @@
  */
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { AnyObject } from '../types/common';
 
 interface AccessibilityState {
   // Screen reader
@@ -42,7 +43,7 @@ interface AccessibilityContextValue extends AccessibilityState {
   toggleFocusMode: () => void;
   
   // ARIA helpers
-  getAriaLabel: (key: string, params?: Record<string, any>) => string;
+  getAriaLabel: (key: string, params?: AnyObject) => string;
   getAriaDescribedBy: (key: string) => string;
   getLiveRegionProps: (priority?: 'polite' | 'assertive') => Record<string, string>;
 }
@@ -50,7 +51,7 @@ interface AccessibilityContextValue extends AccessibilityState {
 const AccessibilityContext = createContext<AccessibilityContextValue | undefined>(undefined);
 
 // ARIA label templates
-const ariaLabels: Record<string, string | ((params: any) => string)> = {
+const ariaLabels: Record<string, string | ((params: AnyObject) => string)> = {
   // Navigation
   'nav.main': 'Main navigation',
   'nav.sidebar': 'Sidebar navigation',
@@ -275,7 +276,7 @@ export const AccessibilityProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   // ARIA helpers
-  const getAriaLabel = useCallback((key: string, params?: Record<string, any>): string => {
+  const getAriaLabel = useCallback((key: string, params?: AnyObject): string => {
     const label = ariaLabels[key];
     if (!label) return key;
     

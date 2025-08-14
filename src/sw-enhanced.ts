@@ -369,7 +369,10 @@ async function queueForBackgroundSync(request: Request): Promise<void> {
       timestamp: Date.now()
     };
     
-    await db.add('sync-queue', requestData);
+    const typedDb = db as IDBDatabase;
+    const transaction = typedDb.transaction(['sync-queue'], 'readwrite');
+    const store = transaction.objectStore('sync-queue');
+    await store.add(requestData);
     console.log('[Enhanced SW] Queued request for background sync:', request.url);
   } catch (error) {
     console.error('[Enhanced SW] Failed to queue request:', error);
@@ -379,7 +382,7 @@ async function queueForBackgroundSync(request: Request): Promise<void> {
 /**
  * Open IndexedDB for background sync queue
  */
-async function openSyncQueue(): Promise<any> {
+async function openSyncQueue(): Promise<unknown> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open('sync-queue', 1);
     
@@ -421,9 +424,10 @@ function isVideoContent(url: URL): boolean {
 }
 
 // Background sync event handling
-self.addEventListener('sync', (event: any) => {
-  if (event.tag === 'background-sync') {
-    event.waitUntil(handleBackgroundSync());
+self.addEventListener('sync', (event: Event) => {
+  const syncEvent = event as Event & { tag?: string; waitUntil?: (promise: Promise<any>) => void };
+  if (syncEvent.tag === 'background-sync' && syncEvent.waitUntil) {
+    syncEvent.waitUntil(handleBackgroundSync());
   }
 });
 
@@ -432,10 +436,16 @@ self.addEventListener('sync', (event: any) => {
  */
 async function handleBackgroundSync(): Promise<void> {
   try {
-    const db = await openSyncQueue();
+    const db = await openSyncQueue() as IDBDatabase;
     const transaction = db.transaction(['sync-queue'], 'readwrite');
     const store = transaction.objectStore('sync-queue');
-    const requests = await store.getAll();
+    
+    // Properly handle IDBRequest
+    const getAllRequest = store.getAll();
+    const requests = await new Promise<any[]>((resolve, reject) => {
+      getAllRequest.onsuccess = () => resolve(getAllRequest.result || []);
+      getAllRequest.onerror = () => reject(getAllRequest.error);
+    });
     
     console.log(`[Enhanced SW] Processing ${requests.length} queued requests`);
     

@@ -16,7 +16,7 @@ import { ShieldIcon,
  } from './icons.dynamic';
 import './CrisisAlert.css';
 
-interface CrisisAlertProps {
+export interface CrisisAlertProps {
   show: boolean;
   severity: 'none' | 'low' | 'medium' | 'high' | 'critical';
   message: string;
@@ -27,6 +27,8 @@ interface CrisisAlertProps {
   onEmergencyCall?: () => void;
   onCrisisChat?: () => void;
   userType?: 'seeker' | 'helper';
+  onClose?: () => void; // Added for backward compatibility
+  variant?: string; // Added for backward compatibility
 }
 
 interface EmergencyContact {
@@ -71,7 +73,9 @@ export function CrisisAlert({
   onDismiss,
   onEmergencyCall,
   onCrisisChat,
-  userType = 'seeker'
+  userType = 'seeker',
+  onClose
+  // variant prop available if needed for styling variations
 }: CrisisAlertProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [timeShown, setTimeShown] = useState<Date | null>(null);
@@ -94,6 +98,10 @@ export function CrisisAlert({
 
   const handleDismiss = () => {
     onDismiss();
+    // Call onClose if provided for backward compatibility
+    if (onClose) {
+      onClose();
+    }
   };
 
   const handleEmergencyCall = (contact: EmergencyContact) => {

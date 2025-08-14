@@ -2,7 +2,7 @@ import { registerServiceWorker, unregisterServiceWorker, updateServiceWorker } f
 
 // Mock service worker APIs
 const mockServiceWorkerRegistration = {
-  waiting: null as any,
+  waiting: null as unknown,
   installing: null,
   active: null,
   update: jest.fn(),
@@ -47,7 +47,7 @@ describe('Service Worker Configuration', () => {
     });
 
     it('should handle browsers without service worker support', async () => {
-      delete (navigator as any).serviceWorker;
+      delete (navigator as unknown).serviceWorker;
 
       const result = await registerServiceWorker();
 

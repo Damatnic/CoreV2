@@ -49,7 +49,7 @@ export const userService = {
     return apiCall('/users/profile');
   },
 
-  async updateProfile(data: any) {
+  async updateProfile(data: unknown) {
     return apiCall('/users/profile', 'PUT', data);
   }
 };
@@ -77,7 +77,7 @@ export const moodService = {
 
 // Assessments
 export const assessmentService = {
-  async submitAssessment(type: string, responses: any[]) {
+  async submitAssessment(type: string, responses: unknown[]) {
     return apiCall('/assessments/submit', 'POST', { type, responses });
   },
 

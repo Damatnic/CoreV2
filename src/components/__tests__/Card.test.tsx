@@ -337,7 +337,7 @@ describe('Card', () => {
   describe('Edge Cases', () => {
     it('should handle undefined className', () => {
       const { container } = render(
-        <Card className={undefined as any}>
+        <Card className={undefined as unknown}>
           <div>Content</div>
         </Card>
       );
@@ -429,7 +429,7 @@ describe('Card', () => {
 
     it('should pass keyboard event to onClick when triggered by keyboard', () => {
       let receivedEvent: any;
-      const handleClick = (event: any) => {
+      const handleClick = (event: Event) => {
         receivedEvent = event;
       };
       

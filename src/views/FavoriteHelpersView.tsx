@@ -10,6 +10,7 @@ import { useSessionStore } from '../stores/sessionStore';
 import { useDilemmaStore } from '../stores/dilemmaStore';
 import { EmptyState } from '../components/EmptyState';
 import { HeartIcon  } from '../components/icons.dynamic';
+import { isError } from '../types/common';
 
 export const FavoriteHelpersView: React.FC<{
     onViewHelperProfile: (helperId: string) => void;
@@ -113,9 +114,10 @@ export const FavoriteHelpersView: React.FC<{
                 alert('Your direct request has been sent to the helper.');
                 setIsModalOpen(false);
                 setRequestMessage('');
-            } catch(error: any) {
+            } catch (error) {
                 console.error(error);
-                alert('Failed to send request: ' + error.message);
+                const errorMessage = isError(error) ? error.message : 'An error occurred';
+                alert('Failed to send request: ' + errorMessage);
             }
         }
     };

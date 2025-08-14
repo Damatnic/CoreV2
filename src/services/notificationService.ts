@@ -538,17 +538,18 @@ class NotificationService {
   /**
    * Handle notification click
    */
-  private handleNotificationClick(data: any) {
+  private handleNotificationClick(data: unknown) {
+    const notificationData = data as any;
     // Track click
-    this.trackNotification('clicked', data);
+    this.trackNotification('clicked', notificationData as NotificationOptions);
 
     // Handle based on action
-    if (data.action) {
-      switch (data.action) {
+    if (notificationData.action) {
+      switch (notificationData.action) {
         case 'view':
           // Navigate to relevant page
-          if (data.url) {
-            window.location.href = data.url;
+          if (notificationData.url) {
+            window.location.href = notificationData.url;
           }
           break;
         case 'dismiss':
@@ -557,15 +558,15 @@ class NotificationService {
         case 'snooze':
           // Reschedule for 10 minutes later
           const snoozeTime = new Date(Date.now() + 10 * 60 * 1000);
-          this.scheduleNotification(data.notification, snoozeTime);
+          this.scheduleNotification(notificationData.notification, snoozeTime);
           break;
         default:
           // Custom action handling
-          window.dispatchEvent(new CustomEvent('notification-action', { detail: data }));
+          window.dispatchEvent(new CustomEvent('notification-action', { detail: notificationData }));
       }
-    } else if (data.url) {
+    } else if (notificationData.url) {
       // Default click behavior
-      window.location.href = data.url;
+      window.location.href = notificationData.url;
     }
   }
 

@@ -25,7 +25,7 @@ interface CulturalCrisisAlertProps {
   /** User type - affects recommendations */
   userType?: 'seeker' | 'helper';
   /** Callback when crisis is detected */
-  onCrisisDetected?: (result: any) => void;
+  onCrisisDetected?: (result: unknown) => void;
   /** Callback when cultural bias is detected */
   onCulturalBiasDetected?: (adjustments: string[]) => void;
   /** Callback when cultural intervention is recommended */

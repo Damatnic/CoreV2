@@ -576,7 +576,7 @@ describe('SecurityService', () => {
 
     it('should limit logs to 100 entries', () => {
       const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
-      const existingLogs: any[] = [];
+      const existingLogs: unknown[] = [];
       const mockGetItem = jest.fn(() => JSON.stringify(existingLogs));
       const mockSetItem = jest.fn((_key, value) => {
         existingLogs.length = 0;
@@ -626,9 +626,9 @@ describe('SecurityService', () => {
         return {};
       });
       
-      global.document.createElement = mockCreateElement as any;
+      global.document.createElement = mockCreateElement as unknown;
       
-      service.addFormProtection(mockForm as any);
+      service.addFormProtection(mockForm as unknown);
       
       expect(mockForm.appendChild).toHaveBeenCalled();
       expect(mockInput.type).toBe('hidden');
@@ -648,7 +648,7 @@ describe('SecurityService', () => {
         querySelectorAll: jest.fn(() => [mockInput])
       };
       
-      service.addFormProtection(mockForm as any);
+      service.addFormProtection(mockForm as unknown);
       
       expect(mockAddEventListener).toHaveBeenCalled();
     });
@@ -821,7 +821,7 @@ describe('edge cases and error handling', () => {
       appendChild: jest.fn(),
       querySelectorAll: jest.fn(() => [])
     };
-    expect(() => service.addFormProtection(mockForm as any)).not.toThrow();
+    expect(() => service.addFormProtection(mockForm as unknown)).not.toThrow();
     expect(mockForm.appendChild).toHaveBeenCalled();
   });
 
@@ -833,7 +833,7 @@ describe('edge cases and error handling', () => {
       subtle: {
         digest: mockDigest
       }
-    } as any;
+    } as unknown;
     
     await expect(service.hashPassword('password')).rejects.toThrow('Crypto error');
   });

@@ -40,12 +40,12 @@ describe('truncateText', () => {
     });
 
     it('should handle null input', () => {
-      const result = truncateText(null as any, 10);
+      const result = truncateText(null as unknown, 10);
       expect(result).toBe('');
     });
 
     it('should handle undefined input', () => {
-      const result = truncateText(undefined as any, 10);
+      const result = truncateText(undefined as unknown, 10);
       expect(result).toBe('');
     });
 
@@ -259,7 +259,7 @@ describe('truncateText', () => {
       
       inputs.forEach(input => {
         expect(() => {
-          truncateText(input as any, 10);
+          truncateText(input as unknown, 10);
         }).not.toThrow();
       });
     });

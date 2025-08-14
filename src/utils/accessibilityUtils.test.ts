@@ -761,7 +761,7 @@ describe('AccessibilityUtils', () => {
   describe('edge cases and error handling', () => {
     it('should handle null elements gracefully', () => {
       expect(() => {
-        AccessibilityUtils.getElementAttributes(null as any);
+        AccessibilityUtils.getElementAttributes(null as unknown);
       }).toThrow();
     });
 

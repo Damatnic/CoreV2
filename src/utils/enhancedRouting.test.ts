@@ -82,11 +82,11 @@ describe('enhancedRouting', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Reset static state
-    (EnhancedRouteManager as any).routes = new Map();
-    (EnhancedRouteManager as any).navigationHistory = [];
-    (EnhancedRouteManager as any).preloadCache = new Set();
-    (EnhancedRouteManager as any).currentRoute = '';
-    (EnhancedRouteManager as any).isInitialized = false;
+    (EnhancedRouteManager as unknown).routes = new Map();
+    (EnhancedRouteManager as unknown).navigationHistory = [];
+    (EnhancedRouteManager as unknown).preloadCache = new Set();
+    (EnhancedRouteManager as unknown).currentRoute = '';
+    (EnhancedRouteManager as unknown).isInitialized = false;
   });
 
   afterEach(() => {
@@ -248,7 +248,7 @@ describe('enhancedRouting', () => {
         ComponentPreloader.addToQueue.mockClear();
         
         // Trigger critical route preloading
-        (EnhancedRouteManager as any).preloadCriticalRoutes();
+        (EnhancedRouteManager as unknown).preloadCriticalRoutes();
 
         expect(ComponentPreloader.addToQueue).toHaveBeenCalledWith(
           '/',
@@ -274,7 +274,7 @@ describe('enhancedRouting', () => {
         });
 
         // Should only preload once
-        expect((EnhancedRouteManager as any).preloadCache.has('/duplicate')).toBe(true);
+        expect((EnhancedRouteManager as unknown).preloadCache.has('/duplicate')).toBe(true);
       });
     });
 
@@ -419,7 +419,7 @@ describe('enhancedRouting', () => {
         
         const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
         
-        (EnhancedRouteManager as any).cleanupUnusedResources();
+        (EnhancedRouteManager as unknown).cleanupUnusedResources();
         
         expect(consoleSpy).toHaveBeenCalledWith('🧹 Cleaning up unused route resources');
         
@@ -496,7 +496,7 @@ describe('enhancedRouting', () => {
     it('should handle component without display name', () => {
       const TestComponent = () => React.createElement('div', null, 'Test');
       // Remove display name
-      delete (TestComponent as any).displayName;
+      delete (TestComponent as unknown).displayName;
       
       const TrackedComponent = withRouteTracking(TestComponent, '/no-name');
       
@@ -566,7 +566,7 @@ describe('enhancedRouting', () => {
     it('should handle intersection observer unavailability', () => {
       // Mock missing IntersectionObserver
       const originalIO = window.IntersectionObserver;
-      delete (window as any).IntersectionObserver;
+      delete (window as unknown).IntersectionObserver;
 
       expect(() => {
         EnhancedRouteManager.initialize();
@@ -579,7 +579,7 @@ describe('enhancedRouting', () => {
     it('should handle mutation observer unavailability', () => {
       // Mock missing MutationObserver
       const originalMO = window.MutationObserver;
-      delete (window as any).MutationObserver;
+      delete (window as unknown).MutationObserver;
 
       expect(() => {
         EnhancedRouteManager.initialize();
@@ -592,7 +592,7 @@ describe('enhancedRouting', () => {
     it('should handle performance API unavailability', () => {
       // Mock missing performance.now
       const originalPerf = window.performance.now;
-      delete (window.performance as any).now;
+      delete (window.performance as unknown).now;
 
       const TestComponent = () => React.createElement('div', null, 'Test');
       const TrackedComponent = withRouteTracking(TestComponent, '/no-perf');

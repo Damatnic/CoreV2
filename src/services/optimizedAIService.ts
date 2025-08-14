@@ -8,7 +8,7 @@ import { crisisEscalationWorkflowService } from './crisisEscalationWorkflowServi
 
 // Lazy-loaded AI service modules
 export const createLazyAIService = () => {
-  let tensorflowPromise: Promise<any> | null = null;
+  let tensorflowPromise: Promise<unknown> | null = null;
 
   return {
     // Lazy load TensorFlow.js only when needed
@@ -51,8 +51,9 @@ export const createLazyAIService = () => {
               const [sentiment] = await Promise.all([
                 this.loadSentimentAnalysis()
               ]);
-              if ((sentiment as any)?.default) {
-                const basicResult = (sentiment as any).default(text);
+              const sentimentModule = sentiment as { default?: (text: string) => { score: number; comparative: number } } | null;
+              if (sentimentModule?.default) {
+                const basicResult = sentimentModule.default(text);
                 return {
                   score: basicResult.score,
                   comparative: basicResult.comparative,
@@ -103,8 +104,9 @@ export const createLazyAIService = () => {
             const [sentiment] = await Promise.all([
               this.loadSentimentAnalysis()
             ]);
-            if ((sentiment as any)?.default) {
-              const basicResult = (sentiment as any).default(text);
+            const sentimentModule = sentiment as { default?: (text: string) => { score: number; comparative: number } } | null;
+            if (sentimentModule?.default) {
+              const basicResult = sentimentModule.default(text);
               return {
                 score: basicResult.score,
                 comparative: basicResult.comparative,
@@ -171,8 +173,12 @@ export const createLazyAIService = () => {
         // Only load when advanced AI features are actually needed
         analyzeComplexPatterns: async (data: number[]) => {
           // Simplified TensorFlow usage
-          const tensor = tf.tensor1d(data);
-          const normalized = tf.div(tensor, tf.max(tensor));
+          if (!tf || typeof tf !== 'object' || !('tensor1d' in tf)) {
+            throw new Error('TensorFlow not properly loaded');
+          }
+          const tfTyped = tf as any; // Type assertion for TensorFlow
+          const tensor = tfTyped.tensor1d(data);
+          const normalized = tfTyped.div(tensor, tfTyped.max(tensor));
           const result = await normalized.data();
           tensor.dispose();
           normalized.dispose();
@@ -219,9 +225,14 @@ export const aiCacheStrategy = {
 export const progressiveAIEnhancement = {
   // Check if AI features should be enabled based on device capabilities
   shouldEnableAI: () => {
-    const { memory, hardwareConcurrency } = navigator as any;
+    // Extended Navigator interface for device capabilities
+    const navigatorExt = navigator as Navigator & { 
+      memory?: number; 
+      hardwareConcurrency?: number 
+    };
+    const { memory, hardwareConcurrency } = navigatorExt;
     const hasGoodMemory = !memory || memory >= 4; // 4GB+ RAM
-    const hasMultipleCores = hardwareConcurrency >= 2;
+    const hasMultipleCores = !hardwareConcurrency || hardwareConcurrency >= 2;
     const isOnline = navigator.onLine;
     
     return hasGoodMemory && hasMultipleCores && isOnline;

@@ -5,6 +5,7 @@ import { AppButton } from '../components/AppButton';
 import { AppInput, AppTextArea } from '../components/AppInput';
 import { View } from '../types';
 import { Card } from '../components/Card';
+import { isError } from '../types/common';
 
 const EXPERTISE_OPTIONS = [
     'Anxiety & Stress',
@@ -57,8 +58,9 @@ export const HelperProfileView: React.FC<{
             await reloadProfile(); // Reload profile in context
             onProfileUpdated(); // Notify parent
             setIsEditing(false);
-        } catch (err: any) {
-            setError(err.message || 'Failed to update profile.');
+        } catch (err) {
+            const errorMessage = isError(err) ? err.message : 'Failed to update profile.';
+            setError(errorMessage);
         } finally {
             setIsSubmitting(false);
         }

@@ -13,6 +13,7 @@ import CulturalCrisisAlert from '../components/CulturalCrisisAlert';
 import { useNotification } from '../contexts/NotificationContext';
 import { useChatStore } from '../stores/chatStore';
 import { useSessionStore } from '../stores/sessionStore';
+import { isError } from '../types/common';
 
 
 export const ChatView: React.FC<{
@@ -78,8 +79,9 @@ export const ChatView: React.FC<{
                     await ApiClient.userBlocking.blockUser(blockerId, blockedId);
                     addToast("User has been blocked. This chat will now close.", 'info');
                     closeChat(dilemma.id);
-                } catch (err: any) {
-                    addToast(err.message || "Failed to block user.", 'error');
+                } catch (err) {
+                    const errorMessage = isError(err) ? err.message : "Failed to block user.";
+                    addToast(errorMessage, 'error');
                 }
             }
         });

@@ -39,7 +39,7 @@ class MockHTMLLinkElement {
 
 const mockCreateElement = jest.fn((tagName: string) => {
   if (tagName === 'link') {
-    return new MockHTMLLinkElement() as any;
+    return new MockHTMLLinkElement() as unknown;
   }
   return document.createElement(tagName);
 });
@@ -229,8 +229,8 @@ describe('CSS Optimization Utilities', () => {
     global.PerformanceObserver = jest.fn().mockImplementation((_callback) => ({
       observe: jest.fn(),
       disconnect: jest.fn()
-    })) as any;
-    (global.PerformanceObserver as any).supportedEntryTypes = ['resource'];
+    })) as unknown;
+    (global.PerformanceObserver as unknown).supportedEntryTypes = ['resource'];
     
     cssOptimization.monitorCSSPerformance();
     

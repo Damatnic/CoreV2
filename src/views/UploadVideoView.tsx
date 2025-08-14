@@ -5,6 +5,7 @@ import { AppTextArea } from '../components/AppInput';
 import { Card } from '../components/Card';
 import { ViewHeader } from '../components/ViewHeader';
 import { useNotification } from '../contexts/NotificationContext';
+import { isError } from '../types/common';
 
 type UploadStatus = 'idle' | 'uploading' | 'error' | 'success';
 
@@ -59,9 +60,10 @@ export const UploadVideoView: React.FC<UploadVideoViewProps> = ({ onUploadComple
         setStatus('success');
         addToast('Video posted successfully!', 'success');
         onUploadComplete();
-    } catch (err: any) {
+    } catch (err) {
       setStatus('error');
-      setError(err.message || 'An unexpected error occurred during upload.');
+      const errorMessage = isError(err) ? err.message : 'An unexpected error occurred during upload.';
+      setError(errorMessage);
       setStatus('idle');
     }
   };

@@ -6,6 +6,7 @@ import { ViewHeader } from '../components/ViewHeader';
 import { useAssessmentStore } from '../stores/assessmentStore';
 import { useNotification } from '../contexts/NotificationContext';
 import { phq9Questions, getPhq9Result, gad7Questions, getGad7Result } from '../utils/assessmentUtils';
+import { isError } from '../types/common';
 
 interface AssessmentDetailViewProps {
     type: 'phq-9' | 'gad-7';
@@ -59,8 +60,9 @@ export const AssessmentDetailView: React.FC<AssessmentDetailViewProps> = ({ type
             await assessmentDetails.submit(score, finalAnswers);
             const resultData = assessmentDetails.getResult(score);
             setResult(resultData);
-        } catch (error: any) {
-            addToast(error.message || 'Failed to submit assessment.', 'error');
+        } catch (error) {
+            const errorMessage = isError(error) ? error.message : 'Failed to submit assessment.';
+            addToast(errorMessage, 'error');
         } finally {
             setIsSubmitting(false);
         }

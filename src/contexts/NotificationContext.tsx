@@ -59,3 +59,6 @@ export const useNotification = (): NotificationContextType => {
   }
   return context;
 };
+
+// Export NotificationContext for testing purposes
+export { NotificationContext };

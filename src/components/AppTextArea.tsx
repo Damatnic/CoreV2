@@ -1,19 +1,19 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 
-interface AppTextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+export interface AppTextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   error?: string;
   helperText?: string;
 }
 
-export const AppTextArea: React.FC<AppTextAreaProps> = ({
+export const AppTextArea = forwardRef<HTMLTextAreaElement, AppTextAreaProps>(({
   label,
   error,
   helperText,
   className = '',
   id,
   ...props
-}) => {
+}, ref) => {
   const textareaId = id || `textarea-${Math.random().toString(36).substr(2, 9)}`;
   
   return (
@@ -24,6 +24,7 @@ export const AppTextArea: React.FC<AppTextAreaProps> = ({
         </label>
       )}
       <textarea
+        ref={ref}
         id={textareaId}
         className={`form-textarea${error ? ' error' : ''} ${className}`}
         aria-invalid={!!error}
@@ -42,6 +43,8 @@ export const AppTextArea: React.FC<AppTextAreaProps> = ({
       )}
     </div>
   );
-};
+});
+
+AppTextArea.displayName = 'AppTextArea';
 
 export default AppTextArea;

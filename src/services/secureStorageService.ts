@@ -411,7 +411,12 @@ class SecureStorageService {
       }
     }
 
-    const result: any = {
+    const result: {
+      data: Record<string, string>;
+      exportTime: string;
+      version: string;
+      metadata?: Record<string, StorageMetadata>;
+    } = {
       data: exportData,
       exportTime: new Date().toISOString(),
       version: '1.0'

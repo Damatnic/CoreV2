@@ -178,8 +178,10 @@ const TetherView: React.FC<{ userToken?: string | null; setActiveView?: (view: a
     });
 
     service.on('breathingSync', (data: any) => {
-      setBreathingPhase(data.phase);
-      setBreathingProgress(data.progress);
+      if (data && typeof data === 'object' && 'phase' in data && 'progress' in data) {
+        setBreathingPhase(data.phase);
+        setBreathingProgress(data.progress);
+      }
     });
   };
 
@@ -803,7 +805,7 @@ const TetherView: React.FC<{ userToken?: string | null; setActiveView?: (view: a
               value={tetherProfile.vibrationPattern}
               onChange={(e) => setTetherProfile(prev => ({
                 ...prev,
-                vibrationPattern: e.target.value as any
+                vibrationPattern: e.target.value as 'heartbeat' | 'wave' | 'pulse' | 'custom'
               }))}
               className="form-select"
             >
@@ -835,7 +837,7 @@ const TetherView: React.FC<{ userToken?: string | null; setActiveView?: (view: a
               value={tetherProfile.breathingPattern}
               onChange={(e) => setTetherProfile(prev => ({
                 ...prev,
-                breathingPattern: e.target.value as any
+                breathingPattern: e.target.value as '4-7-8' | 'box' | 'coherent'
               }))}
               className="form-select"
             >

@@ -348,7 +348,7 @@ class CoreWebVitalsService {
   /**
    * Store crisis metrics locally
    */
-  private storeCrisisMetrics(data: any): void {
+  private storeCrisisMetrics(data: unknown): void {
     try {
       const existingData = localStorage.getItem('crisis-performance-metrics');
       const metrics = existingData ? JSON.parse(existingData) : [];

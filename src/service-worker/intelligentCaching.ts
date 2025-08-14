@@ -20,7 +20,7 @@ export interface CacheStrategy {
       purgeOnQuotaError: boolean;
     };
     networkTimeoutSeconds?: number;
-    plugins?: any[];
+    plugins?: unknown[];
   };
   priority: 'crisis' | 'high' | 'medium' | 'low';
 }

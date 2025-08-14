@@ -455,48 +455,55 @@ class ApiClient {
     if (contentType?.includes('application/json')) {
       return await response.json();
     } else if (contentType?.includes('text/')) {
-      return await response.text() as any;
+      return await response.text() as unknown as T;
     } else {
-      return await response.blob() as any;
+      return await response.blob() as unknown as T;
     }
   }
 
   /**
    * Handle errors
    */
-  private handleError(error: any): AstralCoreApiError {
-    // Abort error
-    if (error.name === 'AbortError') {
-      return new AstralCoreApiError({
-        message: 'Request was cancelled',
-        code: 'REQUEST_CANCELLED',
-        timestamp: new Date().toISOString(),
-      });
+  private handleError(error: unknown): AstralCoreApiError {
+    // Type guard for Error with name property
+    if (error instanceof Error) {
+      // Abort error
+      if (error.name === 'AbortError') {
+        return new AstralCoreApiError({
+          message: 'Request was cancelled',
+          code: 'REQUEST_CANCELLED',
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      // Network error
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        return new AstralCoreApiError({
+          message: 'Network error - please check your connection',
+          code: 'NETWORK_ERROR',
+          timestamp: new Date().toISOString(),
+        });
+      }
     }
 
-    // Network error
-    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+    // API error response with type guard
+    const errorWithResponse = error as any;
+    if (errorWithResponse?.response) {
       return new AstralCoreApiError({
-        message: 'Network error - please check your connection',
-        code: 'NETWORK_ERROR',
-        timestamp: new Date().toISOString(),
-      });
-    }
-
-    // API error response
-    if (error.response) {
-      return new AstralCoreApiError({
-        message: error.response.data?.message || error.message,
-        status: error.response.status,
-        code: error.response.data?.code,
-        details: error.response.data?.details,
+        message: errorWithResponse.response.data?.message || errorWithResponse.message || 'Request failed',
+        status: errorWithResponse.response.status,
+        code: errorWithResponse.response.data?.code,
+        details: errorWithResponse.response.data?.details,
         timestamp: new Date().toISOString(),
       });
     }
 
     // Generic error
+    const errorMessage = error instanceof Error ? error.message : 
+                        (typeof error === 'string' ? error : 'An unexpected error occurred');
+    
     return new AstralCoreApiError({
-      message: error.message || 'An unexpected error occurred',
+      message: errorMessage,
       code: 'UNKNOWN_ERROR',
       details: error,
       timestamp: new Date().toISOString(),

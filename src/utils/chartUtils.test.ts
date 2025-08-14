@@ -13,14 +13,14 @@ jest.spyOn(Date, 'now').mockImplementation(() => mockDate.getTime());
 // Set up consistent Date constructor
 const OriginalDate = Date;
 global.Date = class extends OriginalDate {
-  constructor(...args: any[]) {
+  constructor(...args: unknown[]) {
     if (args.length === 0) {
       super(mockDate.getTime());
     } else {
       super(...args as []);
     }
   }
-} as any;
+} as unknown;
 
 describe('chartUtils', () => {
   describe('groupCheckInsByDay', () => {

@@ -22,7 +22,7 @@ describe('wellnessStore', () => {
 
   test('fetchHistory should update state on successful API call', async () => {
     const mockHistory = [{ id: '1', moodScore: 4 }];
-    mockedApiClient.mood.getHistory.mockResolvedValue(mockHistory as any);
+    mockedApiClient.mood.getHistory.mockResolvedValue(mockHistory as unknown);
 
     await act(async () => {
       await useWellnessStore.getState().fetchHistory();
@@ -35,11 +35,11 @@ describe('wellnessStore', () => {
 
   test('postCheckIn should call the API and then refresh history', async () => {
     const checkInData = { moodScore: 5, tags: ['Grateful'] };
-    mockedApiClient.mood.postCheckIn.mockResolvedValue({} as any);
+    mockedApiClient.mood.postCheckIn.mockResolvedValue({} as unknown);
     mockedApiClient.mood.getHistory.mockResolvedValue([]); // For the refresh call
 
     await act(async () => {
-      await useWellnessStore.getState().postCheckIn(checkInData as any);
+      await useWellnessStore.getState().postCheckIn(checkInData as unknown);
     });
 
     expect(mockedApiClient.mood.postCheckIn).toHaveBeenCalledWith(checkInData, 'user123');
@@ -51,9 +51,9 @@ describe('wellnessStore', () => {
     const mockTrackedIds = ['h1'];
     const mockCompletions = [{ habitId: 'h1', completedAt: new Date().toISOString() }];
 
-    mockedApiClient.habits.getPredefinedHabits.mockResolvedValue(mockPredefined as any);
+    mockedApiClient.habits.getPredefinedHabits.mockResolvedValue(mockPredefined as unknown);
     mockedApiClient.habits.getTrackedHabitIds.mockResolvedValue(mockTrackedIds);
-    mockedApiClient.habits.getCompletions.mockResolvedValue(mockCompletions as any);
+    mockedApiClient.habits.getCompletions.mockResolvedValue(mockCompletions as unknown);
     
     await act(async () => {
       await useWellnessStore.getState().fetchHabits();

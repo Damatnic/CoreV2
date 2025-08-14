@@ -47,7 +47,7 @@ const DefaultErrorFallback: React.FC<{ error: Error; resetErrorBoundary: () => v
 
 // Preloading strategies
 export const PreloadStrategies = {
-  idle: (loadComponent: () => Promise<any>) => {
+  idle: (loadComponent: () => Promise<unknown>) => {
     if ('requestIdleCallback' in window) {
       requestIdleCallback(() => loadComponent());
     } else {
@@ -55,7 +55,7 @@ export const PreloadStrategies = {
     }
   },
   
-  visible: (loadComponent: () => Promise<any>, element?: Element) => {
+  visible: (loadComponent: () => Promise<unknown>, element?: Element) => {
     if ('IntersectionObserver' in window && element) {
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -71,7 +71,7 @@ export const PreloadStrategies = {
     }
   },
   
-  hover: (loadComponent: () => Promise<any>, element?: Element) => {
+  hover: (loadComponent: () => Promise<unknown>, element?: Element) => {
     if (element) {
       const handleMouseEnter = () => {
         loadComponent();
@@ -81,7 +81,7 @@ export const PreloadStrategies = {
     }
   },
   
-  immediate: (loadComponent: () => Promise<any>) => {
+  immediate: (loadComponent: () => Promise<unknown>) => {
     loadComponent();
   }
 };
@@ -164,9 +164,22 @@ export function createLazyComponent<T extends ComponentType<any>>(
     const getLoadingSkeleton = () => {
       if (fallback) return fallback;
       
+      // Map skeleton types to LoadingSkeleton variant types
+      let loadingVariant: 'post' | 'comment' | 'profile' | 'chat' = 'post';
+      
+      if (skeleton === 'chat') {
+        loadingVariant = 'chat';
+      } else if (skeleton === 'form' || skeleton === 'card') {
+        loadingVariant = 'profile';  // Use profile for form/card skeletons
+      } else if (skeleton === 'list') {
+        loadingVariant = 'comment';  // Use comment for list skeletons
+      } else if (skeleton === 'dashboard') {
+        loadingVariant = 'post';  // Use post for dashboard skeletons
+      }
+      
       return (
         <LoadingSkeleton 
-          variant={skeleton as any}
+          variant={loadingVariant}
           className={`lazy-loading ${className}`}
         />
       );

@@ -221,7 +221,7 @@ export const QuietSpaceView: React.FC = () => {
                             <button 
                                 key={theme}
                                 className={`theme-btn ${backgroundTheme === theme ? 'active' : ''}`}
-                                onClick={() => setBackgroundTheme(theme as any)}
+                                onClick={() => setBackgroundTheme(theme as 'ocean' | 'forest' | 'sky' | 'aurora')}
                                 title={title}
                                 style={{
                                     width: '40px',

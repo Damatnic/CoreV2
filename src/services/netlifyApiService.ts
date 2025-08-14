@@ -248,16 +248,16 @@ class NetlifyApiService {
     }
   }
 
-  async getAnalyticsSummary(days = 30): Promise<any> {
+  async getAnalyticsSummary(days = 30): Promise<unknown> {
     return this.request(`api-analytics/summary?days=${days}`);
   }
 
   // ============= User Preferences =============
-  async getUserPreferences(): Promise<any> {
+  async getUserPreferences(): Promise<unknown> {
     return this.request('api-preferences');
   }
 
-  async updateUserPreferences(preferences: any): Promise<any> {
+  async updateUserPreferences(preferences: any): Promise<unknown> {
     return this.request('api-preferences', {
       method: 'PUT',
       body: JSON.stringify(preferences),
@@ -288,7 +288,7 @@ class NetlifyApiService {
   }
 
   // ============= AI Support =============
-  async sendAIMessage(message: string, context?: any): Promise<any> {
+  async sendAIMessage(message: string, context?: any): Promise<unknown> {
     return this.request('api-ai/chat', {
       method: 'POST',
       body: JSON.stringify({

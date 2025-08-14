@@ -665,7 +665,7 @@ describe('culturalAssessmentUtils', () => {
     });
 
     it('should handle malformed service responses', async () => {
-      mockCulturalAssessmentService.getCulturalAssessmentQuestions.mockResolvedValue(null as any);
+      mockCulturalAssessmentService.getCulturalAssessmentQuestions.mockResolvedValue(null as unknown);
 
       const result = await getCulturalPhq9Questions('en', 'Asian');
       

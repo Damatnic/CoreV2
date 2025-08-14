@@ -257,7 +257,7 @@ class EnhancedCrisisDetectionIntegrationService {
     );
 
     // Initialize escalation workflow data
-    let escalationWorkflow: any = undefined;
+    let escalationWorkflow = undefined;
 
     // Handle crisis escalation workflow if needed
     if (escalationRequired || emergencyServicesRequired) {

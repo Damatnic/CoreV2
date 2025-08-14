@@ -75,15 +75,15 @@ export const ShareView: React.FC<{
         const systemInstruction = "You are Astral, a friendly and empathetic AI companion for a mental health peer support app. Your role is to help users articulate their thoughts and feelings so they can write a post for the community. You are NOT a therapist. Do not give advice. Ask open-ended questions, validate their feelings, and gently guide them to clarify their thoughts. Keep your responses concise and supportive.";
 
         try {
-            const aiResponseText = await ApiClient.ai.chat(updatedMessages, systemInstruction);
+            const aiResponse = await ApiClient.ai.chat(updatedMessages, systemInstruction);
             const newAiMessage: AIChatMessage = {
                 id: crypto.randomUUID(),
                 sender: 'ai',
-                text: aiResponseText,
+                text: aiResponse.response,
                 timestamp: new Date().toISOString()
             };
             setChatMessages(prev => [...prev, newAiMessage]);
-        } catch (e: any) {
+        } catch (e) {
             console.error("AI chat error:", e);
             const errorMessage: AIChatMessage = {
                 id: crypto.randomUUID(),
@@ -106,7 +106,7 @@ export const ShareView: React.FC<{
             setPostCategory(draftedCategory);
             setWasAIDrafted(true);
             setViewMode('form');
-        } catch (e: any) {
+        } catch (e) {
              console.error("AI draft error:", e);
              addToast("Sorry, I couldn't draft a post right now. Please try again.", 'error');
         } finally {

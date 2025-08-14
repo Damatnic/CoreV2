@@ -885,23 +885,38 @@ class AccessibilityService {
 
   // Navigation methods for keyboard shortcuts and voice commands
   private navigateToCrisisResources(): void {
-    (window as any).app?.setActiveView?.({ view: 'crisis' });
+    const windowWithApp = window as any;
+    if (windowWithApp.app?.setActiveView) {
+      windowWithApp.app.setActiveView({ view: 'crisis' });
+    }
   }
 
   private navigateToSafetyPlan(): void {
-    (window as any).app?.setActiveView?.({ view: 'safety-plan' });
+    const windowWithApp = window as any;
+    if (windowWithApp.app?.setActiveView) {
+      windowWithApp.app.setActiveView({ view: 'safety-plan' });
+    }
   }
 
   private navigateToHome(): void {
-    (window as any).app?.setActiveView?.({ view: 'feed' });
+    const windowWithApp = window as any;
+    if (windowWithApp.app?.setActiveView) {
+      windowWithApp.app.setActiveView({ view: 'feed' });
+    }
   }
 
   private navigateToHelperChat(): void {
-    (window as any).app?.setActiveView?.({ view: 'chat' });
+    const windowWithApp = window as any;
+    if (windowWithApp.app?.setActiveView) {
+      windowWithApp.app.setActiveView({ view: 'chat' });
+    }
   }
 
   private navigateToAIChat(): void {
-    (window as any).app?.setActiveView?.({ view: 'ai-chat' });
+    const windowWithApp = window as any;
+    if (windowWithApp.app?.setActiveView) {
+      windowWithApp.app.setActiveView({ view: 'ai-chat' });
+    }
   }
 
   private activateEmergencyContact(): void {

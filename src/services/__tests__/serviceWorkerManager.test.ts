@@ -40,7 +40,7 @@ global.caches = {
   }),
   delete: jest.fn().mockResolvedValue(true),
   keys: jest.fn().mockResolvedValue([]),
-} as any;
+} as unknown;
 
 describe('ServiceWorkerManager', () => {
   beforeEach(() => {
