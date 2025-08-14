@@ -7,6 +7,7 @@
     "dev:vite": "vite",
     "clean": "rimraf dist",
     "build": "node scripts/create-test-build.js && npx workbox generateSW workbox-enhanced.js",
+    "build:netlify-simple": "node scripts/netlify-build.js",
     "build:intelligent": "node scripts/create-test-build.js && npx workbox generateSW workbox-intelligent.js",
     "build:optimized": "node scripts/optimized-build.js",
     "build:critical-css": "node scripts/critical-css-optimizer.js",
