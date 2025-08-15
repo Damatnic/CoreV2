@@ -104,24 +104,36 @@ const DashboardView: React.FC = () => {
     }
   ];
 
-  const getColorClasses = (color: string) => {
-    const colorMap: { [key: string]: string } = {
-      red: 'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400',
-      blue: 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
-      pink: 'border-pink-200 dark:border-pink-800 bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400',
-      purple: 'border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
-      green: 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400',
-      indigo: 'border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400'
+  const getGradientClass = (color: string) => {
+    const gradientMap: { [key: string]: string } = {
+      red: 'gradient-sunset',
+      blue: 'gradient-peaceful',
+      pink: 'gradient-wellness',
+      purple: 'gradient-calm',
+      green: 'gradient-forest',
+      indigo: 'gradient-aurora'
     };
-    return colorMap[color] || colorMap.blue;
+    return gradientMap[color] || 'gradient-ocean';
+  };
+  
+  const getMoodVariant = (color: string) => {
+    const moodMap: { [key: string]: 'happy' | 'calm' | 'anxious' | 'sad' | 'none' } = {
+      red: 'anxious',
+      blue: 'calm',
+      pink: 'happy',
+      purple: 'calm',
+      green: 'happy',
+      indigo: 'calm'
+    };
+    return moodMap[color] || 'none';
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-therapy-primary-50 to-therapy-secondary-50 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-8">
         {/* Welcome Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+        <div className="mb-8 glass-card p-6 animate-float">
+          <h1 className="text-3xl font-bold gradient-text mb-2">
             {timeOfDay}, {userName}!
           </h1>
           <p className="text-gray-600 dark:text-gray-400 text-lg">
@@ -131,27 +143,27 @@ const DashboardView: React.FC = () => {
 
         {/* Quick Stats */}
         <div className="grid gap-4 md:grid-cols-3 mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          <div className="wellness-stat-card glass-card smooth-transition animate-breathe">
             <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
               Check-ins This Week
             </h3>
-            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">5</p>
-            <p className="text-sm text-green-600 dark:text-green-400">+2 from last week</p>
+            <p className="text-2xl font-bold gradient-text">5</p>
+            <p className="text-sm text-green-600 dark:text-green-400 animate-glow">+2 from last week</p>
           </div>
           
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          <div className="wellness-stat-card glass-card smooth-transition animate-breathe" style={{animationDelay: '0.2s'}}>
             <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
               Mood Average
             </h3>
-            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">7.2/10</p>
+            <p className="text-2xl font-bold gradient-text">7.2/10</p>
             <p className="text-sm text-blue-600 dark:text-blue-400">Stable trend</p>
           </div>
           
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          <div className="wellness-stat-card glass-card smooth-transition animate-breathe" style={{animationDelay: '0.4s'}}>
             <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
               Support Connections
             </h3>
-            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">18</p>
+            <p className="text-2xl font-bold gradient-text">18</p>
             <p className="text-sm text-purple-600 dark:text-purple-400">Active helpers</p>
           </div>
         </div>
@@ -163,7 +175,7 @@ const DashboardView: React.FC = () => {
             return (
               <button
                 key={card.id}
-                className={`border rounded-lg p-6 cursor-pointer hover:shadow-lg transition-all duration-200 transform hover:scale-105 text-left ${getColorClasses(card.color)}`}
+                className={`therapy-card smooth-transition-slow cursor-pointer text-left ${getGradientClass(card.color)} animate-gradient`}
                 onClick={() => {
                   // In a real app, this would use React Router
                   console.log(`Navigate to ${card.href}`);
@@ -174,22 +186,29 @@ const DashboardView: React.FC = () => {
                     console.log(`Navigate to ${card.href}`);
                   }
                 }}
+                style={{
+                  background: `var(--${getGradientClass(card.color)})`,
+                  backgroundSize: '200% 200%',
+                  animationDelay: `${dashboardCards.indexOf(card) * 0.1}s`
+                }}
               >
                 <div className="flex items-start justify-between mb-4">
-                  <IconComponent className="w-8 h-8" />
+                  <div className="glass-card p-3 animate-float">
+                    <IconComponent className="w-8 h-8 text-white" />
+                  </div>
                   {card.stats && (
-                    <div className="text-right">
-                      <p className="text-xs opacity-75">{card.stats.label}</p>
+                    <div className="text-right text-white">
+                      <p className="text-xs opacity-90">{card.stats.label}</p>
                       <p className="text-sm font-semibold">{card.stats.value}</p>
                     </div>
                   )}
                 </div>
                 
-                <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">
+                <h3 className="text-lg font-semibold mb-2 text-white">
                   {card.title}
                 </h3>
                 
-                <p className="text-sm opacity-80">
+                <p className="text-sm text-white opacity-90">
                   {card.description}
                 </p>
               </button>
@@ -198,14 +217,16 @@ const DashboardView: React.FC = () => {
         </div>
 
         {/* Recent Activity */}
-        <div className="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+        <div className="mt-8 glass-card smooth-transition p-6">
+          <h2 className="text-xl font-semibold gradient-text mb-4">
             Recent Activity
           </h2>
           
           <div className="space-y-4">
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <HeartIcon className="w-5 h-5 text-pink-500" />
+            <div className="flex items-center space-x-3 p-3 glass-card smooth-transition animate-float" style={{animationDelay: '0.1s'}}>
+              <div className="neumorph-card p-2">
+                <HeartIcon className="w-5 h-5 text-pink-500" />
+              </div>
               <div>
                 <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                   Wellness check-in completed
@@ -214,8 +235,10 @@ const DashboardView: React.FC = () => {
               </div>
             </div>
             
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <SparkleIcon className="w-5 h-5 text-purple-500" />
+            <div className="flex items-center space-x-3 p-3 glass-card smooth-transition animate-float" style={{animationDelay: '0.2s'}}>
+              <div className="neumorph-card p-2">
+                <SparkleIcon className="w-5 h-5 text-purple-500" />
+              </div>
               <div>
                 <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                   AI conversation: Stress management tips
@@ -224,8 +247,10 @@ const DashboardView: React.FC = () => {
               </div>
             </div>
             
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <UsersIcon className="w-5 h-5 text-blue-500" />
+            <div className="flex items-center space-x-3 p-3 glass-card smooth-transition animate-float" style={{animationDelay: '0.3s'}}>
+              <div className="neumorph-card p-2">
+                <UsersIcon className="w-5 h-5 text-blue-500" />
+              </div>
               <div>
                 <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                   Connected with new peer support helper
@@ -237,7 +262,7 @@ const DashboardView: React.FC = () => {
         </div>
 
         {/* Emergency Section */}
-        <div className="mt-8 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
+        <div className="mt-8 crisis-indicator glass-card animate-breathe">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">
@@ -248,7 +273,7 @@ const DashboardView: React.FC = () => {
               </p>
             </div>
             <button 
-              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+              className="crisis-button smooth-transition ripple-button"
               onClick={() => console.log('Navigate to /crisis')}
             >
               Get Help Now

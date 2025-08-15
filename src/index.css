@@ -6,6 +6,15 @@
 /* Import mobile optimizations */
 @import './styles/mobile-optimizations.css';
 
+/* Import modern therapeutic design system */
+@import './styles/modern-therapeutic-design.css';
+
+/* Import enhanced dark mode styles */
+@import './styles/enhanced-dark-mode.css';
+
+/* Import WCAG AAA compliance styles */
+@import './styles/wcag-aaa-compliance.css';
+
 /* ===========================
    CSS Reset & Base
    =========================== */

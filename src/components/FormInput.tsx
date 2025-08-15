@@ -173,9 +173,10 @@ export const FormInput: React.FC<FormInputProps> = ({
   const isNearLimit = Boolean(maxLength && charactersUsed > maxLength * 0.8);
   const isOverLimit = Boolean(maxLength && charactersUsed > maxLength);
 
-  // CSS classes
+  // CSS classes with therapeutic design
   const formGroupClasses = [
     'form-group',
+    'smooth-transition',
     validationState !== 'idle' ? validationState : '',
     floatingLabel ? 'floating-label' : '',
     hasValue ? 'has-value' : '',
@@ -184,8 +185,10 @@ export const FormInput: React.FC<FormInputProps> = ({
   ].filter(Boolean).join(' ');
 
   const inputClasses = [
+    'glass-input',
     'form-input',
-    'enhanced-input'
+    'enhanced-input',
+    'smooth-transition'
   ].filter(Boolean).join(' ');
 
   // Unique IDs for accessibility
@@ -305,8 +308,8 @@ const FormInputWrapper: React.FC<FormInputWrapperProps> = ({
         </label>
       )}
 
-      {/* Input container */}
-      <div className="form-input-container">
+      {/* Input container with glass morphism */}
+      <div className="form-input-container smooth-transition">
         <input
           ref={inputRef}
           id={id}
@@ -333,13 +336,15 @@ const FormInputWrapper: React.FC<FormInputWrapperProps> = ({
           </label>
         )}
 
-        {/* Validation icon */}
-        <ValidationIcon validationState={validationState} />
+        {/* Validation icon with animation */}
+        <div className="animate-breathe">
+          <ValidationIcon validationState={validationState} />
+        </div>
       </div>
 
-      {/* Help text */}
+      {/* Help text with glass styling */}
       {helpText && (
-        <div id={helpTextId} className="form-message info show">
+        <div id={helpTextId} className="form-message info show glass-card smooth-transition">
           <div className="form-message-icon">
             <svg viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
@@ -408,7 +413,7 @@ const ValidationMessage: React.FC<ValidationMessageProps> = ({
   if (!validationMessage) return null;
 
   return (
-    <div id={messageId} className={`form-message ${validationState} show`} role="alert">
+    <div id={messageId} className={`form-message ${validationState} show glass-card smooth-transition animate-float`} role="alert">
       <div className="form-message-icon">
         {validationState === 'success' && (
           <svg viewBox="0 0 20 20" fill="currentColor">
@@ -452,8 +457,10 @@ const CharacterCount: React.FC<CharacterCountProps> = ({
       id={counterId}
       className={[
         'form-character-count',
-        isNearLimit && 'near-limit',
-        isOverLimit && 'over-limit'
+        'glass-card',
+        'smooth-transition',
+        isNearLimit && 'near-limit animate-glow',
+        isOverLimit && 'over-limit animate-breathe'
       ].filter(Boolean).join(' ')}
     >
       <span>{charactersUsed}/{maxLength} characters</span>

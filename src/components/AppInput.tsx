@@ -8,6 +8,8 @@ interface AppInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
   helpText?: string;
   mobileOptimized?: boolean;
+  variant?: 'glass' | 'neumorph' | 'default';
+  animate?: boolean;
 }
 
 export const AppInput: React.FC<AppInputProps> = ({
@@ -20,12 +22,29 @@ export const AppInput: React.FC<AppInputProps> = ({
   error,
   helpText,
   mobileOptimized = true,
+  variant = 'glass',
+  animate = true,
   ...rest
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const formGroupClass = enhanced ? 'form-group-enhanced' : 'form-group';
-  const inputClass = enhanced ? 'form-control-enhanced' : 'form-control';
+  const formGroupClass = enhanced ? 'form-group-enhanced smooth-transition' : 'form-group';
+  
+  // Determine input class based on variant
+  let inputClass = 'form-control';
+  if (enhanced) {
+    switch(variant) {
+      case 'neumorph':
+        inputClass = 'neumorph-input';
+        break;
+      case 'glass':
+      default:
+        inputClass = 'form-control-enhanced glass-input';
+        break;
+    }
+  }
+  
   const containerClass = enhanced && floatingLabel ? 'form-floating-enhanced' : '';
+  const animationClass = animate && enhanced ? 'smooth-transition' : '';
   
   const inputId = id || `input-${Math.random().toString(36).substring(2, 11)}`;
 
@@ -80,7 +99,7 @@ export const AppInput: React.FC<AppInputProps> = ({
     ...rest,
     id: inputId,
     ref: inputRef,
-    className: `${inputClass} ${className} ${error ? 'is-invalid' : ''} ${mobileOptimized ? 'mobile-optimized' : ''}`,
+    className: `${inputClass} ${animationClass} ${className} ${error ? 'is-invalid' : ''} ${mobileOptimized ? 'mobile-optimized' : ''}`.trim(),
     'aria-invalid': error ? 'true' as const : 'false' as const,
     'aria-describedby': [
       error ? `${inputId}-error` : '',
@@ -132,6 +151,8 @@ interface AppTextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElem
     error?: string;
     helpText?: string;
     mobileOptimized?: boolean;
+    variant?: 'glass' | 'neumorph' | 'default';
+    animate?: boolean;
 }
 
 export const AppTextArea: React.FC<AppTextAreaProps> = ({
@@ -144,11 +165,28 @@ export const AppTextArea: React.FC<AppTextAreaProps> = ({
     error,
     helpText,
     mobileOptimized = true,
+    variant = 'glass',
+    animate = true,
     ...rest
 }) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const formGroupClass = enhanced ? 'form-group-enhanced' : 'form-group';
-    const textareaClass = enhanced ? 'form-control-enhanced' : 'form-control';
+    const formGroupClass = enhanced ? 'form-group-enhanced smooth-transition' : 'form-group';
+    
+    // Determine textarea class based on variant
+    let textareaClass = 'form-control';
+    if (enhanced) {
+      switch(variant) {
+        case 'neumorph':
+          textareaClass = 'neumorph-input';
+          break;
+        case 'glass':
+        default:
+          textareaClass = 'form-control-enhanced glass-input';
+          break;
+      }
+    }
+    
+    const animationClass = animate && enhanced ? 'smooth-transition' : '';
     
     const textareaId = id || `textarea-${Math.random().toString(36).substring(2, 11)}`;
 
@@ -195,7 +233,7 @@ export const AppTextArea: React.FC<AppTextAreaProps> = ({
       ...rest,
       id: textareaId,
       ref: textareaRef,
-      className: `${textareaClass} ${className} ${error ? 'is-invalid' : ''} ${mobileOptimized ? 'mobile-optimized' : ''}`,
+      className: `${textareaClass} ${animationClass} ${className} ${error ? 'is-invalid' : ''} ${mobileOptimized ? 'mobile-optimized' : ''}`.trim(),
       'aria-invalid': error ? 'true' as const : 'false' as const,
       'aria-describedby': [
         error ? `${textareaId}-error` : '',

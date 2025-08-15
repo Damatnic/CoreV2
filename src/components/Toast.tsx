@@ -10,10 +10,19 @@ export const Toast: React.FC<{ toast: ToastType, onDismiss: (id: string) => void
         return () => clearTimeout(timer);
     }, [toast, onDismiss]);
 
+    // Use glass morphism for toasts
+    const toastClasses = [
+        'glass-card',
+        'toast',
+        `toast-${toast.type}`,
+        'smooth-transition',
+        'animate-float'
+    ].join(' ');
+
     return (
-        <div className={`toast toast-${toast.type}`}>
+        <div className={toastClasses}>
             <div className="toast-message">{toast.message}</div>
-            <div className="toast-progress"></div>
+            <div className="toast-progress animate-gradient"></div>
         </div>
     );
 };

@@ -11,6 +11,8 @@ export const Modal: React.FC<{
   enhanced?: boolean;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   description?: string;
+  variant?: 'glass' | 'neumorph' | 'default';
+  animate?: boolean;
 }> = ({ 
   isOpen, 
   onClose, 
@@ -20,7 +22,9 @@ export const Modal: React.FC<{
   allowSwipeToDismiss = true,
   enhanced = true,
   size = 'md',
-  description
+  description,
+  variant = 'glass',
+  animate = true
 }) => {
     const modalRef = useRef<HTMLDialogElement>(null);
     const previousFocusRef = useRef<HTMLElement | null>(null);
@@ -84,8 +88,26 @@ export const Modal: React.FC<{
 
     if (!isOpen) return null;
 
-    const overlayClasses = [enhanced ? 'modal-overlay-enhanced' : 'modal-overlay'];
-    const contentClasses = [enhanced ? 'modal-content-enhanced' : 'modal-panel'];
+    const overlayClasses = [enhanced ? 'modal-overlay-enhanced smooth-transition' : 'modal-overlay'];
+    
+    // Determine content classes based on variant
+    let contentClasses = ['modal-panel'];
+    if (enhanced) {
+        switch(variant) {
+            case 'glass':
+                contentClasses = ['glass-card', 'modal-content-enhanced'];
+                break;
+            case 'neumorph':
+                contentClasses = ['neumorph-card', 'modal-content-enhanced'];
+                break;
+            default:
+                contentClasses = ['modal-content-enhanced'];
+        }
+    }
+    
+    if (animate) {
+        contentClasses.push('animate-breathe');
+    }
     
     if (enhanced && size !== 'md') {
         contentClasses.push(`modal-${size}`);
@@ -122,13 +144,13 @@ export const Modal: React.FC<{
                     if (isDismissible && onClose) onClose();
                 }}
             >
-                <div className={enhanced ? 'modal-header-enhanced' : 'modal-header'}>
-                    <h2 id="modal-title" className={enhanced ? 'modal-title-enhanced' : ''}>{title}</h2>
+                <div className={enhanced ? 'modal-header-enhanced smooth-transition' : 'modal-header'}>
+                    <h2 id="modal-title" className={enhanced ? 'modal-title-enhanced gradient-text' : ''}>{title}</h2>
                     {isDismissible && (
                         <button 
                             type="button"
                             onClick={onClose} 
-                            className={`modal-close-btn touch-optimized ${enhanced ? 'btn-enhanced ghost sm' : ''}`} 
+                            className={`modal-close-btn touch-optimized smooth-transition ${enhanced ? 'glass-button' : ''}`} 
                             aria-label={`Close ${title} dialog`}
                         >
                             <CloseIcon />
@@ -140,7 +162,7 @@ export const Modal: React.FC<{
                         {description}
                     </div>
                 )}
-                <div className={enhanced ? 'modal-body-enhanced' : 'modal-body'}>
+                <div className={enhanced ? 'modal-body-enhanced smooth-transition' : 'modal-body'}>
                     {children}
                 </div>
                 {enhanced && isDismissible && (
@@ -148,7 +170,7 @@ export const Modal: React.FC<{
                         <button 
                             type="button"
                             onClick={onClose}
-                            className="btn-enhanced secondary sm"
+                            className="glass-button smooth-transition"
                             aria-label={`Close ${title} dialog`}
                         >
                             Close

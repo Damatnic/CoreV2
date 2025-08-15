@@ -18,18 +18,18 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   };
 
   return (
-    <output className={`loading-spinner-container ${className}`} aria-live="polite">
-      <div 
-        className={`loading-spinner ${sizeClasses[size]}`}
-        aria-hidden="true"
-      >
-        <div className="loading-spinner-inner"></div>
+    <output className={`loading-spinner-container glass-card smooth-transition animate-float ${className}`} aria-live="polite">
+      <div className="therapy-spinner">
+        <div className={`loading-dots ${sizeClasses[size]}`}>
+          <span className="loading-dot"></span>
+          <span className="loading-dot"></span>
+          <span className="loading-dot"></span>
+        </div>
       </div>
       {message && (
-        <p className="loading-message">
+        <p className="loading-message gradient-text animate-gradient">
           <span className="sr-only">Loading: </span>
           {message}
-          <span className="loading-dots" aria-hidden="true"></span>
         </p>
       )}
     </output>

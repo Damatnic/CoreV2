@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'success' | 'ghost';
+export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'success' | 'ghost' | 'glass' | 'neumorph' | 'crisis';
 export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 interface AppButtonProps {
@@ -17,6 +17,8 @@ interface AppButtonProps {
   icon?: React.ReactNode;
   enhanced?: boolean;
   iconOnly?: boolean;
+  animate?: 'breathe' | 'glow' | 'none';
+  ripple?: boolean;
 }
 
 export const AppButton: React.FC<AppButtonProps> = ({
@@ -32,31 +34,71 @@ export const AppButton: React.FC<AppButtonProps> = ({
   icon,
   enhanced = true,
   iconOnly = false,
+  animate = 'none',
+  ripple = true,
   'aria-label': ariaLabel,
 }) => {
-  const baseClass = enhanced ? 'btn-enhanced' : 'btn';
-  const variantClass = enhanced ? variant : `btn-${variant}`;
+  // Determine base class based on variant
+  let baseClass = 'btn';
+  let variantClass = '';
   
-  // Consistent size handling for both enhanced and legacy buttons
-  let sizeClass = '';
   if (enhanced) {
-    // Enhanced buttons use size as a class modifier
-    sizeClass = size !== 'md' ? size : '';
+    switch(variant) {
+      case 'glass':
+        baseClass = 'glass-button';
+        break;
+      case 'neumorph':
+        baseClass = 'neumorph-button';
+        break;
+      case 'crisis':
+        baseClass = 'crisis-button';
+        break;
+      case 'primary':
+        baseClass = 'glass-button';
+        variantClass = 'btn-primary-therapeutic';
+        break;
+      case 'secondary':
+        baseClass = 'glass-button';
+        variantClass = 'btn-secondary-therapeutic';
+        break;
+      case 'success':
+        baseClass = 'glass-button';
+        variantClass = 'btn-success-therapeutic';
+        break;
+      case 'danger':
+        baseClass = 'glass-button';
+        variantClass = 'btn-danger-therapeutic';
+        break;
+      default:
+        baseClass = 'glass-button';
+        variantClass = variant;
+    }
   } else {
-    // Legacy buttons use btn-size format
-    sizeClass = size !== 'md' ? `btn-${size}` : '';
+    variantClass = `btn-${variant}`;
   }
+  
+  // Size classes
+  const sizeClass = size !== 'md' ? `btn-${size}` : '';
   
   // Icon-only button handling
   const iconOnlyClass = iconOnly ? 'btn-icon-only' : '';
   
-  const touchClasses = !enhanced ? 'touch-optimized touch-feedback touch-ripple' : '';
+  // Animation classes
+  const animationClass = animate !== 'none' ? `animate-${animate}` : '';
+  
+  // Ripple effect
+  const rippleClass = ripple ? 'ripple-button' : '';
+  
+  // Touch and transition classes
+  const touchClasses = 'touch-optimized touch-feedback smooth-transition';
   
   const classes = [
     baseClass,
     variantClass,
     sizeClass,
     iconOnlyClass,
+    animationClass,
+    rippleClass,
     touchClasses,
     className
   ].filter(Boolean).join(' ');
@@ -82,13 +124,15 @@ export const AppButton: React.FC<AppButtonProps> = ({
       aria-label={ariaLabel || (iconOnly && typeof children === 'string' ? children : undefined)}
     >
       {isLoading ? (
-        <div className={`loading-spinner${size !== 'md' ? ` ${size}` : ''}`}>
-          <div className="loading-spinner-inner"></div>
+        <div className="loading-dots">
+          <span className="loading-dot"></span>
+          <span className="loading-dot"></span>
+          <span className="loading-dot"></span>
         </div>
       ) : (
         <>
-          {icon}
-          {!iconOnly && children}
+          {icon && <span className="btn-icon">{icon}</span>}
+          {!iconOnly && <span className="btn-text">{children}</span>}
         </>
       )}
     </button>

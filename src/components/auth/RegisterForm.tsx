@@ -100,18 +100,18 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   };
 
   return (
-    <div className="auth-form-container">
-      <form onSubmit={handleSubmit} className="auth-form">
-        <h2 className="auth-form-title">Create Account</h2>
-        <p className="auth-form-subtitle">Join the CoreV2 community</p>
+    <div className="auth-form-container smooth-transition">
+      <form onSubmit={handleSubmit} className="auth-form glass-card animate-float">
+        <h2 className="auth-form-title gradient-text">Create Account</h2>
+        <p className="auth-form-subtitle">Join our supportive wellness community</p>
 
         {error && (
-          <div className="auth-error-message" role="alert">
+          <div className="auth-error-message glass-card animate-breathe" role="alert">
             {error}
           </div>
         )}
 
-        <div className="form-group">
+        <div className="form-group smooth-transition">
           <label htmlFor="name" className="form-label">
             Full Name
           </label>
@@ -119,7 +119,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             type="text"
             id="name"
             name="name"
-            className="form-input"
+            className="form-input glass-input smooth-transition"
             value={formData.name}
             onChange={handleChange}
             placeholder="John Doe"
@@ -129,7 +129,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-group smooth-transition">
           <label htmlFor="email" className="form-label">
             Email Address
           </label>
@@ -137,7 +137,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             type="email"
             id="email"
             name="email"
-            className="form-input"
+            className="form-input glass-input smooth-transition"
             value={formData.email}
             onChange={handleChange}
             placeholder="you@example.com"
@@ -147,14 +147,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-group smooth-transition">
           <label htmlFor="role" className="form-label">
             I want to
           </label>
           <select
             id="role"
             name="role"
-            className="form-input"
+            className="form-input glass-input smooth-transition"
             value={formData.role}
             onChange={handleChange}
             disabled={isLoading}
@@ -164,7 +164,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           </select>
         </div>
 
-        <div className="form-group">
+        <div className="form-group smooth-transition">
           <label htmlFor="password" className="form-label">
             Password
           </label>
@@ -172,7 +172,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             type="password"
             id="password"
             name="password"
-            className="form-input"
+            className="form-input glass-input smooth-transition"
             value={formData.password}
             onChange={handleChange}
             placeholder="At least 6 characters"
@@ -183,7 +183,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-group smooth-transition">
           <label htmlFor="confirmPassword" className="form-label">
             Confirm Password
           </label>
@@ -191,7 +191,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             type="password"
             id="confirmPassword"
             name="confirmPassword"
-            className="form-input"
+            className="form-input glass-input smooth-transition"
             value={formData.confirmPassword}
             onChange={handleChange}
             placeholder="Re-enter your password"
@@ -205,10 +205,16 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         <div className="form-actions">
           <button
             type="submit"
-            className="btn btn-primary"
+            className="glass-button btn-primary-therapeutic smooth-transition ripple-button animate-glow"
             disabled={isLoading}
           >
-            {isLoading ? 'Creating account...' : 'Create Account'}
+            {isLoading ? (
+              <div className="loading-dots">
+                <span className="loading-dot"></span>
+                <span className="loading-dot"></span>
+                <span className="loading-dot"></span>
+              </div>
+            ) : 'Create Account'}
           </button>
         </div>
 
@@ -217,7 +223,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             Already have an account?{' '}
             <button
               type="button"
-              className="link-button"
+              className="link-button smooth-transition gradient-text"
               onClick={onSwitchToLogin}
               disabled={isLoading}
             >

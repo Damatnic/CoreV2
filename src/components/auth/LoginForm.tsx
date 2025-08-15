@@ -73,25 +73,25 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   };
 
   return (
-    <div className="auth-form-container">
-      <form onSubmit={handleSubmit} className="auth-form">
-        <h2 className="auth-form-title">Welcome Back</h2>
-        <p className="auth-form-subtitle">Sign in to continue to CoreV2</p>
+    <div className="auth-form-container smooth-transition">
+      <form onSubmit={handleSubmit} className="auth-form glass-card animate-float">
+        <h2 className="auth-form-title gradient-text">Welcome Back</h2>
+        <p className="auth-form-subtitle">Sign in to continue to your wellness journey</p>
 
         {error && (
-          <div className="auth-error-message" role="alert">
+          <div className="auth-error-message glass-card animate-breathe" role="alert">
             {error}
           </div>
         )}
 
-        <div className="form-group">
+        <div className="form-group smooth-transition">
           <label htmlFor="email" className="form-label">
             Email Address
           </label>
           <input
             type="email"
             id="email"
-            className="form-input"
+            className="form-input glass-input smooth-transition"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
@@ -101,14 +101,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-group smooth-transition">
           <label htmlFor="password" className="form-label">
             Password
           </label>
           <input
             type="password"
             id="password"
-            className="form-input"
+            className="form-input glass-input smooth-transition"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter your password"
@@ -122,16 +122,22 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         <div className="form-actions">
           <button
             type="submit"
-            className="btn btn-primary"
+            className="glass-button btn-primary-therapeutic smooth-transition ripple-button animate-glow"
             disabled={isLoading}
           >
-            {isLoading ? 'Signing in...' : 'Sign In'}
+            {isLoading ? (
+              <div className="loading-dots">
+                <span className="loading-dot"></span>
+                <span className="loading-dot"></span>
+                <span className="loading-dot"></span>
+              </div>
+            ) : 'Sign In'}
           </button>
 
           <button
             type="button"
             onClick={handleDemoLogin}
-            className="btn btn-secondary"
+            className="glass-button btn-secondary-therapeutic smooth-transition ripple-button"
             disabled={isLoading}
           >
             Try Demo Account
@@ -143,7 +149,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             Don't have an account?{' '}
             <button
               type="button"
-              className="link-button"
+              className="link-button smooth-transition gradient-text"
               onClick={onSwitchToRegister}
               disabled={isLoading}
             >
