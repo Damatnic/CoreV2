@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { ActiveView, View } from '../types';
 import { SeekerSidebar } from './SeekerSidebar';
 import { HelperSidebar } from './HelperSidebar';
-import { useAuth } from '../contexts/AuthContext';
+import { useOptionalAuth } from '../contexts/OptionalAuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export const Sidebar: React.FC = React.memo(() => {
-  const { isAuthenticated, login, logout, helperProfile, userToken } = useAuth();
+  const { isAuthenticated, isAnonymous, login, logout, register, helperProfile, userToken, anonymousId } = useOptionalAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [activeView, setActiveView] = useState<ActiveView>({ view: 'wellness-tracking' as View });
@@ -75,31 +75,34 @@ export const Sidebar: React.FC = React.memo(() => {
     <aside className="sidebar">
       <div className="sidebar-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span>Astral Core</span>
-        {!isAuthenticated && (
-          <button 
-            className="signin-btn"
-            onClick={login}
-            style={{
-              padding: '0.25rem 0.75rem',
-              fontSize: '0.875rem',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '15px',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'scale(1.05)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
-          >
-            Sign In
-          </button>
+        {isAnonymous && (
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button 
+              className="signin-btn optional"
+              onClick={login}
+              title="Sign in to save your data online (optional)"
+              style={{
+                padding: '0.25rem 0.75rem',
+                fontSize: '0.875rem',
+                background: 'transparent',
+                color: 'var(--text-secondary)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '15px',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#667eea';
+                e.currentTarget.style.color = '#667eea';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'var(--border-color)';
+                e.currentTarget.style.color = 'var(--text-secondary)';
+              }}
+            >
+              Sign In
+            </button>
+          </div>
         )}
         {isAuthenticated && (
           <button 
@@ -140,8 +143,9 @@ export const Sidebar: React.FC = React.memo(() => {
         <SeekerSidebar
           activeView={activeView}
           setActiveView={handleSetActiveView}
-          userToken={userToken}
+          userToken={userToken || anonymousId}
           onlineHelperCount={onlineHelperCount}
+          isAnonymous={isAnonymous}
         />
       )}
     </aside>

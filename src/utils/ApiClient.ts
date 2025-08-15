@@ -100,7 +100,10 @@ const _callApi = async (endpoint: string, options: RequestInit = {}) => {
     }
     
     // In a real app, the access token would be retrieved from a secure context.
-    const token = sessionStorage.getItem('accessToken'); 
+    const token = sessionStorage.getItem('accessToken');
+    
+    // Get anonymous ID for anonymous users
+    const anonymousId = !token ? localStorage.getItem('astral_core_anonymous_id') : null;
     
     // Use Netlify Functions in development
     const baseUrl = process.env.VITE_API_URL || '/.netlify/functions';
@@ -110,6 +113,7 @@ const _callApi = async (endpoint: string, options: RequestInit = {}) => {
         headers: {
             'Content-Type': 'application/json',
             ...(token && { 'Authorization': `Bearer ${token}` }),
+            ...(anonymousId && { 'X-Anonymous-Id': anonymousId }),
             ...options.headers,
         },
     });

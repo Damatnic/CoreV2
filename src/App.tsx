@@ -5,7 +5,7 @@
 
 import React, { useEffect } from 'react';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { AuthProvider } from './contexts/AuthContext';
+import { OptionalAuthProvider } from './contexts/OptionalAuthContext';
 import { useAnalyticsTracking } from './hooks/useAnalyticsTracking';
 import AppRoutes from './routes/AppRoutes';
 
@@ -138,9 +138,9 @@ const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <NotificationProvider>
-        <AuthProvider>
+        <OptionalAuthProvider>
           <AppWithAuth />
-        </AuthProvider>
+        </OptionalAuthProvider>
       </NotificationProvider>
     </ErrorBoundary>
   );

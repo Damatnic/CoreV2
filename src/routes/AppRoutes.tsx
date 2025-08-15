@@ -6,8 +6,9 @@
 import React, { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-import { AuthGuard } from '../components/auth/AuthGuard';
-import { UserRole } from '../services/auth0Service';
+// Auth is now optional - all routes are accessible
+// import { AuthGuard } from '../components/auth/AuthGuard';
+// import { UserRole } from '../services/auth0Service';
 
 // Lazy load all views for better performance
 const DashboardView = lazy(() => import('../views/DashboardView'));
@@ -57,7 +58,7 @@ export const AppRoutes: React.FC = () => {
     <Suspense fallback={<RouteLoading />}>
       <Routes>
         {/* Default Route - Wellness Dashboard */}
-        <Route path="/" element={<WellnessDashboard />} />
+        <Route path="/" element={<DashboardView />} />
         
         {/* Public Routes */}
         <Route path="/about" element={<AboutView />} />
@@ -70,137 +71,53 @@ export const AppRoutes: React.FC = () => {
         
         <Route path="/dashboard" element={<DashboardView />} />
         
-        <Route path="/profile" element={
-          <AuthGuard requireAuth={true}>
-            <ProfileView />
-          </AuthGuard>
-        } />
+        <Route path="/profile" element={<ProfileView />} />
         
-        <Route path="/settings" element={
-          <AuthGuard requireAuth={true}>
-            <SettingsView />
-          </AuthGuard>
-        } />
+        <Route path="/settings" element={<SettingsView />} />
         
-        <Route path="/feed" element={
-          <AuthGuard requireAuth={true}>
-            <FeedView />
-          </AuthGuard>
-        } />
+        <Route path="/feed" element={<FeedView />} />
         
-        <Route path="/community" element={
-          <AuthGuard requireAuth={true}>
-            <CommunityView />
-          </AuthGuard>
-        } />
+        <Route path="/community" element={<CommunityView />} />
         
-        <Route path="/chat" element={
-          <AuthGuard requireAuth={true}>
-            <ChatRoute />
-          </AuthGuard>
-        } />
+        <Route path="/chat" element={<ChatRoute />} />
         
-        <Route path="/ai-chat" element={
-          <AuthGuard requireAuth={true}>
-            <AIChatView />
-          </AuthGuard>
-        } />
+        <Route path="/ai-chat" element={<AIChatView />} />
         
-        <Route path="/assessments" element={
-          <AuthGuard requireAuth={true}>
-            <AssessmentsView />
-          </AuthGuard>
-        } />
+        <Route path="/assessments" element={<AssessmentsView />} />
         
         <Route path="/wellness" element={<WellnessView />} />
         
-        <Route path="/wellness-videos" element={
-          <AuthGuard requireAuth={true}>
-            <WellnessVideosView />
-          </AuthGuard>
-        } />
+        <Route path="/wellness-videos" element={<WellnessVideosView />} />
         
-        <Route path="/reflections" element={
-          <AuthGuard requireAuth={true}>
-            <ReflectionsView />
-          </AuthGuard>
-        } />
+        <Route path="/reflections" element={<ReflectionsView />} />
         
-        <Route path="/safety-plan" element={
-          <AuthGuard requireAuth={true}>
-            <SafetyPlanView />
-          </AuthGuard>
-        } />
+        <Route path="/safety-plan" element={<SafetyPlanView />} />
         
-        <Route path="/quiet-space" element={
-          <AuthGuard requireAuth={true}>
-            <QuietSpaceView />
-          </AuthGuard>
-        } />
+        <Route path="/quiet-space" element={<QuietSpaceView />} />
         
-        <Route path="/peer-support" element={
-          <AuthGuard requireAuth={true}>
-            <PeerSupportView />
-          </AuthGuard>
-        } />
+        <Route path="/peer-support" element={<PeerSupportView />} />
         
-        <Route path="/tether" element={
-          <AuthGuard requireAuth={true}>
-            <TetherView />
-          </AuthGuard>
-        } />
+        <Route path="/tether" element={<TetherView />} />
         
-        {/* Helper Routes */}
-        <Route path="/helper/dashboard" element={
-          <AuthGuard requireAuth={true} requireRoles={['helper', 'admin'] as UserRole[]}>
-            <HelperDashboardRoute />
-          </AuthGuard>
-        } />
+        {/* Helper Routes - Optional Authentication */}
+        <Route path="/helper/dashboard" element={<HelperDashboardRoute />} />
         
-        <Route path="/helper/profile" element={
-          <AuthGuard requireAuth={true} requireRoles={['helper', 'admin'] as UserRole[]}>
-            <HelperProfileRoute />
-          </AuthGuard>
-        } />
+        <Route path="/helper/profile" element={<HelperProfileRoute />} />
         
-        <Route path="/helper/training" element={
-          <AuthGuard requireAuth={true}>
-            <HelperTrainingRoute />
-          </AuthGuard>
-        } />
+        <Route path="/helper/training" element={<HelperTrainingRoute />} />
         
-        <Route path="/helper/application" element={
-          <AuthGuard requireAuth={true}>
-            <HelperApplicationRoute />
-          </AuthGuard>
-        } />
+        <Route path="/helper/application" element={<HelperApplicationRoute />} />
         
-        <Route path="/helper/community" element={
-          <AuthGuard requireAuth={true} requireRoles={['helper', 'admin'] as UserRole[]}>
-            <HelperCommunityView />
-          </AuthGuard>
-        } />
+        <Route path="/helper/community" element={<HelperCommunityView />} />
         
-        {/* Admin Routes */}
-        <Route path="/admin" element={
-          <AuthGuard requireAuth={true} requireRoles={['admin'] as UserRole[]}>
-            <AdminDashboardRoute />
-          </AuthGuard>
-        } />
+        {/* Admin Routes - Optional Authentication */}
+        <Route path="/admin" element={<AdminDashboardRoute />} />
         
-        <Route path="/admin/moderation" element={
-          <AuthGuard requireAuth={true} requireRoles={['admin', 'moderator'] as UserRole[]}>
-            <ModerationView />
-          </AuthGuard>
-        } />
+        <Route path="/admin/moderation" element={<ModerationView />} />
         
-        <Route path="/admin/analytics" element={
-          <AuthGuard requireAuth={true} requireRoles={['admin'] as UserRole[]}>
-            <AnalyticsView />
-          </AuthGuard>
-        } />
+        <Route path="/admin/analytics" element={<AnalyticsView />} />
         
-        {/* 404 Fallback - Redirect to wellness dashboard */}
+        {/* 404 Fallback - Redirect to main dashboard */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>

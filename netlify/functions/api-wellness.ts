@@ -10,6 +10,26 @@ const verifyToken = (token: string) => {
   }
 };
 
+// Get user identifier - supports both authenticated and anonymous users
+const getUserIdentifier = (event: any): { userId: string; isAnonymous: boolean } | null => {
+  // Try to get authenticated user first
+  const token = event.headers.authorization?.replace('Bearer ', '');
+  if (token) {
+    const decoded = verifyToken(token) as any;
+    if (decoded) {
+      return { userId: decoded.userId, isAnonymous: false };
+    }
+  }
+  
+  // Fall back to anonymous user ID from headers
+  const anonymousId = event.headers['x-anonymous-id'];
+  if (anonymousId) {
+    return { userId: `anon_${anonymousId}`, isAnonymous: true };
+  }
+  
+  return null;
+};
+
 const calculateRiskLevel = (score: number, type: string): string => {
   if (type === 'PHQ-9') {
     if (score <= 4) return 'minimal';
@@ -38,23 +58,17 @@ export const handler: Handler = async (event) => {
     return { statusCode: 200, headers, body: '' };
   }
 
-  const token = event.headers.authorization?.replace('Bearer ', '');
-  if (!token) {
+  // Support both authenticated and anonymous users
+  const userInfo = getUserIdentifier(event);
+  if (!userInfo) {
     return {
       statusCode: 401,
       headers,
-      body: JSON.stringify({ error: 'Unauthorized' }),
+      body: JSON.stringify({ error: 'No user identifier provided' }),
     };
   }
 
-  const decoded = verifyToken(token) as any;
-  if (!decoded) {
-    return {
-      statusCode: 401,
-      headers,
-      body: JSON.stringify({ error: 'Invalid token' }),
-    };
-  }
+  const { userId, isAnonymous } = userInfo;
 
   try {
     switch (event.httpMethod) {
@@ -66,7 +80,7 @@ export const handler: Handler = async (event) => {
         if (type) {
           query = sql`
             SELECT * FROM wellness_assessments 
-            WHERE user_id = ${decoded.userId} 
+            WHERE user_id = ${userId} 
             AND assessment_type = ${type}
             ORDER BY created_at DESC
             LIMIT ${parseInt(limit)}
@@ -74,7 +88,7 @@ export const handler: Handler = async (event) => {
         } else {
           query = sql`
             SELECT * FROM wellness_assessments 
-            WHERE user_id = ${decoded.userId}
+            WHERE user_id = ${userId}
             ORDER BY created_at DESC
             LIMIT ${parseInt(limit)}
           `;
@@ -112,7 +126,7 @@ export const handler: Handler = async (event) => {
           INSERT INTO wellness_assessments (
             user_id, assessment_type, responses, score, risk_level, recommendations
           ) VALUES (
-            ${decoded.userId},
+            ${userId},
             ${assessment_type},
             ${JSON.stringify(responses)},
             ${score},
@@ -128,7 +142,7 @@ export const handler: Handler = async (event) => {
             INSERT INTO crisis_support_logs (
               user_id, action_type, severity_level
             ) VALUES (
-              ${decoded.userId},
+              ${userId},
               'high_risk_assessment',
               'severe'
             )

@@ -10,6 +10,13 @@ interface JWTPayload {
   exp?: number;
 }
 
+interface AnonymousUser {
+  id: string;
+  isAnonymous: true;
+  role: 'anonymous';
+  anonymousId: string;
+}
+
 interface User {
   id: string;
   email: string;
@@ -97,11 +104,21 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 }
 
 /**
- * Authenticate user from token
+ * Authenticate user from token (supports anonymous users)
  */
-export async function authenticateUser(authHeader?: string): Promise<User | null> {
+export async function authenticateUser(authHeader?: string, anonymousId?: string): Promise<User | AnonymousUser | null> {
+  // First try to authenticate with token
   const token = extractToken(authHeader);
   if (!token) {
+    // If no token but anonymous ID provided, return anonymous user
+    if (anonymousId) {
+      return {
+        id: anonymousId,
+        isAnonymous: true,
+        role: 'anonymous',
+        anonymousId: anonymousId
+      } as AnonymousUser;
+    }
     return null;
   }
 
@@ -130,8 +147,25 @@ export async function authenticateUser(authHeader?: string): Promise<User | null
 /**
  * Check if user has required role
  */
-export function hasRole(user: User, requiredRoles: string[]): boolean {
+export function hasRole(user: User | AnonymousUser, requiredRoles: string[]): boolean {
   return requiredRoles.includes(user.role);
+}
+
+/**
+ * Check if user is anonymous
+ */
+export function isAnonymousUser(user: User | AnonymousUser): user is AnonymousUser {
+  return 'isAnonymous' in user && user.isAnonymous === true;
+}
+
+/**
+ * Get user identifier (works for both authenticated and anonymous)
+ */
+export function getUserIdentifier(user: User | AnonymousUser): string {
+  if (isAnonymousUser(user)) {
+    return `anon_${user.anonymousId}`;
+  }
+  return user.id;
 }
 
 /**
@@ -193,20 +227,24 @@ export function sanitizeUser(user: any): any {
 }
 
 /**
- * Create audit log entry
+ * Create audit log entry (supports anonymous users)
  */
 export async function createAuditLog(
   userId: string,
   action: string,
   entityType?: string,
   entityId?: string,
-  details?: any
+  details?: any,
+  isAnonymous?: boolean
 ): Promise<void> {
   try {
+    // For anonymous users, store with a special prefix
+    const userIdToLog = isAnonymous ? `anon_${userId}` : userId;
+    
     await query(
       `INSERT INTO user_audit_log (user_id, action, entity_type, entity_id, new_values)
        VALUES ($1, $2, $3, $4, $5)`,
-      [userId, action, entityType, entityId, JSON.stringify(details)]
+      [userIdToLog, action, entityType, entityId, JSON.stringify(details)]
     );
   } catch (error) {
     console.error('Failed to create audit log:', error);

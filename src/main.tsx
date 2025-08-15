@@ -5,8 +5,9 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-// Using Simple Auth version instead of Auth0
-import AppWithSimpleAuth from './AppWithSimpleAuth';
+import { BrowserRouter } from 'react-router-dom';
+// Using App with Optional Auth - login is not required
+import App from './App';
 import './index.css';
 
 // Import global styles
@@ -85,12 +86,14 @@ if (!rootElement) {
   throw new Error('Failed to find root element. Make sure index.html contains a div with id="root"');
 }
 
-// Create React root and render app with Simple Auth
+// Create React root and render app with Optional Auth
 const root = ReactDOM.createRoot(rootElement);
 
 root.render(
   <React.StrictMode>
-    <AppWithSimpleAuth />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </React.StrictMode>
 );
 
