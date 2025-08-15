@@ -43,6 +43,18 @@
   Cache-Control: public, max-age=31536000, immutable
   X-Content-Type-Options: nosniff
 
+# JavaScript files in subdirectories - CRITICAL FOR MODULE LOADING
+/assets/js/*.js
+  Content-Type: application/javascript
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+
+# CSS files in subdirectories
+/assets/css/*.css
+  Content-Type: text/css
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+
 # All CSS files
 /assets/*.css
   Content-Type: text/css
