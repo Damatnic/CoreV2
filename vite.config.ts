@@ -23,6 +23,7 @@ export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
   
   return {
+    base: '/', // Ensure correct base path for Netlify
     plugins: [
       react(),
       splitVendorChunkPlugin(),

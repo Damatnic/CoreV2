@@ -43,9 +43,15 @@
   Cache-Control: public, max-age=31536000, immutable
   X-Content-Type-Options: nosniff
 
+# Main entry point files - HIGHEST PRIORITY
+/assets/js/index-*.js
+  Content-Type: application/javascript; charset=UTF-8
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+
 # JavaScript files in subdirectories - CRITICAL FOR MODULE LOADING
 /assets/js/*.js
-  Content-Type: application/javascript
+  Content-Type: application/javascript; charset=UTF-8
   Cache-Control: public, max-age=31536000, immutable
   X-Content-Type-Options: nosniff
 
