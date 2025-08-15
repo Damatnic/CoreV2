@@ -4,6 +4,7 @@ import { visualizer } from 'rollup-plugin-visualizer';
 import viteCompression from 'vite-plugin-compression';
 // import { VitePWA } from 'vite-plugin-pwa';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
+import path from 'path';
 
 // Dynamic import for legacy plugin to handle potential loading issues
 let legacy: any;
@@ -55,8 +56,12 @@ export default defineConfig(({ mode }) => {
       alias: {
         buffer: 'buffer',
         stream: 'stream-browserify',
-        util: 'util'
-      }
+        util: 'util',
+        // Add explicit resolution for services to ensure cross-platform compatibility
+        '@services': path.resolve(__dirname, './src/services')
+      },
+      // Ensure proper extension resolution for TypeScript files
+      extensions: ['.ts', '.tsx', '.js', '.jsx', '.json']
     },
     esbuild: {
       jsx: 'automatic',
