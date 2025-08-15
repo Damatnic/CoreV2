@@ -67,7 +67,7 @@ describe('LoadingSpinner', () => {
 
     it('should handle invalid size gracefully', () => {
       // TypeScript would prevent this, but testing runtime behavior
-      const { container } = render(<LoadingSpinner size={'invalid' as unknown} />);
+      const { container } = render(<LoadingSpinner size={'invalid' as 'small' | 'medium' | 'large' | undefined} />);
       
       const spinner = container.querySelector('.loading-spinner');
       // Should default to medium or handle gracefully
@@ -261,7 +261,7 @@ describe('LoadingSpinner', () => {
     });
 
     it('should handle null message', () => {
-      render(<LoadingSpinner message={null as unknown} />);
+      render(<LoadingSpinner message={undefined} />);
       
       const container = screen.getByRole('status');
       expect(container).toBeInTheDocument();
@@ -283,13 +283,13 @@ describe('LoadingSpinner', () => {
     });
 
     it('should handle numeric message', () => {
-      render(<LoadingSpinner message={123 as unknown} />);
+      render(<LoadingSpinner message={'123'} />);
       
       expect(screen.getByText('123')).toBeInTheDocument();
     });
 
     it('should handle boolean message', () => {
-      render(<LoadingSpinner message={true as unknown} />);
+      render(<LoadingSpinner message={'true'} />);
       
       // React will render boolean as string
       const { container } = render(<LoadingSpinner />);

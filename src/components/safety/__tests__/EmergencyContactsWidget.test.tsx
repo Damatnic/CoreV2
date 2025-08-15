@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '../../../test-utils';
 import '@testing-library/jest-dom';
 import { EmergencyContactsWidget, EmergencyContactWidget } from '../EmergencyContactsWidget';
 import { AuthContext } from '../../../contexts/AuthContext';
@@ -599,7 +599,7 @@ describe('EmergencyContactsWidget', () => {
       );
 
       const callButtons = screen.getAllByRole('button', { name: /call/i });
-      callButtons.forEach(button => {
+      callButtons.forEach((button: HTMLElement) => {
         expect(button).toHaveClass('touch-target');
       });
     });

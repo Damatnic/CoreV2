@@ -3,7 +3,7 @@
  * Tests interactive breathing exercises with visual guide
  */
 
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '../../../test-utils';
 import '@testing-library/jest-dom';
 import { BreathingExerciseOverlay } from '../BreathingExerciseOverlay';
 

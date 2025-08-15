@@ -2,7 +2,7 @@
   command = "npm run build:netlify"
   functions = "netlify/functions"
   publish = "dist"
-  ignore = "/bin/false"
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF . -- ':(exclude)*.md' ':(exclude)docs/**'"
 
 [dev]
   command = "npm run dev:vite"
@@ -16,6 +16,10 @@
   NODE_OPTIONS = "--max-old-space-size=4096"
   NETLIFY_USE_YARN = "false"
   NPM_FLAGS = "--no-audit --no-fund --legacy-peer-deps"
+  CI = "true"
+  DISABLE_ESLINT_PLUGIN = "true"
+  GENERATE_SOURCEMAP = "false"
+  VITE_BUILD_MODE = "production"
 
 # Service Worker specific headers
 [[headers]]
@@ -64,18 +68,35 @@
     Cache-Control = "public, max-age=3600"
     Content-Type = "application/manifest+json"
 
-# JavaScript files - ensure proper MIME type
+# JavaScript files - BULLETPROOF MIME type handling (most specific first)
+[[headers]]
+  for = "/assets/js/index-*.js"
+  [headers.values]
+    Content-Type = "application/javascript; charset=UTF-8"
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
 [[headers]]
   for = "/assets/js/*.js"
   [headers.values]
     Content-Type = "application/javascript; charset=UTF-8"
     Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+# CSS files - ensure proper MIME type
+[[headers]]
+  for = "/assets/css/*.css"
+  [headers.values]
+    Content-Type = "text/css; charset=UTF-8"
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
 
 # Static assets - long cache with immutable content
 [[headers]]
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
 
 # Icons and images
 [[headers]]
@@ -108,8 +129,11 @@
   [headers.values]
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https: wss:; media-src 'self' blob:; object-src 'none'; base-uri 'self'"
 
 # Redirect HTTP to HTTPS
 [[redirects]]
@@ -118,22 +142,108 @@
   status = 301
   force = true
 
-# SPA fallback - serve index.html for client-side routing (remove restrictive conditions)
+# API routes to Netlify Functions (HIGHEST PRIORITY)
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/api/*"
+  to = "/.netlify/functions/api-:splat"
   status = 200
 
-# Crisis page fallback when offline (remove restrictive conditions)
+# Block potential security threats
+[[redirects]]
+  from = "/admin*"
+  to = "/404.html"
+  status = 404
+
+[[redirects]]
+  from = "/.env*"
+  to = "/404.html"
+  status = 404
+
+[[redirects]]
+  from = "/config*"
+  to = "/404.html"
+  status = 404
+
+# Static assets - prevent SPA fallback
+[[redirects]]
+  from = "/assets/*"
+  to = "/assets/:splat"
+  status = 200
+  force = true
+
+# Videos - prevent SPA fallback
+[[redirects]]
+  from = "/Videos/*"
+  to = "/Videos/:splat"
+  status = 200
+  force = true
+
+# PWA and static files - prevent SPA fallback
+[[redirects]]
+  from = "/manifest.json"
+  to = "/manifest.json"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/sw.js"
+  to = "/sw.js"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/service-worker.js"
+  to = "/service-worker.js"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*.png"
+  to = "/:splat.png"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*.svg"
+  to = "/:splat.svg"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*.ico"
+  to = "/:splat.ico"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*.json"
+  to = "/:splat.json"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*.txt"
+  to = "/:splat.txt"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*.xml"
+  to = "/:splat.xml"
+  status = 200
+  force = true
+
+# Crisis page fallback when offline
 [[redirects]]
   from = "/crisis"
   to = "/offline-crisis.html"
   status = 200
+  conditions = {Role = ["offline"]}
 
-# API routes to Netlify Functions
+# SPA fallback - serve index.html for client-side routing (LOWEST PRIORITY)
 [[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/api-:splat"
+  from = "/*"
+  to = "/index.html"
   status = 200
 
 # Environment-specific settings
@@ -176,20 +286,6 @@
     ignorePeriod = 0
 
 
-# Performance optimizations
+# Performance optimizations - DISABLED to prevent conflicts with Vite
 [build.processing]
-  skip_processing = false
-
-[build.processing.css]
-  bundle = true
-  minify = true
-
-[build.processing.js]
-  bundle = true
-  minify = true
-
-[build.processing.html]
-  pretty_urls = true
-
-[build.processing.images]
-  compress = true
+  skip_processing = true

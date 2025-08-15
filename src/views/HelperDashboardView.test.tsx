@@ -1,12 +1,10 @@
 import '@testing-library/jest-dom';
-import { screen } from '@testing-library/react';
-import { describe, test, expect, jest, beforeEach } from '@jest/globals';
-import { render } from '../test-utils';
+import { render, screen } from '../test-utils';
 import { HelperDashboardView } from './HelperDashboardView';
 import { useDilemmaStore } from '../stores/dilemmaStore';
 import { useChatStore } from '../stores/chatStore';
 import { useAuth } from '../contexts/AuthContext';
-import userEvent from '@testing-library/user-event';
+import { userEvent } from '../test-utils';
 
 // Mock child components that are not relevant to this test
 jest.mock('../components/XPBar', () => ({

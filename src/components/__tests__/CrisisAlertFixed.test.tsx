@@ -137,7 +137,7 @@ describe('CrisisAlert', () => {
       render(<CrisisAlert {...props} />);
       
       const callButtons = screen.getAllByRole('button');
-      const emergencyButtons = callButtons.filter(button => 
+      const emergencyButtons = callButtons.filter((button: HTMLElement) => 
         button.textContent?.includes('988') || 
         button.textContent?.includes('741741') || 
         button.textContent?.includes('911')

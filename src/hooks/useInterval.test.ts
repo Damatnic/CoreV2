@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act } from '../test-utils';
 import { useInterval } from './useInterval';
 
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => 

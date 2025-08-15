@@ -6,7 +6,7 @@ import { useOptionalAuth } from '../contexts/OptionalAuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export const Sidebar: React.FC = React.memo(() => {
-  const { isAuthenticated, isAnonymous, login, logout, register, helperProfile, userToken, anonymousId } = useOptionalAuth();
+  const { isAuthenticated, isAnonymous, login, logout, helperProfile, userToken, anonymousId } = useOptionalAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [activeView, setActiveView] = useState<ActiveView>({ view: 'wellness-tracking' as View });

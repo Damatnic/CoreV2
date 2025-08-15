@@ -77,6 +77,27 @@
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
+# Block external script injection attempts - return as text/plain
+/index.js
+  Content-Type: text/plain
+  Cache-Control: no-cache, no-store, must-revalidate
+  X-Content-Type-Options: nosniff
+
+/constants.js
+  Content-Type: text/plain
+  Cache-Control: no-cache, no-store, must-revalidate
+  X-Content-Type-Options: nosniff
+
+/config.js
+  Content-Type: text/plain
+  Cache-Control: no-cache, no-store, must-revalidate
+  X-Content-Type-Options: nosniff
+
+/app.js
+  Content-Type: text/plain
+  Cache-Control: no-cache, no-store, must-revalidate
+  X-Content-Type-Options: nosniff
+
 # Security headers for all pages
 /*
   X-Frame-Options: DENY

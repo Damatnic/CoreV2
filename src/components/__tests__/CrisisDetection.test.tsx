@@ -1,6 +1,5 @@
 import '@testing-library/jest-dom';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, test, expect, jest, beforeEach } from '@jest/globals';
+import { render, screen, fireEvent, waitFor } from '../../test-utils';
 import { CrisisAlert } from '../CrisisAlert';
 import { CrisisSupportWidget } from '../CrisisSupportWidget';
 import { CrisisDetectionDashboard } from '../CrisisDetectionDashboard';
@@ -299,8 +298,8 @@ describe('Crisis Detection Components', () => {
 
     test('initiates emergency call when emergency button is clicked', () => {
       // Mock window.location.href
-      delete (window as unknown).location;
-      window.location = { href: '' } as unknown;
+      delete (window as any).location;
+      window.location = { href: '' } as Location;
       
       renderWithProviders(<CrisisSupportWidget />);
       

@@ -52,7 +52,9 @@
       "Bash(else echo \"❌ $file missing\")",
       "Bash(do if [ -f \"$view.tsx\" ])",
       "Bash(then echo \"✅ $view.tsx\")",
-      "Bash(else echo \"❌ $view.tsx MISSING\")"
+      "Bash(else echo \"❌ $view.tsx MISSING\")",
+      "Bash(sed:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

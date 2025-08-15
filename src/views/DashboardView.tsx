@@ -116,17 +116,6 @@ const DashboardView: React.FC = () => {
     return gradientMap[color] || 'gradient-ocean';
   };
   
-  const getMoodVariant = (color: string) => {
-    const moodMap: { [key: string]: 'happy' | 'calm' | 'anxious' | 'sad' | 'none' } = {
-      red: 'anxious',
-      blue: 'calm',
-      pink: 'happy',
-      purple: 'calm',
-      green: 'happy',
-      indigo: 'calm'
-    };
-    return moodMap[color] || 'none';
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-therapy-primary-50 to-therapy-secondary-50 dark:from-gray-900 dark:to-gray-800">

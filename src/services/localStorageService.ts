@@ -233,7 +233,7 @@ class LocalStorageService {
   /**
    * Migrate anonymous data to authenticated user (when user logs in)
    */
-  async migrateToAuthenticatedUser(userId: string, authToken: string): Promise<boolean> {
+  async migrateToAuthenticatedUser(userId: string): Promise<boolean> {
     try {
       const data = this.getUserData();
       if (!data) {

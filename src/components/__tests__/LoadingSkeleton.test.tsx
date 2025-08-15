@@ -184,7 +184,7 @@ describe('LoadingSkeleton', () => {
         const skeletons = container.querySelectorAll('.loading-skeleton');
         expect(skeletons).toHaveLength(3);
         
-        skeletons.forEach(skeleton => {
+        skeletons.forEach((skeleton: Element) => {
           expect(skeleton).toHaveClass(`${variant}-skeleton`);
         });
         
@@ -219,7 +219,7 @@ describe('LoadingSkeleton', () => {
       };
       
       Object.entries(variantLabels).forEach(([variant, label]) => {
-        const { unmount } = render(<LoadingSkeleton variant={variant as unknown} />);
+        const { unmount } = render(<LoadingSkeleton variant={variant as 'post' | 'comment' | 'profile' | 'chat'} />);
         
         expect(screen.getByLabelText(label)).toBeInTheDocument();
         
@@ -236,7 +236,7 @@ describe('LoadingSkeleton', () => {
       };
       
       Object.entries(screenReaderTexts).forEach(([variant, text]) => {
-        const { unmount } = render(<LoadingSkeleton variant={variant as unknown} />);
+        const { unmount } = render(<LoadingSkeleton variant={variant as 'post' | 'comment' | 'profile' | 'chat'} />);
         
         expect(screen.getByText(text)).toBeInTheDocument();
         expect(screen.getByText(text)).toHaveClass('sr-only');
@@ -251,7 +251,7 @@ describe('LoadingSkeleton', () => {
       const outputs = screen.getAllByRole('status');
       expect(outputs).toHaveLength(3);
       
-      outputs.forEach(output => {
+      outputs.forEach((output: HTMLElement) => {
         expect(output).toHaveAttribute('aria-label', 'Loading comment');
       });
       
@@ -306,7 +306,7 @@ describe('LoadingSkeleton', () => {
     });
 
     it('should handle invalid variant and default to post', () => {
-      const { container } = render(<LoadingSkeleton variant={'invalid' as unknown} />);
+      const { container } = render(<LoadingSkeleton variant={'invalid' as 'post' | 'comment' | 'profile' | 'chat'} />);
       
       expect(container.querySelector('.post-skeleton')).toBeInTheDocument();
       expect(screen.getByLabelText('Loading post')).toBeInTheDocument();
@@ -315,9 +315,9 @@ describe('LoadingSkeleton', () => {
     it('should handle undefined props gracefully', () => {
       const { container } = render(
         <LoadingSkeleton 
-          variant={undefined as unknown} 
-          count={undefined as unknown} 
-          className={undefined as unknown}
+          variant={undefined as 'post' | 'comment' | 'profile' | 'chat' | undefined} 
+          count={undefined as number | undefined} 
+          className={undefined as string | undefined}
         />
       );
       
@@ -333,7 +333,7 @@ describe('LoadingSkeleton', () => {
       const wrappers = Array.from(container.children);
       expect(wrappers).toHaveLength(2);
       
-      wrappers.forEach((wrapper) => {
+      wrappers.forEach((wrapper: Element) => {
         expect(wrapper.tagName.toLowerCase()).toBe('div');
         // Keys are not directly accessible, but structure should be correct
         expect(wrapper.children).toHaveLength(1);

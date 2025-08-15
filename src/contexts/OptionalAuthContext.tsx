@@ -9,8 +9,6 @@ import { localStorageService } from '../services/localStorageService';
 const AUTH0_DOMAIN = import.meta.env.VITE_AUTH0_DOMAIN || '';
 const AUTH0_CLIENT_ID = import.meta.env.VITE_AUTH0_CLIENT_ID || '';
 const AUTH0_AUDIENCE = import.meta.env.VITE_AUTH0_AUDIENCE || '';
-const AUTH_OPTIONAL = import.meta.env.VITE_AUTH_OPTIONAL === 'true';
-const ALLOW_ANONYMOUS = import.meta.env.VITE_ALLOW_ANONYMOUS === 'true';
 
 const REDIRECT_URI = AUTH0_DOMAIN ? AuthSession.makeRedirectUri() : '';
 
@@ -273,7 +271,7 @@ export const OptionalAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
     await promptAsync?.();
   }, [request, promptAsync, addToast]);
 
-  const register = useCallback(async (email?: string, password?: string, name?: string) => {
+  const register = useCallback(async () => {
     // For anonymous mode, registration is optional
     if (!AUTH0_DOMAIN) {
       addToast('Registration is optional. You can use all features without an account!', 'info');

@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act } from '../test-utils';
 import {
   useScrollAnimation,
   useStaggeredAnimation,
@@ -203,7 +203,7 @@ describe('useRippleEffect Hook', () => {
       },
       clientX: 50,
       clientY: 80
-    } as unknown;
+    } as React.MouseEvent<HTMLElement, MouseEvent>;
 
     act(() => {
       result.current.createRipple(mockEvent);
@@ -226,7 +226,7 @@ describe('useRippleEffect Hook', () => {
       },
       clientX: 0,
       clientY: 0
-    } as unknown;
+    } as React.MouseEvent<HTMLElement, MouseEvent>;
 
     act(() => {
       result.current.createRipple(mockEvent);
@@ -251,7 +251,7 @@ describe('useRippleEffect Hook', () => {
       },
       clientX: 0,
       clientY: 0
-    } as unknown;
+    } as React.MouseEvent<HTMLElement, MouseEvent>;
 
     act(() => {
       result.current.createRipple(mockEvent);
@@ -676,7 +676,7 @@ describe('useReducedMotion Hook', () => {
 
     // Simulate media query change
     act(() => {
-      changeHandler({ matches: true });
+      changeHandler({ matches: true } as MediaQueryListEvent);
     });
 
     expect(result.current).toBe(true);

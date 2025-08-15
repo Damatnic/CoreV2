@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act, waitFor } from '../test-utils';
 import { useConnectionStatus } from './useConnectionStatus';
 
 // Mock navigator
@@ -107,7 +107,7 @@ describe('useConnectionStatus Hook', () => {
 
   it('should handle missing network information gracefully', () => {
     const originalConnection = mockNavigator.connection;
-    delete (mockNavigator as unknown).connection;
+    delete (mockNavigator as any).connection;
     
     const { result } = renderHook(() => useConnectionStatus(), { wrapper: Wrapper });
     

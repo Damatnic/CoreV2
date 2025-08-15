@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react';
+import { renderHook } from '../test-utils';
 import { useSafeLocation } from './useSafeLocation';
 
 // Mock react-router-dom

@@ -1,13 +1,17 @@
 import '@testing-library/jest-dom';
-import { screen } from '@testing-library/react';
-import { describe, test, expect, jest, beforeEach } from '@jest/globals';
-import { render } from '../test-utils';
+import { render, screen } from '../test-utils';
 import { ShareView } from './ShareView';
 import { ApiClient } from '../utils/ApiClient';
-import userEvent from '@testing-library/user-event';
+import { userEvent } from '../test-utils';
 
-jest.mock('../utils/ApiClient');
-const mockedApiClient = ApiClient as jest.Mocked<typeof ApiClient>;
+jest.mock('../utils/ApiClient', () => ({
+  ApiClient: {
+    ai: {
+      chat: jest.fn(),
+      draftPostFromChat: jest.fn()
+    }
+  }
+}));
 
 describe('ShareView user flow', () => {
   const onPostSubmitMock = jest.fn();
@@ -18,10 +22,10 @@ describe('ShareView user flow', () => {
 
   test('user can chat with AI, draft a post, and submit it', async () => {
     // Mock AI responses
-    mockedApiClient.ai.chat.mockResolvedValue({ 
+    (ApiClient.ai.chat as jest.Mock).mockResolvedValue({ 
       response: "That sounds really tough. Could you tell me more?" 
     });
-    mockedApiClient.ai.draftPostFromChat.mockResolvedValue({
+    (ApiClient.ai.draftPostFromChat as jest.Mock).mockResolvedValue({
       postContent: "This is the drafted post from the AI.",
       category: "Stress",
     });

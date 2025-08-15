@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act, waitFor } from '../test-utils';
 import { useIntelligentCaching, CacheStatusMonitor, useCrisisOptimization } from './useIntelligentCaching';
 
 // Mock service worker functionality

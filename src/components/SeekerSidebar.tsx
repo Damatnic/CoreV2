@@ -87,6 +87,7 @@ interface SeekerSidebarProps {
   setActiveView: (view: ActiveView) => void;
   userToken: string | null;
   onlineHelperCount: number;
+  isAnonymous?: boolean;
   isMobile?: boolean;
   onNavigation?: () => void; // Callback for mobile navigation (to close sidebar)
 }

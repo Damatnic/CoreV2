@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderHook } from '@testing-library/react';
+import { renderHook } from '../test-utils';
 import { useErrorTracking } from './useErrorTracking';
 import ErrorTrackingService from '../services/errorTracking';
 

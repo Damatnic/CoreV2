@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act, waitFor } from '../test-utils';
 import { useCulturalCrisisDetection } from './useCulturalCrisisDetection';
 import { culturalCrisisDetectionService } from '../services/culturalCrisisDetectionService';
 

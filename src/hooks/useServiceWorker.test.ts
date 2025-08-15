@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act, waitFor } from '../test-utils';
 import { useServiceWorker, useOfflineStatus, useCacheManager } from './useServiceWorker';
 import serviceWorkerManager from '../services/serviceWorkerManager';
 

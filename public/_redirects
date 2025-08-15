@@ -24,5 +24,11 @@
 # Service worker - return 404 instead of index.html
 /service-worker.js /404.html 404
 
+# Block common external script injection attempts
+/index.js /404.html 404
+/constants.js /404.html 404
+/config.js /404.html 404
+/app.js /404.html 404
+
 # SPA fallback for all other routes
 /* /index.html 200

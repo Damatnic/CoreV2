@@ -12,7 +12,6 @@ import { LoadingSpinner } from '../components/LoadingSpinner';
 
 // Lazy load all views for better performance
 const DashboardView = lazy(() => import('../views/DashboardView'));
-const WellnessDashboard = lazy(() => import('../views/WellnessView'));
 const ProfileView = lazy(() => import('../views/ProfileView'));
 const SettingsView = lazy(() => import('../views/SettingsView'));
 const FeedView = lazy(() => import('../views/FeedView'));
