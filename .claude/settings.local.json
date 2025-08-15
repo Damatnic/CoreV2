@@ -37,7 +37,9 @@
       "Bash(then echo \"File exists\")",
       "Bash(else echo \"File not found\")",
       "Bash(fi)",
-      "Bash(move:*)"
+      "Bash(move:*)",
+      "Bash(timeout:*)",
+      "Bash(echo \"Server check: $?\")"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

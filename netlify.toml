@@ -1,5 +1,5 @@
 [build]
-  command = "node scripts/netlify-robust-build.js"
+  command = "node scripts/netlify-bulletproof-build.js"
   functions = "netlify/functions"
   publish = "dist"
   ignore = "/bin/false"
@@ -133,7 +133,7 @@
 
 # Environment-specific settings
 [context.production]
-  command = "node scripts/netlify-robust-build.js"
+  command = "node scripts/netlify-bulletproof-build.js"
   [context.production.environment]
     NODE_ENV = "production"
     VITE_BUILD_MODE = "production"
@@ -169,6 +169,7 @@
     baseUrl = "https://astralcorev2.netlify.app"
     sitemapPath = "/sitemap.xml"
     ignorePeriod = 0
+
 
 # Performance optimizations
 [build.processing]

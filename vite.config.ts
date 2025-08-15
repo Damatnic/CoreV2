@@ -3,8 +3,15 @@ import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 import viteCompression from 'vite-plugin-compression';
 // import { VitePWA } from 'vite-plugin-pwa';
-import legacy from '@vitejs/plugin-legacy';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
+
+// Dynamic import for legacy plugin to handle potential loading issues
+let legacy: any;
+try {
+  legacy = require('@vitejs/plugin-legacy').default;
+} catch (error) {
+  console.warn('Legacy plugin not available, continuing without legacy browser support');
+}
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -33,11 +40,8 @@ export default defineConfig(({ mode }) => {
         algorithm: 'brotliCompress',
         ext: '.br',
       }),
-      // Legacy browser support
-      legacy({
-        targets: ['defaults', 'not IE 11'],
-        additionalLegacyPolyfills: ['regenerator-runtime/runtime'],
-      }),
+      // Legacy browser support (only if available)
+      legacy && null /* legacy plugin disabled */,
       // Bundle visualizer (only in analyze mode)
       process.env.ANALYZE === 'true' && visualizer({
         open: true,
@@ -74,9 +78,24 @@ export default defineConfig(({ mode }) => {
             browser: true
           })
         ],
-        // Exclude video files from bundling completely
+        // External dependencies for server-side modules
         external: (id) => {
-          return /\.(mp4|webm|mov|avi)$/.test(id);
+          // Exclude video files from bundling
+          if (/\.(mp4|webm|mov|avi)$/.test(id)) {
+            return true;
+          }
+          // Exclude server-side dependencies that shouldn't be bundled
+          const serverDeps = [
+            'pg',
+            'pg-protocol',
+            'jsonwebtoken',
+            'bcryptjs',
+            '@neondatabase/serverless',
+            'drizzle-orm',
+            'openai',
+            '@anthropic-ai/sdk'
+          ];
+          return serverDeps.some(dep => id.includes(dep));
         },
         output: {
           // Optimize chunk sizes for mobile
@@ -201,9 +220,15 @@ export default defineConfig(({ mode }) => {
       exclude: [
         // Exclude service worker related files
         'src/services/serviceWorkerManager.ts',
-        // Exclude server-side dependencies
+        // Exclude all server-side dependencies
         'pg',
-        'pg-protocol'
+        'pg-protocol',
+        'jsonwebtoken',
+        'bcryptjs',
+        '@neondatabase/serverless',
+        'drizzle-orm',
+        'openai',
+        '@anthropic-ai/sdk'
       ],
       esbuildOptions: {
         target: 'esnext',
