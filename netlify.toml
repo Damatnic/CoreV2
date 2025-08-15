@@ -1,5 +1,5 @@
 [build]
-  command = "vite build"
+  command = "npm run build:netlify"
   functions = "netlify/functions"
   publish = "dist"
   ignore = "/bin/false"
@@ -133,7 +133,7 @@
 
 # Environment-specific settings
 [context.production]
-  command = "vite build"
+  command = "npm run build:netlify"
   [context.production.environment]
     NODE_ENV = "production"
     VITE_BUILD_MODE = "production"

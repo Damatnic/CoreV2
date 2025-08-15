@@ -42,7 +42,8 @@
       "Bash(echo \"Server check: $?\")",
       "Bash(for file in *.ts)",
       "Bash(do basename \"$file\" .ts)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(git mv:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
