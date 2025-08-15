@@ -4,7 +4,7 @@
  */
 
 import Pusher, { Channel, PresenceChannel } from 'pusher-js';
-import { getWebSocketService } from './webSocketService';
+import { getWebSocketService } from './webSocketService.js';
 
 interface RealtimeConfig {
   key: string;
