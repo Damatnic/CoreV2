@@ -44,7 +44,15 @@
       "Bash(do basename \"$file\" .ts)",
       "Bash(done)",
       "Bash(git mv:*)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "WebFetch(domain:localhost)",
+      "Bash(for:*)",
+      "Bash(do if [ -f \"$file\" ])",
+      "Bash(then echo \"✅ $file exists\")",
+      "Bash(else echo \"❌ $file missing\")",
+      "Bash(do if [ -f \"$view.tsx\" ])",
+      "Bash(then echo \"✅ $view.tsx\")",
+      "Bash(else echo \"❌ $view.tsx MISSING\")"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

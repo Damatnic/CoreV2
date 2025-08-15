@@ -66,18 +66,11 @@ module.exports = {
           maxAgeSeconds: 5 * 60, // 5 minutes
         },
         networkTimeoutSeconds: 10,
-        cacheKeyWillBeUsed: async ({ request }) => {
-          // Remove auth headers from cache key for privacy
-          const url = new URL(request.url);
-          url.searchParams.delete('auth');
-          url.searchParams.delete('token');
-          return url.href;
-        },
         plugins: [
           {
             cacheWillUpdate: async ({ response }) => {
               // Only cache successful responses
-              return response.status === 200;
+              return response && response.status === 200 ? response : null;
             },
             requestWillFetch: async ({ request }) => {
               // Add cache-busting for critical API calls

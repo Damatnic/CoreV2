@@ -220,6 +220,7 @@ async function build() {
   log('\n📦 Step 6: Generating Service Worker...', 'cyan');
   
   const workboxConfigs = [
+    'workbox-config-simple.js',  // Use simplified config first
     'workbox-enhanced.js',
     'workbox-config.js',
     'workbox-intelligent.js'
