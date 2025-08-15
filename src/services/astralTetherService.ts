@@ -6,9 +6,9 @@
  * breathing guides, and real-time connection management.
  */
 
-import { getWebSocketService } from './webSocketService.js';
-import { notificationService } from './notificationService.js';
-import { getSecureStorage } from './secureStorageService.js';
+import { getWebSocketService } from './webSocketService';
+import { notificationService } from './notificationService';
+import { getSecureStorage } from './secureStorageService';
 
 export interface TetherRequest {
   id: string;
