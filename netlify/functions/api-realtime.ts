@@ -6,7 +6,7 @@
 import { Handler } from '@netlify/functions';
 import Pusher from 'pusher';
 import PusherClient from 'pusher-js';
-import { getDbConnection } from './utils/db-connection';
+import { getDb } from './utils/db-connection';
 import { verifyToken } from './utils/auth';
 
 // Initialize Pusher server (for sending messages)
@@ -80,7 +80,7 @@ export const handler: Handler = async (event, context) => {
       userId = decoded.sub;
     }
 
-    const db = await getDbConnection();
+    const db = getDb();
 
     switch (event.httpMethod) {
       case 'GET':
