@@ -39,7 +39,10 @@
       "Bash(fi)",
       "Bash(move:*)",
       "Bash(timeout:*)",
-      "Bash(echo \"Server check: $?\")"
+      "Bash(echo \"Server check: $?\")",
+      "Bash(for file in *.ts)",
+      "Bash(do basename \"$file\" .ts)",
+      "Bash(done)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
