@@ -2,14 +2,70 @@ import { render, screen, act } from '../../test-utils';
 import { Toast, ToastContainer } from '../Toast';
 import { Toast as ToastType } from '../../types';
 
+// Mock ThemeContext to avoid initialization issues in tests
+jest.mock('../../contexts/ThemeContext', () => ({
+  ThemeProvider: ({ children }: { children: React.ReactNode }) => children,
+  useTheme: () => ({
+    theme: 'light',
+    themeConfig: {
+      colors: {
+        bgPrimary: '#f7f9fc',
+        bgSecondary: '#FFFFFF',
+        bgTertiary: '#eef2f7',
+        textPrimary: '#2c3e50',
+        textSecondary: '#7f8c8d',
+        accentPrimary: '#3498db',
+        accentPrimaryHover: '#2980b9',
+        accentPrimaryText: '#ffffff',
+        accentDanger: '#e74c3c',
+        accentSuccess: '#2ecc71',
+        borderColor: '#e0e6ed',
+      },
+      spacing: { xs: '0.25rem', sm: '0.5rem', md: '1rem', lg: '1.5rem', xl: '2.5rem' },
+      radius: { sm: '4px', md: '8px', lg: '12px' },
+    },
+    toggleTheme: jest.fn(),
+  }),
+}));
+
+// Mock AuthContext to avoid initialization issues in tests
+jest.mock('../../contexts/AuthContext', () => ({
+  AuthProvider: ({ children }: { children: React.ReactNode }) => children,
+  useAuth: () => ({
+    isAuthenticated: false,
+    user: null,
+    helperProfile: null,
+    isNewUser: false,
+    isLoading: false,
+    login: jest.fn(() => Promise.resolve()),
+    logout: jest.fn(() => Promise.resolve()),
+    reloadProfile: jest.fn(() => Promise.resolve()),
+    updateHelperProfile: jest.fn(),
+    userToken: null,
+    isAnonymous: false,
+    authState: {},
+  }),
+  authState: {
+    isAuthenticated: false,
+    user: null,
+    helperProfile: null,
+    userToken: null,
+  },
+}));
+
 // Mock the NotificationContext
 const mockToasts: ToastType[] = [];
 const mockRemoveToast = jest.fn();
 
 jest.mock('../../contexts/NotificationContext', () => ({
+  NotificationProvider: ({ children }: { children: React.ReactNode }) => children,
   useNotification: () => ({
     toasts: mockToasts,
     removeToast: mockRemoveToast,
+    addToast: jest.fn(),
+    confirmationModal: null,
+    showConfirmationModal: jest.fn(),
+    hideConfirmationModal: jest.fn(),
   })
 }));
 
@@ -28,6 +84,8 @@ describe('Toast', () => {
     jest.clearAllMocks();
     jest.clearAllTimers();
     jest.useFakeTimers();
+    // Clear the mock toasts array before each test
+    mockToasts.length = 0;
   });
 
   afterEach(() => {
@@ -161,11 +219,6 @@ describe('Toast', () => {
   });
 
   describe('ToastContainer Component', () => {
-    beforeEach(() => {
-      // Clear the mock array
-      mockToasts.length = 0;
-    });
-
     it('should render empty container when no toasts', () => {
       const { container } = render(<ToastContainer />);
       
@@ -257,8 +310,8 @@ describe('Toast', () => {
 
   describe('Integration Tests', () => {
     it('should handle rapid toast additions and removals', () => {
-      const toast1 = createMockToast({ id: 'toast-1' });
-      const toast2 = createMockToast({ id: 'toast-2' });
+      const toast1 = createMockToast({ id: 'toast-1', message: 'First toast' });
+      const toast2 = createMockToast({ id: 'toast-2', message: 'Second toast' });
       
       // Start with one toast
       mockToasts.push(toast1);
@@ -283,10 +336,11 @@ describe('Toast', () => {
 
     it('should handle edge case of empty toast message', () => {
       const toast = createMockToast({ message: '' });
-      render(<Toast toast={toast} onDismiss={mockOnDismiss} />);
+      const { container } = render(<Toast toast={toast} onDismiss={mockOnDismiss} />);
       
-      const messageElement = screen.getByText('');
+      const messageElement = container.querySelector('.toast-message');
       expect(messageElement).toBeInTheDocument();
+      expect(messageElement).toHaveTextContent('');
     });
 
     it('should handle very long toast messages', () => {
@@ -322,8 +376,16 @@ describe('Toast', () => {
     it('should handle undefined onDismiss gracefully', () => {
       const toast = createMockToast();
       
+      // Should not throw when rendering
       expect(() => {
         render(<Toast toast={toast} onDismiss={undefined as any} />);
+      }).not.toThrow();
+      
+      // Should not throw when timer fires
+      expect(() => {
+        act(() => {
+          jest.advanceTimersByTime(5000);
+        });
       }).not.toThrow();
     });
 

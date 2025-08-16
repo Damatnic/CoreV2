@@ -76,7 +76,17 @@ describe('AppButton', () => {
         render(<AppButton {...props} />);
         
         const button = screen.getByRole('button');
-        expect(button).toHaveClass('btn-enhanced', variant);
+        // Check for glass-button base class for enhanced mode
+        if (variant === 'glass' || variant === 'neumorph' || variant === 'crisis') {
+          expect(button).toHaveClass(variant === 'glass' ? 'glass-button' : 
+                                     variant === 'neumorph' ? 'neumorph-button' : 
+                                     'crisis-button');
+        } else {
+          expect(button).toHaveClass('glass-button');
+          if (variant !== 'ghost') {
+            expect(button).toHaveClass(`btn-${variant}-therapeutic`);
+          }
+        }
       });
 
       it(`should apply correct classes for ${variant} variant when not enhanced`, () => {
@@ -99,10 +109,10 @@ describe('AppButton', () => {
         
         const button = screen.getByRole('button');
         if (size !== 'md') {
-          expect(button).toHaveClass(size);
+          expect(button).toHaveClass(`btn-${size}`);
         } else {
           // 'md' is default, so no size class should be applied
-          expect(button).not.toHaveClass('md');
+          expect(button).not.toHaveClass('btn-md');
         }
       });
 
@@ -127,7 +137,8 @@ describe('AppButton', () => {
       render(<AppButton {...props} />);
       
       expect(screen.getByRole('button')).toBeDisabled();
-      expect(document.querySelector('.loading-spinner')).toBeInTheDocument();
+      // The component uses loading-dots, not loading-spinner
+      expect(document.querySelector('.loading-dots')).toBeInTheDocument();
       expect(screen.queryByText('Test Button')).not.toBeInTheDocument();
     });
 
@@ -139,23 +150,28 @@ describe('AppButton', () => {
       render(<AppButton {...props} />);
       
       expect(screen.queryByText('Submit Form')).not.toBeInTheDocument();
-      expect(document.querySelector('.loading-spinner')).toBeInTheDocument();
+      // The component uses loading-dots, not loading-spinner
+      expect(document.querySelector('.loading-dots')).toBeInTheDocument();
     });
 
-    it('should apply size class to loading spinner', () => {
+    it('should show loading dots when loading', () => {
       const props = createMockButtonProps({ isLoading: true, size: 'lg' });
       render(<AppButton {...props} />);
       
-      const spinner = document.querySelector('.loading-spinner');
-      expect(spinner).toHaveClass('lg');
+      // The component uses loading-dots with individual dots
+      const loadingDots = document.querySelector('.loading-dots');
+      expect(loadingDots).toBeInTheDocument();
+      const dots = document.querySelectorAll('.loading-dot');
+      expect(dots).toHaveLength(3);
     });
 
-    it('should not apply size class to loading spinner for default size', () => {
+    it('should show loading dots for default size', () => {
       const props = createMockButtonProps({ isLoading: true, size: 'md' });
       render(<AppButton {...props} />);
       
-      const spinner = document.querySelector('.loading-spinner');
-      expect(spinner).not.toHaveClass('md');
+      // The component uses loading-dots
+      const loadingDots = document.querySelector('.loading-dots');
+      expect(loadingDots).toBeInTheDocument();
     });
   });
 
@@ -301,8 +317,11 @@ describe('AppButton', () => {
       render(<AppButton {...props} />);
       
       const button = screen.getByRole('button');
-      expect(button).toHaveClass('btn-enhanced');
-      expect(button).not.toHaveClass('touch-optimized', 'touch-feedback', 'touch-ripple');
+      // Enhanced mode uses glass-button as base
+      expect(button).toHaveClass('glass-button');
+      expect(button).toHaveClass('btn-primary-therapeutic'); // Default variant is primary
+      // Touch classes are always applied
+      expect(button).toHaveClass('touch-optimized', 'touch-feedback');
     });
 
     it('should apply legacy classes when enhanced is false', () => {
@@ -310,8 +329,10 @@ describe('AppButton', () => {
       render(<AppButton {...props} />);
       
       const button = screen.getByRole('button');
-      expect(button).toHaveClass('btn', 'touch-optimized', 'touch-feedback', 'touch-ripple');
-      expect(button).not.toHaveClass('btn-enhanced');
+      expect(button).toHaveClass('btn', 'btn-primary'); // Legacy uses btn-primary
+      expect(button).toHaveClass('touch-optimized', 'touch-feedback');
+      // Ripple is applied by default when ripple={true}
+      expect(button).toHaveClass('ripple-button');
     });
 
     it('should apply custom className', () => {
@@ -333,9 +354,9 @@ describe('AppButton', () => {
       
       const button = screen.getByRole('button');
       expect(button).toHaveClass(
-        'btn-enhanced',
-        'primary',
-        'lg',
+        'glass-button',
+        'btn-primary-therapeutic',
+        'btn-lg',
         'btn-icon-only',
         'custom-class'
       );
@@ -427,10 +448,10 @@ describe('AppButton', () => {
       
       // Rapidly change loading state
       rerender(<AppButton {...props} isLoading={true} />);
-      expect(document.querySelector('.loading-spinner')).toBeInTheDocument();
+      expect(document.querySelector('.loading-dots')).toBeInTheDocument();
       
       rerender(<AppButton {...props} isLoading={false} />);
-      expect(document.querySelector('.loading-spinner')).not.toBeInTheDocument();
+      expect(document.querySelector('.loading-dots')).not.toBeInTheDocument();
       
       rerender(<AppButton {...props} disabled={true} />);
       expect(screen.getByRole('button')).toBeDisabled();

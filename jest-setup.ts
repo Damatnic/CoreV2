@@ -91,6 +91,188 @@ if (typeof Element !== 'undefined' && !Element.prototype.scrollIntoView) {
   Element.prototype.scrollIntoView = jest.fn();
 }
 
+// Mock Canvas API for chart and image tests
+if (typeof HTMLCanvasElement !== 'undefined') {
+  HTMLCanvasElement.prototype.getContext = jest.fn((contextType) => {
+    if (contextType === '2d') {
+      return {
+        fillStyle: '',
+        strokeStyle: '',
+        lineWidth: 1,
+        lineCap: 'butt',
+        lineJoin: 'miter',
+        font: '10px sans-serif',
+        textAlign: 'start',
+        textBaseline: 'alphabetic',
+        globalAlpha: 1,
+        globalCompositeOperation: 'source-over',
+        canvas: {
+          width: 300,
+          height: 150
+        },
+        clearRect: jest.fn(),
+        fillRect: jest.fn(),
+        strokeRect: jest.fn(),
+        fillText: jest.fn(),
+        strokeText: jest.fn(),
+        measureText: jest.fn(() => ({ width: 0 })),
+        beginPath: jest.fn(),
+        closePath: jest.fn(),
+        moveTo: jest.fn(),
+        lineTo: jest.fn(),
+        bezierCurveTo: jest.fn(),
+        quadraticCurveTo: jest.fn(),
+        arc: jest.fn(),
+        arcTo: jest.fn(),
+        rect: jest.fn(),
+        fill: jest.fn(),
+        stroke: jest.fn(),
+        clip: jest.fn(),
+        isPointInPath: jest.fn(() => false),
+        isPointInStroke: jest.fn(() => false),
+        save: jest.fn(),
+        restore: jest.fn(),
+        scale: jest.fn(),
+        rotate: jest.fn(),
+        translate: jest.fn(),
+        transform: jest.fn(),
+        setTransform: jest.fn(),
+        resetTransform: jest.fn(),
+        createLinearGradient: jest.fn(() => ({
+          addColorStop: jest.fn()
+        })),
+        createRadialGradient: jest.fn(() => ({
+          addColorStop: jest.fn()
+        })),
+        createPattern: jest.fn(() => null),
+        createImageData: jest.fn(() => ({
+          data: new Uint8ClampedArray(),
+          width: 0,
+          height: 0
+        })),
+        getImageData: jest.fn(() => ({
+          data: new Uint8ClampedArray(),
+          width: 0,
+          height: 0
+        })),
+        putImageData: jest.fn(),
+        drawImage: jest.fn(),
+        getLineDash: jest.fn(() => []),
+        setLineDash: jest.fn()
+      };
+    }
+    if (contextType === 'webgl' || contextType === 'webgl2') {
+      return {
+        viewport: jest.fn(),
+        clearColor: jest.fn(),
+        clear: jest.fn(),
+        enable: jest.fn(),
+        disable: jest.fn(),
+        createShader: jest.fn(),
+        shaderSource: jest.fn(),
+        compileShader: jest.fn(),
+        createProgram: jest.fn(),
+        attachShader: jest.fn(),
+        linkProgram: jest.fn(),
+        useProgram: jest.fn(),
+        deleteShader: jest.fn(),
+        deleteProgram: jest.fn()
+      };
+    }
+    return null;
+  });
+
+  HTMLCanvasElement.prototype.toDataURL = jest.fn(() => 'data:image/png;base64,mock');
+  HTMLCanvasElement.prototype.toBlob = jest.fn((callback) => {
+    if (callback) {
+      callback(new Blob(['mock'], { type: 'image/png' }));
+    }
+  });
+}
+
+// Mock Image for image loading tests
+if (typeof Image === 'undefined') {
+  (global as any).Image = class MockImage {
+    onload: (() => void) | null = null;
+    onerror: (() => void) | null = null;
+    src = '';
+    width = 0;
+    height = 0;
+    complete = false;
+    naturalWidth = 0;
+    naturalHeight = 0;
+
+    constructor() {
+      setTimeout(() => {
+        this.width = 100;
+        this.height = 100;
+        this.naturalWidth = 100;
+        this.naturalHeight = 100;
+        this.complete = true;
+        if (this.onload) {
+          this.onload();
+        }
+      }, 0);
+    }
+  };
+}
+
+// Mock ResizeObserver
+if (typeof ResizeObserver === 'undefined') {
+  (global as any).ResizeObserver = class MockResizeObserver {
+    observe = jest.fn();
+    unobserve = jest.fn();
+    disconnect = jest.fn();
+  };
+}
+
+// Mock IntersectionObserver
+if (typeof IntersectionObserver === 'undefined') {
+  (global as any).IntersectionObserver = class MockIntersectionObserver {
+    observe = jest.fn();
+    unobserve = jest.fn();
+    disconnect = jest.fn();
+    constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {}
+  };
+}
+
+// Mock MutationObserver
+if (typeof MutationObserver === 'undefined') {
+  (global as any).MutationObserver = class MockMutationObserver {
+    observe = jest.fn();
+    disconnect = jest.fn();
+    takeRecords = jest.fn(() => []);
+    constructor(callback: MutationCallback) {}
+  };
+}
+
+// Import cleanup at the top level to avoid nested hook issues
+const { cleanup } = require('@testing-library/react');
+
+// Ensure document.body exists and has a container for React Testing Library
+if (typeof document !== 'undefined') {
+  // Clear and set up document body for each test
+  beforeEach(() => {
+    // Create a root container for React Testing Library
+    document.body.innerHTML = '';
+    const root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+    
+    // Also create a container div that RTL can use
+    const container = document.createElement('div');
+    container.setAttribute('data-testid', 'rtl-container');
+    document.body.appendChild(container);
+  });
+  
+  afterEach(() => {
+    // Clean up the DOM after each test
+    document.body.innerHTML = '';
+    // Also clean up any React roots
+    cleanup();
+  });
+}
+
 // Mock Web APIs for testing
 global.Response = global.Response || class MockResponse {
   public body: any;
@@ -369,3 +551,179 @@ beforeAll(() => {
 afterAll(() => {
   console.error = originalError;
 });
+
+// Mock localStorage
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: jest.fn((key: string) => store[key] || null),
+    setItem: jest.fn((key: string, value: string) => {
+      store[key] = value.toString();
+    }),
+    removeItem: jest.fn((key: string) => {
+      delete store[key];
+    }),
+    clear: jest.fn(() => {
+      store = {};
+    }),
+    get length() {
+      return Object.keys(store).length;
+    },
+    key: jest.fn((index: number) => {
+      const keys = Object.keys(store);
+      return keys[index] || null;
+    })
+  };
+})();
+
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+  writable: true
+});
+
+// Mock sessionStorage
+const sessionStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: jest.fn((key: string) => store[key] || null),
+    setItem: jest.fn((key: string, value: string) => {
+      store[key] = value.toString();
+    }),
+    removeItem: jest.fn((key: string) => {
+      delete store[key];
+    }),
+    clear: jest.fn(() => {
+      store = {};
+    }),
+    get length() {
+      return Object.keys(store).length;
+    },
+    key: jest.fn((index: number) => {
+      const keys = Object.keys(store);
+      return keys[index] || null;
+    })
+  };
+})();
+
+Object.defineProperty(window, 'sessionStorage', {
+  value: sessionStorageMock,
+  writable: true
+});
+
+// Mock matchMedia
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+});
+
+// Mock window.location
+delete (window as any).location;
+window.location = {
+  href: 'http://localhost/',
+  origin: 'http://localhost',
+  protocol: 'http:',
+  host: 'localhost',
+  hostname: 'localhost',
+  port: '',
+  pathname: '/',
+  search: '',
+  hash: '',
+  assign: jest.fn(),
+  replace: jest.fn(),
+  reload: jest.fn(),
+  toString: jest.fn(() => 'http://localhost/')
+} as any;
+
+// Mock window.open
+window.open = jest.fn();
+
+// Mock window.alert, confirm, prompt
+window.alert = jest.fn();
+window.confirm = jest.fn(() => true);
+window.prompt = jest.fn(() => 'mocked prompt');
+
+// Mock requestAnimationFrame
+window.requestAnimationFrame = jest.fn(cb => {
+  setTimeout(cb, 0);
+  return 0;
+});
+window.cancelAnimationFrame = jest.fn();
+
+// Mock performance API
+if (!window.performance) {
+  window.performance = {
+    now: jest.fn(() => Date.now()),
+    mark: jest.fn(),
+    measure: jest.fn(),
+    clearMarks: jest.fn(),
+    clearMeasures: jest.fn(),
+    getEntriesByName: jest.fn(() => []),
+    getEntriesByType: jest.fn(() => []),
+    navigation: {
+      type: 0,
+      redirectCount: 0
+    },
+    timing: {} as any
+  } as any;
+}
+
+// Mock Web Audio API
+(window as any).AudioContext = jest.fn(() => ({
+  createOscillator: jest.fn(() => ({
+    connect: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+    frequency: { value: 440 }
+  })),
+  createGain: jest.fn(() => ({
+    connect: jest.fn(),
+    gain: { value: 1 }
+  })),
+  destination: {}
+}));
+
+// Mock Notification API
+(window as any).Notification = {
+  permission: 'default',
+  requestPermission: jest.fn(() => Promise.resolve('granted'))
+};
+
+// Mock navigator APIs
+Object.defineProperty(navigator, 'onLine', {
+  writable: true,
+  value: true
+});
+
+Object.defineProperty(navigator, 'geolocation', {
+  writable: true,
+  value: {
+    getCurrentPosition: jest.fn((success) => {
+      success({
+        coords: {
+          latitude: 0,
+          longitude: 0,
+          altitude: null,
+          accuracy: 10,
+          altitudeAccuracy: null,
+          heading: null,
+          speed: null
+        },
+        timestamp: Date.now()
+      });
+    }),
+    watchPosition: jest.fn(),
+    clearWatch: jest.fn()
+  }
+});
+
+// Increase default timeout for async tests
+jest.setTimeout(10000);

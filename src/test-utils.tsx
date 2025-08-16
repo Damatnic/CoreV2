@@ -1,18 +1,28 @@
 import React, { ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { AuthProvider } from './contexts/AuthContext';
-import { NotificationProvider } from './contexts/NotificationContext';
+import { render, RenderOptions, renderHook as renderHookBase, RenderHookOptions } from '@testing-library/react';
 
+// Lazy load providers to avoid initialization issues
+const ThemeProvider = React.lazy(() => import('./contexts/ThemeContext').then(m => ({ default: m.ThemeProvider })));
+const AuthProvider = React.lazy(() => import('./contexts/AuthContext').then(m => ({ default: m.AuthProvider })));
+const NotificationProvider = React.lazy(() => import('./contexts/NotificationContext').then(m => ({ default: m.NotificationProvider })));
+
+// Simple wrapper for hooks that don't need all providers
+const SimpleWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return <>{children}</>;
+};
+
+// Full provider wrapper for components
 const AllTheProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <NotificationProvider>
-      <AuthProvider>
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
-      </AuthProvider>
-    </NotificationProvider>
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <ThemeProvider>
+        <NotificationProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </NotificationProvider>
+      </ThemeProvider>
+    </React.Suspense>
   );
 };
 
@@ -21,9 +31,25 @@ const customRender = (
   options?: Omit<RenderOptions, 'wrapper'>,
 ) => render(ui, { wrapper: AllTheProviders, ...options });
 
+// Custom renderHook that properly accepts wrapper option
+const customRenderHook = <TProps = unknown, TResult = unknown>(
+  hook: (props?: TProps) => TResult,
+  options?: RenderHookOptions<TProps>
+) => {
+  // If no wrapper is provided, use SimpleWrapper as default
+  // This allows tests to provide their own wrapper when needed
+  const finalOptions: RenderHookOptions<TProps> = {
+    wrapper: SimpleWrapper,
+    ...options
+  };
+  
+  return renderHookBase(hook, finalOptions);
+};
+
 // Re-export testing library utilities
 export * from '@testing-library/react';
 export { customRender as render };
+export { customRenderHook as renderHook };
 
 // Re-export commonly used testing utilities explicitly for better TypeScript support
 export { screen, fireEvent, waitFor, within, act, cleanup } from '@testing-library/react';

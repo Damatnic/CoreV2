@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
+import { render, RenderOptions, renderHook as renderHookBase, RenderHookOptions } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from '../contexts/AuthContext';
 import { I18nextProvider } from 'react-i18next';
@@ -29,8 +29,36 @@ const customRender = (
   options?: Omit<RenderOptions, 'wrapper'>
 ) => render(ui, { wrapper: AllTheProviders, ...options });
 
+// Custom renderHook with providers - properly typed for React 18
+const customRenderHook = <TProps = unknown, TResult = unknown>(
+  hook: (props?: TProps) => TResult,
+  options?: RenderHookOptions<TProps>
+) => {
+  // For React 18 compatibility, ensure document.body is ready
+  if (!document.body) {
+    const body = document.createElement('body');
+    document.documentElement.appendChild(body);
+  }
+  
+  // Ensure there's a container in the body
+  if (!document.body.firstChild) {
+    const container = document.createElement('div');
+    container.setAttribute('id', 'rtl-root');
+    document.body.appendChild(container);
+  }
+  
+  // Use provided wrapper or default to AllTheProviders
+  const finalOptions: RenderHookOptions<TProps> = {
+    wrapper: AllTheProviders,
+    ...options
+  };
+  
+  return renderHookBase(hook, finalOptions);
+};
+
 export * from '@testing-library/react';
 export { customRender as render };
+export { customRenderHook as renderHook };
 
 // Test data factories
 export const createMockUser = (overrides = {}) => ({

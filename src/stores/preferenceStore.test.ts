@@ -1,28 +1,9 @@
-import { describe, test, expect, jest, beforeEach, afterEach } from '@jest/globals';
+import { describe, test, expect, beforeEach } from '@jest/globals';
 import { usePreferenceStore } from './preferenceStore';
-import { act } from 'react';
+import { act } from '@testing-library/react';
 
-// Mock localStorage
-const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
-};
-Object.defineProperty(global, 'localStorage', {
-  value: localStorageMock,
-  writable: true,
-});
-
-// Mock console.error to prevent noise in tests
-const originalConsoleError = console.error;
-beforeEach(() => {
-  console.error = jest.fn();
-});
-
-afterEach(() => {
-  console.error = originalConsoleError;
-});
+// localStorage is already mocked in setupTests.ts, just get reference
+const localStorageMock = window.localStorage as any;
 
 describe('preferenceStore', () => {
   beforeEach(() => {

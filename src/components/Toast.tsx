@@ -5,7 +5,9 @@ import { useNotification } from '../contexts/NotificationContext';
 export const Toast: React.FC<{ toast: ToastType, onDismiss: (id: string) => void }> = ({ toast, onDismiss }) => {
     useEffect(() => {
         const timer = setTimeout(() => {
-            onDismiss(toast.id);
+            if (onDismiss) {
+                onDismiss(toast.id);
+            }
         }, 5000);
         return () => clearTimeout(timer);
     }, [toast, onDismiss]);

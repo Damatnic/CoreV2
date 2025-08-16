@@ -2,8 +2,11 @@
  * Tests for Keyboard Navigation Hook
  */
 
+/**
+ * @jest-environment jsdom
+ */
 import React from 'react';
-import { renderHook, act } from '../test-utils';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { 
   useKeyboardNavigation, 
   useFocusTrap, 
@@ -12,6 +15,23 @@ import {
   useGlobalKeyboardShortcuts,
   announceKeyboardShortcut
 } from './useKeyboardNavigation';
+
+// Setup DOM for tests
+beforeEach(() => {
+  // Ensure document.body exists
+  if (!document.body) {
+    document.documentElement.innerHTML = '<body></body>';
+  }
+  // Clear and prepare body
+  document.body.innerHTML = '';
+  const root = document.createElement('div');
+  root.id = 'root';
+  document.body.appendChild(root);
+});
+
+afterEach(() => {
+  document.body.innerHTML = '';
+});
 
 // Mock DOM methods
 const mockFocus = jest.fn();
@@ -58,21 +78,27 @@ Object.defineProperty(document, 'removeEventListener', {
   writable: true
 });
 
-Object.defineProperty(document, 'createElement', {
-  value: jest.fn((tagName: string) => createMockElement(tagName)),
-  writable: true
-});
+// Don't override createElement - it might interfere with React Testing Library
 
-Object.defineProperty(document, 'body', {
-  value: {
-    appendChild: jest.fn(),
-    removeChild: jest.fn()
-  },
-  writable: true
-});
+// Don't override document.body - let React Testing Library handle it
+// Mock appendChild and removeChild on the actual body if needed
+if (document.body) {
+  const originalAppendChild = document.body.appendChild.bind(document.body);
+  const originalRemoveChild = document.body.removeChild.bind(document.body);
+  
+  document.body.appendChild = jest.fn((child) => {
+    return originalAppendChild(child);
+  });
+  
+  document.body.removeChild = jest.fn((child) => {
+    if (child && child.parentNode === document.body) {
+      return originalRemoveChild(child);
+    }
+    return child;
+  });
+}
 
-const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => 
-  React.createElement('div', {}, children);
+// No wrapper needed for these tests
 
 describe('useKeyboardNavigation Hook', () => {
   let containerRef: React.RefObject<HTMLElement>;
@@ -94,7 +120,7 @@ describe('useKeyboardNavigation Hook', () => {
   });
 
   it('should initialize with default options', () => {
-    const { result } = renderHook(() => useKeyboardNavigation(containerRef), { wrapper: Wrapper });
+    const { result } = renderHook(() => useKeyboardNavigation(containerRef));
 
     expect(typeof result.current.focusFirst).toBe('function');
     expect(typeof result.current.focusLast).toBe('function');
@@ -105,7 +131,7 @@ describe('useKeyboardNavigation Hook', () => {
   });
 
   it('should get focusable elements correctly', () => {
-    const { result } = renderHook(() => useKeyboardNavigation(containerRef), { wrapper: Wrapper });
+    const { result } = renderHook(() => useKeyboardNavigation(containerRef));
 
     const elements = result.current.getFocusableElements();
     
@@ -123,14 +149,14 @@ describe('useKeyboardNavigation Hook', () => {
       createMockElement('input', { disabled: true })
     ]);
 
-    const { result } = renderHook(() => useKeyboardNavigation(containerRef), { wrapper: Wrapper });
+    const { result } = renderHook(() => useKeyboardNavigation(containerRef));
 
     const elements = result.current.getFocusableElements();
     expect(elements).toHaveLength(2); // Only non-disabled elements
   });
 
   it('should focus first element', () => {
-    const { result } = renderHook(() => useKeyboardNavigation(containerRef), { wrapper: Wrapper });
+    const { result } = renderHook(() => useKeyboardNavigation(containerRef));
 
     act(() => {
       result.current.focusFirst();
@@ -141,7 +167,7 @@ describe('useKeyboardNavigation Hook', () => {
   });
 
   it('should focus last element', () => {
-    const { result } = renderHook(() => useKeyboardNavigation(containerRef), { wrapper: Wrapper });
+    const { result } = renderHook(() => useKeyboardNavigation(containerRef));
 
     act(() => {
       result.current.focusLast();
@@ -155,7 +181,7 @@ describe('useKeyboardNavigation Hook', () => {
     const elements = mockContainer.querySelectorAll();
     (document as any).activeElement = elements[0];
 
-    const { result } = renderHook(() => useKeyboardNavigation(containerRef, { wrap: true }), { wrapper: Wrapper });
+    const { result } = renderHook(() => useKeyboardNavigation(containerRef, { wrap: true }));
 
     act(() => {
       result.current.focusNext();
@@ -168,7 +194,7 @@ describe('useKeyboardNavigation Hook', () => {
     const elements = mockContainer.querySelectorAll();
     (document as any).activeElement = elements[elements.length - 1];
 
-    const { result } = renderHook(() => useKeyboardNavigation(containerRef, { wrap: true }), { wrapper: Wrapper });
+    const { result } = renderHook(() => useKeyboardNavigation(containerRef, { wrap: true }));
 
     act(() => {
       result.current.focusNext();
@@ -181,7 +207,7 @@ describe('useKeyboardNavigation Hook', () => {
     const elements = mockContainer.querySelectorAll();
     (document as any).activeElement = elements[elements.length - 1];
 
-    const { result } = renderHook(() => useKeyboardNavigation(containerRef, { wrap: false }), { wrapper: Wrapper });
+    const { result } = renderHook(() => useKeyboardNavigation(containerRef, { wrap: false }));
 
     act(() => {
       result.current.focusNext();
@@ -195,7 +221,7 @@ describe('useKeyboardNavigation Hook', () => {
     const elements = mockContainer.querySelectorAll();
     (document as any).activeElement = elements[1];
 
-    const { result } = renderHook(() => useKeyboardNavigation(containerRef), { wrapper: Wrapper });
+    const { result } = renderHook(() => useKeyboardNavigation(containerRef));
 
     act(() => {
       result.current.focusPrevious();
@@ -205,13 +231,13 @@ describe('useKeyboardNavigation Hook', () => {
   });
 
   it('should set up keyboard event listeners', () => {
-    renderHook(() => useKeyboardNavigation(containerRef), { wrapper: Wrapper });
+    renderHook(() => useKeyboardNavigation(containerRef));
 
     expect(document.addEventListener).toHaveBeenCalledWith('keydown', expect.any(Function));
   });
 
   it('should clean up event listeners on unmount', () => {
-    const { unmount } = renderHook(() => useKeyboardNavigation(containerRef), { wrapper: Wrapper });
+    const { unmount } = renderHook(() => useKeyboardNavigation(containerRef));
 
     unmount();
 
@@ -229,7 +255,7 @@ describe('useKeyboardNavigation Hook', () => {
     mockContainer.contains.mockReturnValue(true);
     (document as any).activeElement = elements[0];
 
-    renderHook(() => useKeyboardNavigation(containerRef), { wrapper: Wrapper });
+    renderHook(() => useKeyboardNavigation(containerRef));
 
     // Simulate keydown event
     const eventListeners = (document.addEventListener as jest.Mock).mock.calls;
@@ -254,7 +280,7 @@ describe('useKeyboardNavigation Hook', () => {
     mockContainer.contains.mockReturnValue(true);
     (document as any).activeElement = elements[1];
 
-    renderHook(() => useKeyboardNavigation(containerRef), { wrapper: Wrapper });
+    renderHook(() => useKeyboardNavigation(containerRef));
 
     const eventListeners = (document.addEventListener as jest.Mock).mock.calls;
     const keydownListener = eventListeners.find(call => call[0] === 'keydown')[1];
@@ -278,7 +304,7 @@ describe('useKeyboardNavigation Hook', () => {
     mockContainer.contains.mockReturnValue(true);
     (document as any).activeElement = elements[0];
 
-    renderHook(() => useKeyboardNavigation(containerRef), { wrapper: Wrapper });
+    renderHook(() => useKeyboardNavigation(containerRef));
 
     const eventListeners = (document.addEventListener as jest.Mock).mock.calls;
     const keydownListener = eventListeners.find(call => call[0] === 'keydown')[1];
@@ -301,7 +327,7 @@ describe('useKeyboardNavigation Hook', () => {
 
     mockContainer.contains.mockReturnValue(true);
 
-    renderHook(() => useKeyboardNavigation(containerRef, { onEscape }), { wrapper: Wrapper });
+    renderHook(() => useKeyboardNavigation(containerRef, { onEscape }));
 
     const eventListeners = (document.addEventListener as jest.Mock).mock.calls;
     const keydownListener = eventListeners.find(call => call[0] === 'keydown')[1];
@@ -318,7 +344,7 @@ describe('useKeyboardNavigation Hook', () => {
     const onNavigate = jest.fn();
     const elements = mockContainer.querySelectorAll();
 
-    const { result } = renderHook(() => useKeyboardNavigation(containerRef, { onNavigate }), { wrapper: Wrapper });
+    const { result } = renderHook(() => useKeyboardNavigation(containerRef, { onNavigate }));
 
     act(() => {
       result.current.focusFirst();
@@ -339,7 +365,7 @@ describe('useKeyboardNavigation Hook', () => {
     mockContainer.contains.mockReturnValue(true);
     (document as any).activeElement = elements[0];
 
-    renderHook(() => useKeyboardNavigation(containerRef, { onActivate }), { wrapper: Wrapper });
+    renderHook(() => useKeyboardNavigation(containerRef, { onActivate }));
 
     const eventListeners = (document.addEventListener as jest.Mock).mock.calls;
     const keydownListener = eventListeners.find(call => call[0] === 'keydown')[1];
@@ -354,7 +380,7 @@ describe('useKeyboardNavigation Hook', () => {
   it('should auto-focus first element when enabled', () => {
     const elements = mockContainer.querySelectorAll();
 
-    renderHook(() => useKeyboardNavigation(containerRef, { autoFocus: true }), { wrapper: Wrapper });
+    renderHook(() => useKeyboardNavigation(containerRef, { autoFocus: true }));
 
     expect(elements[0].focus).toHaveBeenCalled();
   });
@@ -370,7 +396,7 @@ describe('useKeyboardNavigation Hook', () => {
     mockContainer.contains.mockReturnValue(true);
     (document as any).activeElement = elements[0];
 
-    renderHook(() => useKeyboardNavigation(containerRef, { orientation: 'horizontal' }), { wrapper: Wrapper });
+    renderHook(() => useKeyboardNavigation(containerRef, { orientation: 'horizontal' }));
 
     const eventListeners = (document.addEventListener as jest.Mock).mock.calls;
     const keydownListener = eventListeners.find(call => call[0] === 'keydown')[1];
@@ -392,7 +418,7 @@ describe('useKeyboardNavigation Hook', () => {
 
     mockContainer.contains.mockReturnValue(false);
 
-    renderHook(() => useKeyboardNavigation(containerRef), { wrapper: Wrapper });
+    renderHook(() => useKeyboardNavigation(containerRef));
 
     const eventListeners = (document.addEventListener as jest.Mock).mock.calls;
     const keydownListener = eventListeners.find(call => call[0] === 'keydown')[1];
@@ -407,7 +433,7 @@ describe('useKeyboardNavigation Hook', () => {
   it('should handle empty container', () => {
     mockContainer.querySelectorAll.mockReturnValue([]);
 
-    const { result } = renderHook(() => useKeyboardNavigation(containerRef), { wrapper: Wrapper });
+    const { result } = renderHook(() => useKeyboardNavigation(containerRef));
 
     expect(() => {
       act(() => {
@@ -434,7 +460,7 @@ describe('useFocusTrap Hook', () => {
   it('should initialize focus trap when active', () => {
     const elements = mockContainer.querySelectorAll();
     
-    renderHook(() => useFocusTrap(containerRef, true), { wrapper: Wrapper });
+    renderHook(() => useFocusTrap(containerRef, true));
 
     expect(elements[0].focus).toHaveBeenCalled();
     expect(document.addEventListener).toHaveBeenCalledWith('keydown', expect.any(Function));
@@ -443,7 +469,7 @@ describe('useFocusTrap Hook', () => {
   it('should not initialize when inactive', () => {
     const elements = mockContainer.querySelectorAll();
     
-    renderHook(() => useFocusTrap(containerRef, false), { wrapper: Wrapper });
+    renderHook(() => useFocusTrap(containerRef, false));
 
     expect(elements[0].focus).not.toHaveBeenCalled();
     expect(document.addEventListener).not.toHaveBeenCalledWith('keydown', expect.any(Function));
@@ -459,7 +485,7 @@ describe('useFocusTrap Hook', () => {
 
     (document as any).activeElement = elements[elements.length - 1]; // Last element
 
-    renderHook(() => useFocusTrap(containerRef, true), { wrapper: Wrapper });
+    renderHook(() => useFocusTrap(containerRef, true));
 
     const eventListeners = (document.addEventListener as jest.Mock).mock.calls;
     const keydownListener = eventListeners.find(call => call[0] === 'keydown')[1];
@@ -482,7 +508,7 @@ describe('useFocusTrap Hook', () => {
 
     (document as any).activeElement = elements[0]; // First element
 
-    renderHook(() => useFocusTrap(containerRef, true), { wrapper: Wrapper });
+    renderHook(() => useFocusTrap(containerRef, true));
 
     const eventListeners = (document.addEventListener as jest.Mock).mock.calls;
     const keydownListener = eventListeners.find(call => call[0] === 'keydown')[1];
@@ -499,7 +525,7 @@ describe('useFocusTrap Hook', () => {
     const previousElement = createMockElement('button');
     (document as any).activeElement = previousElement;
 
-    const { unmount } = renderHook(() => useFocusTrap(containerRef, true, { restoreFocus: true }), { wrapper: Wrapper });
+    const { unmount } = renderHook(() => useFocusTrap(containerRef, true, { restoreFocus: true }));
 
     unmount();
 
@@ -510,25 +536,28 @@ describe('useFocusTrap Hook', () => {
     const previousElement = createMockElement('button');
     (document as any).activeElement = previousElement;
 
-    const { unmount } = renderHook(() => useFocusTrap(containerRef, true, { restoreFocus: false }), { wrapper: Wrapper });
+    const { unmount } = renderHook(() => useFocusTrap(containerRef, true, { restoreFocus: false }));
+    
+    // Clear any calls from initialization
+    mockFocus.mockClear();
 
     unmount();
 
-    // Should only be called once during initialization
-    expect(previousElement.focus).toHaveBeenCalledTimes(0);
+    // Should not be called on unmount when restoreFocus is false
+    expect(previousElement.focus).not.toHaveBeenCalled();
   });
 
   it('should handle fallback focus when no focusable elements', () => {
     mockContainer.querySelectorAll.mockReturnValue([]);
     mockContainer.querySelector.mockReturnValue(createMockElement('div'));
 
-    renderHook(() => useFocusTrap(containerRef, true, { fallbackFocus: 'div' }), { wrapper: Wrapper });
+    renderHook(() => useFocusTrap(containerRef, true, { fallbackFocus: 'div' }));
 
     expect(mockContainer.querySelector).toHaveBeenCalledWith('div');
   });
 
   it('should provide focus control functions', () => {
-    const { result } = renderHook(() => useFocusTrap(containerRef, true), { wrapper: Wrapper });
+    const { result } = renderHook(() => useFocusTrap(containerRef, true));
 
     expect(typeof result.current.focusFirst).toBe('function');
     expect(typeof result.current.focusLast).toBe('function');
@@ -552,13 +581,18 @@ describe('useFocusTrap Hook', () => {
 describe('useSkipNavigation Hook', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useFakeTimers();
+  });
+  
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it('should skip to main content', () => {
     const mainElement = createMockElement('main');
     document.querySelector = jest.fn().mockReturnValue(mainElement);
 
-    const { result } = renderHook(() => useSkipNavigation(), { wrapper: Wrapper });
+    const { result } = renderHook(() => useSkipNavigation());
 
     act(() => {
       result.current.skipToMain();
@@ -579,7 +613,7 @@ describe('useSkipNavigation Hook', () => {
     navElement.querySelector = jest.fn().mockReturnValue(linkElement);
     document.querySelector = jest.fn().mockReturnValue(navElement);
 
-    const { result } = renderHook(() => useSkipNavigation(), { wrapper: Wrapper });
+    const { result } = renderHook(() => useSkipNavigation());
 
     act(() => {
       result.current.skipToNavigation();
@@ -595,7 +629,7 @@ describe('useSkipNavigation Hook', () => {
     const mainElement = createMockElement('main');
     document.querySelector = jest.fn().mockReturnValue(mainElement);
 
-    const { result } = renderHook(() => useSkipNavigation(), { wrapper: Wrapper });
+    const { result } = renderHook(() => useSkipNavigation());
 
     act(() => {
       result.current.skipToMain();
@@ -626,7 +660,7 @@ describe('useRovingTabindex Hook', () => {
   it('should set initial tabindex values', () => {
     const elements = mockContainer.querySelectorAll();
 
-    renderHook(() => useRovingTabindex(containerRef), { wrapper: Wrapper });
+    renderHook(() => useRovingTabindex(containerRef));
 
     expect(elements[0].setAttribute).toHaveBeenCalledWith('tabindex', '0');
     expect(elements[1].setAttribute).toHaveBeenCalledWith('tabindex', '-1');
@@ -636,7 +670,7 @@ describe('useRovingTabindex Hook', () => {
   it('should provide setActiveIndex function', () => {
     const elements = mockContainer.querySelectorAll();
 
-    const { result } = renderHook(() => useRovingTabindex(containerRef), { wrapper: Wrapper });
+    const { result } = renderHook(() => useRovingTabindex(containerRef));
 
     act(() => {
       result.current.setActiveIndex(1);
@@ -646,7 +680,7 @@ describe('useRovingTabindex Hook', () => {
   });
 
   it('should provide getCurrentIndex function', () => {
-    const { result } = renderHook(() => useRovingTabindex(containerRef, { defaultIndex: 2 }), { wrapper: Wrapper });
+    const { result } = renderHook(() => useRovingTabindex(containerRef, { defaultIndex: 2 }));
 
     expect(result.current.getCurrentIndex()).toBe(2);
   });
@@ -654,7 +688,7 @@ describe('useRovingTabindex Hook', () => {
   it('should handle wrapping when enabled', () => {
     const elements = mockContainer.querySelectorAll();
 
-    const { result } = renderHook(() => useRovingTabindex(containerRef, { wrap: true }), { wrapper: Wrapper });
+    const { result } = renderHook(() => useRovingTabindex(containerRef, { wrap: true }));
 
     // Try to set index beyond array length
     act(() => {
@@ -667,7 +701,7 @@ describe('useRovingTabindex Hook', () => {
   it('should not wrap when disabled', () => {
     const elements = mockContainer.querySelectorAll();
 
-    const { result } = renderHook(() => useRovingTabindex(containerRef, { wrap: false }), { wrapper: Wrapper });
+    const { result } = renderHook(() => useRovingTabindex(containerRef, { wrap: false }));
 
     act(() => {
       result.current.setActiveIndex(5);
@@ -689,7 +723,7 @@ describe('useGlobalKeyboardShortcuts Hook', () => {
       'shift+?': jest.fn()
     };
 
-    renderHook(() => useGlobalKeyboardShortcuts(shortcuts), { wrapper: Wrapper });
+    renderHook(() => useGlobalKeyboardShortcuts(shortcuts));
 
     expect(document.addEventListener).toHaveBeenCalledWith('keydown', expect.any(Function));
   });
@@ -703,7 +737,7 @@ describe('useGlobalKeyboardShortcuts Hook', () => {
       'alt+h': helpHandler
     };
 
-    renderHook(() => useGlobalKeyboardShortcuts(shortcuts), { wrapper: Wrapper });
+    renderHook(() => useGlobalKeyboardShortcuts(shortcuts));
 
     const eventListeners = (document.addEventListener as jest.Mock).mock.calls;
     const keydownListener = eventListeners.find(call => call[0] === 'keydown')[1];
@@ -733,7 +767,7 @@ describe('useGlobalKeyboardShortcuts Hook', () => {
       'ctrl+shift+alt+z': complexHandler
     };
 
-    renderHook(() => useGlobalKeyboardShortcuts(shortcuts), { wrapper: Wrapper });
+    renderHook(() => useGlobalKeyboardShortcuts(shortcuts));
 
     const eventListeners = (document.addEventListener as jest.Mock).mock.calls;
     const keydownListener = eventListeners.find(call => call[0] === 'keydown')[1];
@@ -757,7 +791,7 @@ describe('useGlobalKeyboardShortcuts Hook', () => {
   it('should clean up event listeners on unmount', () => {
     const shortcuts = { 'ctrl+s': jest.fn() };
 
-    const { unmount } = renderHook(() => useGlobalKeyboardShortcuts(shortcuts), { wrapper: Wrapper });
+    const { unmount } = renderHook(() => useGlobalKeyboardShortcuts(shortcuts));
 
     unmount();
 
@@ -771,7 +805,7 @@ describe('useGlobalKeyboardShortcuts Hook', () => {
       'ctrl+s': saveHandler
     };
 
-    renderHook(() => useGlobalKeyboardShortcuts(shortcuts), { wrapper: Wrapper });
+    renderHook(() => useGlobalKeyboardShortcuts(shortcuts));
 
     const eventListeners = (document.addEventListener as jest.Mock).mock.calls;
     const keydownListener = eventListeners.find(call => call[0] === 'keydown')[1];

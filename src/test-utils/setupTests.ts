@@ -244,11 +244,38 @@ afterAll(() => {
   console.warn = originalWarn;
 });
 
+// Import cleanup from React Testing Library
+import { cleanup } from '@testing-library/react';
+
+// Ensure document.body exists and has required structure for renderHook
+beforeEach(() => {
+  // Clean the DOM first
+  document.body.innerHTML = '';
+  
+  // Create a root div for React Testing Library
+  const root = document.createElement('div');
+  root.id = 'root';
+  document.body.appendChild(root);
+  
+  // Create an additional container for React Testing Library to use
+  const container = document.createElement('div');
+  container.setAttribute('data-testid', 'rtl-container');
+  document.body.appendChild(container);
+});
+
 // Clean up after each test
 afterEach(() => {
+  // Clean up React Testing Library
+  cleanup();
+  
+  // Clear all mocks
   jest.clearAllMocks();
+  
+  // Clear storage
   localStorage.clear();
   sessionStorage.clear();
+  
+  // Clean the DOM
   document.body.innerHTML = '';
 });
 

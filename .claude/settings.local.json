@@ -57,7 +57,8 @@
       "Bash(find:*)",
       "Bash(do)",
       "Bash(if [ -f \"$file\" ])",
-      "Bash(then)"
+      "Bash(then)",
+      "Bash(npm outdated)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

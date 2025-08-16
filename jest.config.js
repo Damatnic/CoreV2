@@ -2,7 +2,10 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/jest-setup.ts'],
+  setupFilesAfterEnv: [
+    '<rootDir>/jest-setup.ts',
+    '<rootDir>/src/setupTests.ts'
+  ],
   setupFiles: ['<rootDir>/jest-env-setup.js'],
   transformIgnorePatterns: [
     'node_modules/(?!(expo-auth-session|expo-constants|@expo|react-markdown|remark-gfm)/)'
