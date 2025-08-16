@@ -126,7 +126,7 @@ HTMLCanvasElement.prototype.toBlob = jest.fn((callback) => {
   observe = jest.fn();
   unobserve = jest.fn();
   disconnect = jest.fn();
-  constructor(callback: ResizeObserverCallback) {}
+  constructor(_callback: ResizeObserverCallback) {}
 };
 
 // Mock IntersectionObserver
@@ -134,7 +134,7 @@ HTMLCanvasElement.prototype.toBlob = jest.fn((callback) => {
   observe = jest.fn();
   unobserve = jest.fn();
   disconnect = jest.fn();
-  constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {}
+  constructor(_callback: IntersectionObserverCallback, _options?: IntersectionObserverInit) {}
 };
 
 // Mock MutationObserver
@@ -142,7 +142,7 @@ HTMLCanvasElement.prototype.toBlob = jest.fn((callback) => {
   observe = jest.fn();
   disconnect = jest.fn();
   takeRecords = jest.fn(() => []);
-  constructor(callback: MutationCallback) {}
+  constructor(_callback: MutationCallback) {}
 };
 
 // Mock localStorage
@@ -249,6 +249,20 @@ window.requestAnimationFrame = jest.fn(cb => {
   return 0;
 });
 window.cancelAnimationFrame = jest.fn();
+
+// Ensure timer functions are available in the global scope
+if (typeof global.setInterval === 'undefined') {
+  global.setInterval = setInterval;
+}
+if (typeof global.clearInterval === 'undefined') {
+  global.clearInterval = clearInterval;
+}
+if (typeof global.setTimeout === 'undefined') {
+  global.setTimeout = setTimeout;
+}
+if (typeof global.clearTimeout === 'undefined') {
+  global.clearTimeout = clearTimeout;
+}
 
 // Mock performance API
 if (!window.performance) {
@@ -388,6 +402,215 @@ global.crypto.randomUUID = () => {
 // Mock scrollIntoView
 Element.prototype.scrollIntoView = jest.fn();
 
+// Mock comprehensive DOM element methods
+HTMLElement.prototype.setAttribute = jest.fn();
+HTMLElement.prototype.getAttribute = jest.fn((attr: string) => {
+  // Return some default values for commonly used attributes
+  switch (attr) {
+    case 'class':
+    case 'className':
+      return '';
+    case 'id':
+      return '';
+    case 'role':
+      return '';
+    case 'tabindex':
+      return '0';
+    case 'aria-label':
+      return '';
+    case 'aria-hidden':
+      return 'false';
+    case 'data-testid':
+      return '';
+    default:
+      return null;
+  }
+});
+HTMLElement.prototype.removeAttribute = jest.fn();
+HTMLElement.prototype.hasAttribute = jest.fn(() => false);
+HTMLElement.prototype.getAttributeNames = jest.fn(() => []);
+
+// Mock Element methods
+Element.prototype.setAttribute = jest.fn();
+Element.prototype.getAttribute = jest.fn((attr: string) => {
+  switch (attr) {
+    case 'class':
+    case 'className':
+      return '';
+    case 'id':
+      return '';
+    case 'role':
+      return '';
+    case 'tabindex':
+      return '0';
+    default:
+      return null;
+  }
+});
+Element.prototype.removeAttribute = jest.fn();
+Element.prototype.hasAttribute = jest.fn(() => false);
+Element.prototype.getAttributeNames = jest.fn(() => []);
+Element.prototype.getBoundingClientRect = jest.fn(() => ({
+  bottom: 0,
+  height: 0,
+  left: 0,
+  right: 0,
+  top: 0,
+  width: 0,
+  x: 0,
+  y: 0
+} as DOMRect));
+Element.prototype.closest = jest.fn(() => null);
+Element.prototype.matches = jest.fn(() => false);
+Element.prototype.querySelector = jest.fn(() => null);
+Element.prototype.querySelectorAll = jest.fn(() => [] as any);
+
+// Mock comprehensive window.getComputedStyle with getPropertyValue
+const createMockComputedStyle = () => {
+  const getPropertyValue = jest.fn((property: string) => {
+    // Return default values for commonly accessed CSS properties
+    switch (property) {
+      case 'display':
+        return 'block';
+      case 'visibility':
+        return 'visible';
+      case 'opacity':
+        return '1';
+      case 'color':
+        return 'rgb(0, 0, 0)';
+      case 'background-color':
+        return 'rgba(0, 0, 0, 0)';
+      case 'font-size':
+        return '16px';
+      case 'font-family':
+        return 'serif';
+      case 'width':
+        return 'auto';
+      case 'height':
+        return 'auto';
+      case 'margin':
+      case 'margin-top':
+      case 'margin-right':
+      case 'margin-bottom':
+      case 'margin-left':
+        return '0px';
+      case 'padding':
+      case 'padding-top':
+      case 'padding-right':
+      case 'padding-bottom':
+      case 'padding-left':
+        return '0px';
+      case 'border':
+      case 'border-top':
+      case 'border-right':
+      case 'border-bottom':
+      case 'border-left':
+        return 'none';
+      case 'border-style':
+        return 'none';
+      case 'outline':
+        return 'none';
+      case 'box-shadow':
+        return 'none';
+      case 'transform':
+        return 'none';
+      case 'transition':
+        return 'none';
+      case 'position':
+        return 'static';
+      case 'top':
+      case 'right':
+      case 'bottom':
+      case 'left':
+        return 'auto';
+      case 'z-index':
+        return 'auto';
+      case 'overflow':
+      case 'overflow-x':
+      case 'overflow-y':
+        return 'visible';
+      default:
+        return '';
+    }
+  });
+
+  return {
+    getPropertyValue,
+    // Add commonly accessed CSS properties as direct properties
+    display: 'block',
+    visibility: 'visible',
+    opacity: '1',
+    color: 'rgb(0, 0, 0)',
+    backgroundColor: 'rgba(0, 0, 0, 0)',
+    fontSize: '16px',
+    fontFamily: 'serif',
+    width: 'auto',
+    height: 'auto',
+    margin: '0px',
+    marginTop: '0px',
+    marginRight: '0px',
+    marginBottom: '0px',
+    marginLeft: '0px',
+    padding: '0px',
+    paddingTop: '0px',
+    paddingRight: '0px',
+    paddingBottom: '0px',
+    paddingLeft: '0px',
+    border: 'none',
+    borderTop: 'none',
+    borderRight: 'none',
+    borderBottom: 'none',
+    borderLeft: 'none',
+    borderStyle: 'none',
+    outline: 'none',
+    boxShadow: 'none',
+    transform: 'none',
+    transition: 'none',
+    position: 'static',
+    top: 'auto',
+    right: 'auto',
+    bottom: 'auto',
+    left: 'auto',
+    zIndex: 'auto',
+    overflow: 'visible',
+    overflowX: 'visible',
+    overflowY: 'visible'
+  };
+};
+
+window.getComputedStyle = jest.fn((element: Element, pseudoElt?: string | null) => {
+  return createMockComputedStyle() as any;
+});
+
+// Also mock it on the global object for broader compatibility
+Object.defineProperty(window, 'getComputedStyle', {
+  writable: true,
+  value: jest.fn((element: Element, pseudoElt?: string | null) => {
+    return createMockComputedStyle() as any;
+  })
+});
+
+// Mock additional Element/Node methods that might be accessed
+Element.prototype.insertAdjacentElement = jest.fn();
+Element.prototype.insertAdjacentHTML = jest.fn();
+Element.prototype.insertAdjacentText = jest.fn();
+Node.prototype.appendChild = jest.fn();
+Node.prototype.removeChild = jest.fn();
+Node.prototype.insertBefore = jest.fn();
+Node.prototype.replaceChild = jest.fn();
+Node.prototype.cloneNode = jest.fn(() => ({} as Node));
+
+// Mock focus/blur methods
+HTMLElement.prototype.focus = jest.fn();
+HTMLElement.prototype.blur = jest.fn();
+HTMLElement.prototype.click = jest.fn();
+
+// Mock form element methods
+HTMLInputElement.prototype.setSelectionRange = jest.fn();
+HTMLInputElement.prototype.select = jest.fn();
+HTMLTextAreaElement.prototype.setSelectionRange = jest.fn();
+HTMLTextAreaElement.prototype.select = jest.fn();
+
 // Mock console methods to reduce noise
 const originalError = console.error;
 const originalWarn = console.warn;
@@ -424,15 +647,25 @@ afterAll(() => {
   console.warn = originalWarn;
 });
 
-// Setup before each test
-beforeEach(() => {
-  // Clear DOM
-  document.body.innerHTML = '';
-  
-  // Create root element
+// Ensure DOM root element exists immediately
+if (!document.getElementById('root')) {
   const root = document.createElement('div');
   root.id = 'root';
   document.body.appendChild(root);
+}
+
+// Setup before each test
+beforeEach(() => {
+  // Clear DOM but preserve root
+  const root = document.getElementById('root');
+  if (root) {
+    root.innerHTML = '';
+  } else {
+    // Create root element if it doesn't exist
+    const newRoot = document.createElement('div');
+    newRoot.id = 'root';
+    document.body.appendChild(newRoot);
+  }
   
   // Setup default mocks
   setupDefaultMocks();
