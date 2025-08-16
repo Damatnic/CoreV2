@@ -50,7 +50,7 @@ describe('notificationService', () => {
     });
 
     it('should accept undefined to clear the toast function', () => {
-      notificationService.setToastFunction(undefined as unknown);
+      notificationService.setToastFunction(undefined as any);
       notificationService.addToast('test message');
       
       expect(consoleSpy).toHaveBeenCalledWith('Toast function not set, falling back to alert');
@@ -128,7 +128,7 @@ describe('notificationService', () => {
     describe('when toast function is not set', () => {
       beforeEach(() => {
         // Clear the toast function by setting it to undefined
-        notificationService.setToastFunction(undefined as unknown);
+        notificationService.setToastFunction(undefined as any);
       });
 
       it('should warn and fall back to alert', () => {
@@ -196,7 +196,7 @@ describe('notificationService', () => {
       notificationService.addToast('Message 2');
       
       // Clear function and fall back to alert
-      notificationService.setToastFunction(undefined as unknown);
+      notificationService.setToastFunction(undefined as any);
       notificationService.addToast('Message 3');
       
       expect(firstFunction).toHaveBeenCalledWith('Message 1', 'success');
@@ -242,19 +242,19 @@ describe('notificationService', () => {
 
   describe('type safety and edge cases', () => {
     it('should handle null message gracefully', () => {
-      notificationService.addToast(null as unknown);
+      notificationService.addToast(null as any);
       
       expect(mockAddToast).toHaveBeenCalledWith(null, 'success');
     });
 
     it('should handle undefined message gracefully', () => {
-      notificationService.addToast(undefined as unknown);
+      notificationService.addToast(undefined as any);
       
       expect(mockAddToast).toHaveBeenCalledWith(undefined, 'success');
     });
 
     it('should work with numeric message converted to string', () => {
-      notificationService.addToast(123 as unknown, 'info');
+      notificationService.addToast(123 as any, 'info');
       
       expect(mockAddToast).toHaveBeenCalledWith(123, 'info');
     });

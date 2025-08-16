@@ -448,7 +448,7 @@ describe('CulturalFamilySupportService', () => {
         lastUpdated: new Date().toISOString(),
       };
 
-      const strategy = (service as unknown).getCrisisNotificationStrategy(familySupport, 'immediate_danger');
+      const strategy = (service as any).getCrisisNotificationStrategy(familySupport, 'immediate_danger');
       
       expect(strategy.contactsToNotify).toHaveLength(1);
       expect(strategy.contactsToNotify[0].emergencyContact).toBe(true);
@@ -523,7 +523,7 @@ describe('CulturalFamilySupportService', () => {
         lastUpdated: new Date().toISOString(),
       };
 
-      const strategy = (service as unknown).getCrisisNotificationStrategy(familySupport, 'mild_concern');
+      const strategy = (service as any).getCrisisNotificationStrategy(familySupport, 'mild_concern');
       
       expect(strategy.contactsToNotify.length).toBeGreaterThan(0);
       expect(strategy.escalationOrder).toContain('primary_family');
@@ -582,7 +582,7 @@ describe('CulturalFamilySupportService', () => {
         lastUpdated: new Date().toISOString(),
       };
 
-      const strategy = (service as unknown).getCrisisNotificationStrategy(familySupport, 'high_risk');
+      const strategy = (service as any).getCrisisNotificationStrategy(familySupport, 'high_risk');
       
       expect(strategy.contactsToNotify).toHaveLength(1);
       expect(strategy.escalationOrder).toContain('family_elders');
@@ -822,7 +822,7 @@ describe('CulturalFamilySupportService', () => {
         communicationStyle: 'direct',
       };
 
-      const message = (service as unknown).generateCulturalMessage(
+      const message = (service as any).generateCulturalMessage(
         member,
         'crisis_alert',
         { severity: 8 },
@@ -864,7 +864,7 @@ describe('CulturalFamilySupportService', () => {
         communicationStyle: 'indirect',
       };
 
-      const message = (service as unknown).generateCulturalMessage(
+      const message = (service as any).generateCulturalMessage(
         member,
         'crisis_alert',
         { severity: 7 },
@@ -904,7 +904,7 @@ describe('CulturalFamilySupportService', () => {
         communicationStyle: 'indirect',
       };
 
-      const message = (service as unknown).generateCulturalMessage(
+      const message = (service as any).generateCulturalMessage(
         member,
         'mild_concern',
         { severity: 4 },
@@ -944,7 +944,7 @@ describe('CulturalFamilySupportService', () => {
         communicationStyle: 'contextual',
       };
 
-      const message = (service as unknown).generateCulturalMessage(
+      const message = (service as any).generateCulturalMessage(
         member,
         'family_meeting',
         { severity: 5 },
@@ -1032,7 +1032,7 @@ describe('CulturalFamilySupportService', () => {
         communicationStyle: 'direct',
       };
 
-      const escalationLevels = (service as unknown).getDefaultEscalationLevels(westernContext);
+      const escalationLevels = (service as any).getDefaultEscalationLevels(westernContext);
       
       expect(escalationLevels).toHaveLength(4);
       expect(escalationLevels[0].level).toBe(1);
@@ -1051,7 +1051,7 @@ describe('CulturalFamilySupportService', () => {
         communicationStyle: 'indirect',
       };
 
-      const escalationLevels = (service as unknown).getDefaultEscalationLevels(arabicContext);
+      const escalationLevels = (service as any).getDefaultEscalationLevels(arabicContext);
       
       expect(escalationLevels[2].culturalProtocols).toContain('elder_decision_making');
       expect(escalationLevels[3].culturalProtocols).toContain('religious_guidance');
@@ -1066,7 +1066,7 @@ describe('CulturalFamilySupportService', () => {
         communicationStyle: 'contextual',
       };
 
-      const escalationLevels = (service as unknown).getDefaultEscalationLevels(hispanicContext);
+      const escalationLevels = (service as any).getDefaultEscalationLevels(hispanicContext);
       
       expect(escalationLevels[1].culturalProtocols).toContain('extended_family_consultation');
       expect(escalationLevels[2].culturalProtocols).toContain('community_support');
@@ -1081,7 +1081,7 @@ describe('CulturalFamilySupportService', () => {
         communicationStyle: 'direct',
       };
 
-      const guidelines = (service as unknown).getDefaultCommunicationGuidelines(individualContext);
+      const guidelines = (service as any).getDefaultCommunicationGuidelines(individualContext);
       
       expect(guidelines.familyMeetingFormat).toBe('individual_sessions');
       expect(guidelines.crisisDisclosureProtocol).toBe('immediate_family');
@@ -1097,7 +1097,7 @@ describe('CulturalFamilySupportService', () => {
         communicationStyle: 'indirect',
       };
 
-      const guidelines = (service as unknown).getDefaultCommunicationGuidelines(familyCenteredContext);
+      const guidelines = (service as any).getDefaultCommunicationGuidelines(familyCenteredContext);
       
       expect(guidelines.familyMeetingFormat).toBe('elder_mediated'); // Due to indirect communication
       expect(guidelines.crisisDisclosureProtocol).toBe('extended_family');
@@ -1113,7 +1113,7 @@ describe('CulturalFamilySupportService', () => {
         communicationStyle: 'indirect',
       };
 
-      const guidelines = (service as unknown).getDefaultCommunicationGuidelines(communityContext);
+      const guidelines = (service as any).getDefaultCommunicationGuidelines(communityContext);
       
       expect(guidelines.familyMeetingFormat).toBe('elder_mediated');
       expect(guidelines.crisisDisclosureProtocol).toBe('community_elders');

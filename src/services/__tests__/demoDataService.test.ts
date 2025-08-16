@@ -610,7 +610,7 @@ describe('DemoDataService', () => {
 
   describe('Error handling', () => {
     it('should handle invalid user types in getDemoData', () => {
-      const result = service.getDemoData('invalid' as unknown);
+      const result = service.getDemoData('invalid' as any);
       
       expect(result).toBeDefined();
       // Should not throw an error

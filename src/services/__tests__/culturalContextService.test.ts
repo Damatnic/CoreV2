@@ -14,7 +14,7 @@ describe('CulturalContextService', () => {
 
   describe('Cultural Context Data Structure', () => {
     test('should have complete cultural contexts for all supported languages', () => {
-      const contexts = (service as unknown).culturalContexts;
+      const contexts = (service as any).culturalContexts;
       
       // Check that all expected languages are present
       const expectedLanguages = ['en', 'es', 'pt-BR', 'pt', 'ar', 'zh', 'vi', 'tl'];
@@ -24,7 +24,7 @@ describe('CulturalContextService', () => {
     });
 
     test('should have consistent structure across all cultural contexts', () => {
-      const contexts = (service as unknown).culturalContexts;
+      const contexts = (service as any).culturalContexts;
       
       Object.keys(contexts).forEach(lang => {
         const context = contexts[lang];
@@ -158,8 +158,8 @@ describe('CulturalContextService', () => {
     });
 
     test('should handle null and undefined language codes', () => {
-      const nullContext = service.getCulturalContext(null as unknown);
-      const undefinedContext = service.getCulturalContext(undefined as unknown);
+      const nullContext = service.getCulturalContext(null as any);
+      const undefinedContext = service.getCulturalContext(undefined as any);
       
       expect(nullContext.region).toBe('Western');
       expect(undefinedContext.region).toBe('Western');
@@ -452,17 +452,17 @@ describe('CulturalContextService', () => {
 
   describe('Performance and Immutability', () => {
     test('should not modify internal data when returning contexts', () => {
-      const originalContexts = JSON.parse(JSON.stringify((service as unknown).culturalContexts));
+      const originalContexts = JSON.parse(JSON.stringify((service as any).culturalContexts));
       
       // Get contexts multiple times and try to modify them
       const context1 = service.getCulturalContext('es');
       const context2 = service.getAllCulturalContexts();
       
-      context1.mentalHealthStigma = 'low' as unknown;
-      context2.ar.communicationStyle = 'direct' as unknown;
+      context1.mentalHealthStigma = 'low' as any;
+      context2.ar.communicationStyle = 'direct' as any;
       
       // Internal data should remain unchanged
-      const currentContexts = (service as unknown).culturalContexts;
+      const currentContexts = (service as any).culturalContexts;
       expect(currentContexts).toEqual(originalContexts);
     });
 

@@ -136,7 +136,7 @@ export const CrisisHelpWidget: React.FC = () => {
                   className={`urgency-btn medium ${urgencyLevel === 'medium' ? 'active' : ''}`}
                   onClick={() => setUrgencyLevel('medium')}
                 >
-                  I'm struggling
+                  I&apos;m struggling
                 </button>
                 <button 
                   className={`urgency-btn high ${urgencyLevel === 'high' ? 'active' : ''}`}

@@ -7,18 +7,16 @@ import { renderHook } from '../test-utils';
 import { useSafeLocation } from './useSafeLocation';
 
 // Mock react-router-dom
-const mockLocationContext = {
-  location: {
-    pathname: '/test-path',
-    search: '?param=value',
-    hash: '#section',
-    state: { from: '/previous' },
-    key: 'test-key-123'
-  }
+const mockLocation = {
+  pathname: '/test-path',
+  search: '?param=value',
+  hash: '#section',
+  state: { from: '/previous' },
+  key: 'test-key-123'
 };
 
 jest.mock('react-router-dom', () => ({
-  UNSAFE_LocationContext: React.createContext(mockLocationContext)
+  useLocation: jest.fn()
 }));
 
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => 
@@ -30,20 +28,20 @@ describe('useSafeLocation Hook', () => {
   });
 
   it('should return location from router context when available', () => {
+    const { useLocation } = require('react-router-dom');
+    useLocation.mockReturnValue(mockLocation);
+    
     const { result } = renderHook(() => useSafeLocation(), { wrapper: Wrapper });
 
-    expect(result.current).toEqual({
-      pathname: '/test-path',
-      search: '?param=value',
-      hash: '#section',
-      state: { from: '/previous' },
-      key: 'test-key-123'
-    });
+    expect(result.current).toEqual(mockLocation);
   });
 
   it('should return fallback location when no router context exists', () => {
-    // Mock useContext to return null (no context)
-    jest.spyOn(React, 'useContext').mockReturnValue(null);
+    const { useLocation } = require('react-router-dom');
+    // Mock useLocation to throw (no Router context)
+    useLocation.mockImplementation(() => {
+      throw new Error('useLocation() may be used only in the context of a <Router> component.');
+    });
 
     const { result } = renderHook(() => useSafeLocation(), { wrapper: Wrapper });
 
@@ -230,7 +228,7 @@ describe('useSafeLocation Hook', () => {
         pathname: '/updated',
         search: '?updated=true',
         hash: '#new',
-        state: { updated: true } as unknown,
+        state: { updated: true } as any,
         key: 'updated'
       }
     };

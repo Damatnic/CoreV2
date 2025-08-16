@@ -10,7 +10,9 @@ module.exports = {
   moduleNameMapper: {
     '^workbox-(.*)$': '<rootDir>/tests/__mocks__/workbox-$1.js',
     '\\.css$': 'identity-obj-proxy',
-    '\\.module\\.css$': 'identity-obj-proxy'
+    '\\.module\\.css$': 'identity-obj-proxy',
+    '^../contexts/AuthContext$': '<rootDir>/src/contexts/__mocks__/AuthContext.tsx',
+    '^./contexts/AuthContext$': '<rootDir>/src/contexts/__mocks__/AuthContext.tsx'
   },
   testMatch: [
     '<rootDir>/src/**/*.test.{js,jsx,ts,tsx}',

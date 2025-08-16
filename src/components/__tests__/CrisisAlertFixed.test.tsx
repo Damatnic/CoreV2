@@ -1,15 +1,25 @@
 import { render, screen, fireEvent, waitFor } from '../../test-utils';
 import { CrisisAlert } from '../CrisisAlertFixed';
-import { createMockCrisisAlert, mockWindowMethods } from '../../test-utils';
+import { createMockCrisisAlert } from '../../test-utils';
 
 // Mock the CSS file
 jest.mock('../CrisisAlert.css', () => ({}));
 
 describe('CrisisAlert', () => {
-  let mockWindow: ReturnType<typeof mockWindowMethods>;
+  let mockWindow: { open: jest.Mock; alert: jest.Mock; confirm: jest.Mock; prompt: jest.Mock };
 
   beforeEach(() => {
-    mockWindow = mockWindowMethods();
+    // Mock window methods directly
+    mockWindow = {
+      open: jest.fn(),
+      alert: jest.fn(),
+      confirm: jest.fn(),
+      prompt: jest.fn()
+    };
+    
+    // Apply mocks to global window
+    Object.assign(window, mockWindow);
+    
     jest.clearAllMocks();
   });
 
@@ -19,7 +29,7 @@ describe('CrisisAlert', () => {
 
   describe('Rendering', () => {
     it('should render crisis alert when show is true', () => {
-      const props = createMockCrisisAlert();
+      const props = createMockCrisisAlert({ show: true });
       render(<CrisisAlert {...props} />);
       
       expect(screen.getByRole('alert')).toBeInTheDocument();
@@ -150,7 +160,7 @@ describe('CrisisAlert', () => {
       const props = createMockCrisisAlert({ emergencyMode: false });
       render(<CrisisAlert {...props} />);
       
-      const backdrop = screen.getByRole('button', { name: /close alert/i });
+      const backdrop = screen.getByRole('button', { name: /close alert backdrop/i });
       expect(backdrop).toHaveAttribute('tabIndex', '0');
     });
   });
@@ -180,7 +190,7 @@ describe('CrisisAlert', () => {
       const props = createMockCrisisAlert({ emergencyMode: false });
       render(<CrisisAlert {...props} />);
       
-      const backdrop = screen.getByRole('button', { name: /close alert/i });
+      const backdrop = screen.getByRole('button', { name: /close alert backdrop/i });
       fireEvent.click(backdrop);
       
       expect(props.onDismiss).toHaveBeenCalled();
@@ -198,7 +208,7 @@ describe('CrisisAlert', () => {
       const props = createMockCrisisAlert({ emergencyMode: false });
       render(<CrisisAlert {...props} />);
       
-      const backdrop = screen.getByRole('button', { name: /close alert/i });
+      const backdrop = screen.getByRole('button', { name: /close alert backdrop/i });
       fireEvent.keyDown(backdrop, { key: 'Enter', code: 'Enter' });
       
       expect(props.onDismiss).toHaveBeenCalled();
@@ -208,7 +218,7 @@ describe('CrisisAlert', () => {
       const props = createMockCrisisAlert({ emergencyMode: false });
       render(<CrisisAlert {...props} />);
       
-      const backdrop = screen.getByRole('button', { name: /close alert/i });
+      const backdrop = screen.getByRole('button', { name: /close alert backdrop/i });
       fireEvent.keyDown(backdrop, { key: ' ', code: 'Space' });
       
       expect(props.onDismiss).toHaveBeenCalled();

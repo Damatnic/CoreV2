@@ -103,7 +103,7 @@ export const CrisisSupportWidget: React.FC = () => {
         </div>
         <h2 className="widget-title">
           <HeartIcon className="widget-icon" />
-          You're Not Alone
+          You&apos;re Not Alone
         </h2>
       </div>
       

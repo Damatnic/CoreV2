@@ -245,7 +245,7 @@ export const usePerformanceMonitor = (options: UsePerformanceMonitorOptions = {}
   /**
    * Handle performance metric updates
    */
-  const handleMetricUpdate = useCallback((metric: any) => {
+  const handleMetricUpdate = useCallback((metric: { name: string; value: number; id?: string; isCrisisCritical?: boolean }) => {
     setPerformanceState(prevState => {
       const newMetrics = {
         ...prevState.metrics,
@@ -319,16 +319,18 @@ export const usePerformanceMonitor = (options: UsePerformanceMonitorOptions = {}
   const startAutomaticReporting = useCallback(() => {
     if (!enableAutomaticReporting) return;
 
+    // Clear any existing interval
+    if (reportingIntervalRef.current) {
+      clearInterval(reportingIntervalRef.current);
+    }
+
     reportingIntervalRef.current = setInterval(() => {
       const report = coreWebVitalsService.generateReport();
       
       // Log performance summary
       console.log('📊 Performance Report:', {
-        route: location.pathname,
-        score: performanceState.performanceScore,
-        crisisOptimized: performanceState.crisisOptimized,
-        mobileOptimized: performanceState.mobileOptimized,
-        metrics: performanceState.metrics
+        route: window.location.pathname,
+        timestamp: Date.now()
       });
       
       // Store performance data locally for analysis
@@ -337,7 +339,8 @@ export const usePerformanceMonitor = (options: UsePerformanceMonitorOptions = {}
         const reports = existingReports ? JSON.parse(existingReports) : [];
         reports.push({
           ...report,
-          appMetrics: performanceState
+          pathname: window.location.pathname,
+          timestamp: Date.now()
         });
         
         // Keep only last 50 reports
@@ -350,13 +353,21 @@ export const usePerformanceMonitor = (options: UsePerformanceMonitorOptions = {}
         console.warn('Could not store performance report:', error);
       }
     }, reportingInterval);
-  }, [enableAutomaticReporting, reportingInterval, location.pathname, performanceState]);
+    
+    // Return cleanup function
+    return () => {
+      if (reportingIntervalRef.current) {
+        clearInterval(reportingIntervalRef.current);
+      }
+    };
+  }, [enableAutomaticReporting, reportingInterval]);
 
   /**
    * Initialize performance monitoring
    */
   useEffect(() => {
-    let cleanup: (() => void) | undefined;
+    let emergencyCleanup: (() => void) | undefined;
+    let reportingCleanup: (() => void) | undefined;
 
     const initializeMonitoring = async () => {
       try {
@@ -364,17 +375,10 @@ export const usePerformanceMonitor = (options: UsePerformanceMonitorOptions = {}
         await coreWebVitalsService.initialize();
         
         // Set up emergency button monitoring
-        const emergencyCleanup = monitorEmergencyButtons();
+        emergencyCleanup = monitorEmergencyButtons();
         
         // Start automatic reporting
-        startAutomaticReporting();
-        
-        cleanup = () => {
-          emergencyCleanup();
-          if (reportingIntervalRef.current) {
-            clearInterval(reportingIntervalRef.current);
-          }
-        };
+        reportingCleanup = startAutomaticReporting();
         
       } catch (error) {
         console.warn('Performance monitoring initialization failed:', error);
@@ -384,7 +388,13 @@ export const usePerformanceMonitor = (options: UsePerformanceMonitorOptions = {}
 
     initializeMonitoring();
 
-    return cleanup;
+    return () => {
+      if (emergencyCleanup) emergencyCleanup();
+      if (reportingCleanup) reportingCleanup();
+      if (reportingIntervalRef.current) {
+        clearInterval(reportingIntervalRef.current);
+      }
+    };
   }, [monitorEmergencyButtons, startAutomaticReporting]);
 
   /**
@@ -466,6 +476,7 @@ export const usePerformanceMonitor = (options: UsePerformanceMonitorOptions = {}
     getPerformanceSummary,
     generateReport,
     isPerformanceCritical,
+    handleMetricUpdate,
     isCrisisRoute: isCrisisRoute(),
     isMobileDevice: isMobileDevice()
   };

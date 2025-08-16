@@ -277,7 +277,7 @@ describe('SafeSpaceIndicator', () => {
 
     it('should handle undefined auth state gracefully', () => {
       render(
-        <AuthContext.Provider value={null as unknown}>
+        <AuthContext.Provider value={null as any}>
           <SafeSpaceIndicator />
         </AuthContext.Provider>
       );

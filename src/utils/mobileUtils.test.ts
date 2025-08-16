@@ -283,7 +283,7 @@ describe('mobileUtils', () => {
       enhanceMobileFocus();
 
       // Trigger focus event
-      (focusHandler as unknown)({ target: input } as unknown as FocusEvent);
+      (focusHandler as any)({ target: input } as unknown as FocusEvent);
 
       expect(input.classList.contains('mobile-input-focused')).toBe(true);
 
@@ -405,7 +405,7 @@ describe('mobileUtils', () => {
       });
 
       Object.defineProperty(window, 'innerWidth', { value: 1200, writable: true });
-      delete (window as unknown).ontouchstart;
+      delete (window as any).ontouchstart;
 
       expect(isMobileDevice()).toBe(false);
     });
@@ -758,7 +758,7 @@ describe('mobileUtils', () => {
     test('should handle missing document gracefully', () => {
       // Mock missing document
       const originalDocument = global.document;
-      (global as unknown).document = undefined;
+      (global as any).document = undefined;
 
       expect(() => {
         jest.resetModules();
@@ -773,7 +773,7 @@ describe('mobileUtils', () => {
   describe('Edge Cases and Error Handling', () => {
     test('should handle elements without style property', () => {
       const input = document.createElement('input');
-      delete (input as unknown).style;
+      delete (input as any).style;
       document.body.appendChild(input);
 
       expect(() => {

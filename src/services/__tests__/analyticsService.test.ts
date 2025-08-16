@@ -34,8 +34,8 @@ Object.defineProperty(window, 'PerformanceObserver', {
 });
 
 // Cast to any to allow setting supportedEntryTypes
-(global as unknown).PerformanceObserver = mockPerformanceObserver;
-(mockPerformanceObserver as unknown).supportedEntryTypes = ['navigation', 'paint'];
+(global as any).PerformanceObserver = mockPerformanceObserver;
+(mockPerformanceObserver as any).supportedEntryTypes = ['navigation', 'paint'];
 
 // Mock fetch
 global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;

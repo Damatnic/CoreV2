@@ -4,6 +4,7 @@ import { ApiClient } from '../utils/ApiClient';
 import { Helper } from '../types';
 import { useNotification } from './NotificationContext';
 import { localStorageService } from '../services/localStorageService';
+import { logger } from '../utils/logger';
 
 // Auth0 Configuration (Optional)
 const AUTH0_DOMAIN = import.meta.env.VITE_AUTH0_DOMAIN || '';
@@ -55,7 +56,7 @@ const jwtDecode = (token: string) => {
   try {
     const base64Url = token.split('.')[1];
     if (!base64Url) {
-      console.error("Invalid JWT: Missing payload part.");
+      logger.error("Invalid JWT: Missing payload part.", undefined, 'OptionalAuthContext');
       return null;
     }
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -65,7 +66,7 @@ const jwtDecode = (token: string) => {
 
     return JSON.parse(jsonPayload);
   } catch (e) {
-    console.error("Failed to decode JWT", e);
+    logger.error("Failed to decode JWT", e, 'OptionalAuthContext');
     return null;
   }
 };
@@ -108,7 +109,7 @@ export const OptionalAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
         setIsNewUser(true);
       }
     } catch (error) {
-      console.error("Failed to fetch helper profile", error);
+      logger.error("Failed to fetch helper profile", error, 'OptionalAuthContext');
       setHelperProfile(null);
       setIsNewUser(true);
     }
@@ -185,7 +186,7 @@ export const OptionalAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
   // Load existing session on mount
   useEffect(() => {
     const loadToken = async () => {
-      console.log("OptionalAuthContext: Starting token load");
+      logger.debug("Starting token load", undefined, 'OptionalAuthContext');
       setIsLoading(true);
       try {
         // Check for demo user first
@@ -193,7 +194,7 @@ export const OptionalAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
         const demoToken = localStorage.getItem('demo_token');
         
         if (demoUser && demoToken) {
-          console.log("OptionalAuthContext: Loading demo user");
+          logger.debug("Loading demo user", undefined, 'OptionalAuthContext');
           const userData = JSON.parse(demoUser);
           setUser(userData);
           setUserToken(demoToken);
@@ -231,13 +232,13 @@ export const OptionalAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
         }
         
         // If no auth, remain anonymous
-        console.log("OptionalAuthContext: No authentication found, using anonymous mode");
+        logger.debug("No authentication found, using anonymous mode", undefined, 'OptionalAuthContext');
       } catch (error) {
-        console.error("Error during token loading:", error);
+        logger.error("Error during token loading:", error, 'OptionalAuthContext');
         // Default to anonymous mode on error
         await setAuthData(null);
       } finally {
-        console.log("OptionalAuthContext: Token load complete");
+        logger.debug("Token load complete", undefined, 'OptionalAuthContext');
         setIsLoading(false);
       }
     };
@@ -250,7 +251,7 @@ export const OptionalAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
       setAuthData(response.params.access_token);
     } else if (response?.type === 'error') {
       addToast('Authentication error: ' + (response.params.error_description || response.error?.message), 'error');
-      console.error(response.error);
+      logger.error("Authentication error", response.error, 'OptionalAuthContext');
     }
   }, [response, setAuthData, addToast]);
 
@@ -263,7 +264,7 @@ export const OptionalAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
     
     if (!request) {
       const errorMessage = "Authentication service is not configured correctly.";
-      console.error(errorMessage);
+      logger.error(errorMessage, undefined, 'OptionalAuthContext');
       addToast(errorMessage, 'error');
       return;
     }

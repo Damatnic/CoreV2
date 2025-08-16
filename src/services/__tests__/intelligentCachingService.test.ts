@@ -382,7 +382,7 @@ describe('IntelligentCachingService', () => {
       await service.getResource('/resource2');
       await service.getResource('/resource3');
 
-      const analytics = await service.getCacheAnalytics();
+      const analytics = await service.getCacheAnalytics() as any;
 
       expect(analytics.hitRate).toBeCloseTo(0.67, 2); // 2/3 hits
       expect(analytics.missRate).toBeCloseTo(0.33, 2); // 1/3 misses
@@ -398,13 +398,13 @@ describe('IntelligentCachingService', () => {
         }
       });
 
-      const analytics = await service.getCacheAnalytics();
+      const analytics = await service.getCacheAnalytics() as any;
 
       expect(analytics.storageUsage).toBeCloseTo(0.25, 2); // 25% usage
     });
 
     it('should track performance metrics', async () => {
-      const analytics = await service.getCacheAnalytics();
+      const analytics = await service.getCacheAnalytics() as any;
 
       expect(analytics.performanceMetrics).toHaveProperty('averageLoadTime');
       expect(analytics.performanceMetrics).toHaveProperty('cacheRetrievalTime');

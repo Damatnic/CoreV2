@@ -492,7 +492,7 @@ const EnhancedMoodTracker: React.FC = () => {
                   Mood Tracked!
                 </h3>
                 <p className="text-gray-600">
-                  Thank you for sharing how you're feeling
+                  Thank you for sharing how you&apos;re feeling
                 </p>
               </div>
             </div>
@@ -531,7 +531,7 @@ const EnhancedMoodTracker: React.FC = () => {
                     </p>
                     {entry.note && (
                       <p className="text-sm text-gray-700 mt-1">
-                        "{entry.note}"
+                        &ldquo;{entry.note}&rdquo;
                       </p>
                     )}
                   </div>

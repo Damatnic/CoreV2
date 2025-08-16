@@ -137,7 +137,7 @@ describe('useIntelligentCaching Hook', () => {
           type: 'CACHE_STATUS',
           data: mockCacheStatus
         }
-      });
+      } as MessageEvent);
     });
 
     expect(result.current.cacheStatus).toEqual(mockCacheStatus);
@@ -163,7 +163,7 @@ describe('useIntelligentCaching Hook', () => {
   it('should handle missing service worker controller', async () => {
     // Mock no active service worker
     const originalController = mockServiceWorker.controller;
-    delete (mockServiceWorker as unknown).controller;
+    delete (mockServiceWorker as any).controller;
 
     const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
     
@@ -176,7 +176,7 @@ describe('useIntelligentCaching Hook', () => {
     expect(consoleSpy).toHaveBeenCalledWith('[Intelligent Cache] Service worker not ready');
 
     // Restore controller
-    (mockServiceWorker as unknown).controller = originalController;
+    (mockServiceWorker as any).controller = originalController;
     consoleSpy.mockRestore();
   });
 
@@ -214,8 +214,8 @@ describe('useIntelligentCaching Hook', () => {
 
   it('should handle missing navigator.connection', () => {
     // Mock missing connection API
-    const originalConnection = (navigator as unknown).connection;
-    delete (navigator as unknown).connection;
+    const originalConnection = (navigator as any).connection;
+    delete (navigator as any).connection;
 
     const { result } = renderHook(() => useIntelligentCaching(), { wrapper: Wrapper });
 
@@ -225,12 +225,12 @@ describe('useIntelligentCaching Hook', () => {
     expect(capabilities.effectiveType).toBe('4g');
 
     // Restore connection
-    (navigator as unknown).connection = originalConnection;
+    (navigator as any).connection = originalConnection;
   });
 
   it('should identify slow networks correctly', () => {
     // Mock slow connection
-    (navigator as unknown).connection.effectiveType = 'slow-2g';
+    (navigator as any).connection.effectiveType = 'slow-2g';
 
     const { result } = renderHook(() => useIntelligentCaching(), { wrapper: Wrapper });
 
@@ -281,7 +281,7 @@ describe('useIntelligentCaching Hook', () => {
 
   it('should skip prefetch on slow networks for non-crisis resources', async () => {
     // Mock slow network
-    (navigator as unknown).connection.effectiveType = 'slow-2g';
+    (navigator as any).connection.effectiveType = 'slow-2g';
 
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
     
@@ -301,7 +301,7 @@ describe('useIntelligentCaching Hook', () => {
 
   it('should prefetch crisis resources even on slow networks', async () => {
     // Mock slow network
-    (navigator as unknown).connection.effectiveType = 'slow-2g';
+    (navigator as any).connection.effectiveType = 'slow-2g';
 
     const { result } = renderHook(() => useIntelligentCaching(), { wrapper: Wrapper });
 
@@ -441,7 +441,7 @@ describe('useIntelligentCaching Hook', () => {
       port2: {}
     };
 
-    global.MessageChannel = jest.fn(() => mockChannel) as unknown;
+    global.MessageChannel = jest.fn(() => mockChannel) as any;
 
     const statusPromise = act(async () => {
       return result.current.getCacheStatus();
@@ -475,7 +475,7 @@ describe('useIntelligentCaching Hook', () => {
       port2: {}
     };
 
-    global.MessageChannel = jest.fn(() => mockChannel) as unknown;
+    global.MessageChannel = jest.fn(() => mockChannel) as any;
 
     const statusPromise = result.current.getCacheStatus();
 
@@ -527,7 +527,7 @@ describe('useIntelligentCaching Hook', () => {
 
   it('should skip image preload on slow networks', async () => {
     // Mock slow network
-    (navigator as unknown).connection.effectiveType = 'slow-2g';
+    (navigator as any).connection.effectiveType = 'slow-2g';
 
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
     

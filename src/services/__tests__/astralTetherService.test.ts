@@ -614,8 +614,8 @@ describe('AstralTetherService', () => {
       tetherService.userProfiles.set('default-user', mockProfile);
 
       // Mock window.location.href
-      delete (window as unknown).location;
-      (window as unknown).location = { href: '' };
+      delete (window as any).location;
+      (window as any).location = { href: '' };
 
       await tetherService.triggerPanicMode();
       

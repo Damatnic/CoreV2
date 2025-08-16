@@ -323,7 +323,7 @@ describe('Toast', () => {
       const toast = createMockToast();
       
       expect(() => {
-        render(<Toast toast={toast} onDismiss={undefined as ((id: string) => void) | undefined} />);
+        render(<Toast toast={toast} onDismiss={undefined as any} />);
       }).not.toThrow();
     });
 

@@ -4,6 +4,7 @@
 
 import React from 'react';
 import { renderHook, act, waitFor } from '../test-utils';
+import { render as testRender } from '../test-utils';
 import { 
   usePerformanceMetrics,
   usePerformanceAlerts,
@@ -146,8 +147,10 @@ describe('usePerformanceMetrics Hook', () => {
     (comprehensivePerformanceMonitor.getCurrentMetrics as jest.Mock).mockClear();
 
     // Fast-forward 5 seconds
-    act(() => {
+    await act(async () => {
       jest.advanceTimersByTime(5000);
+      // Wait for async operations to complete
+      await new Promise(resolve => setTimeout(resolve, 0));
     });
 
     expect(comprehensivePerformanceMonitor.getCurrentMetrics).toHaveBeenCalledTimes(1);
@@ -343,8 +346,10 @@ describe('useOptimizationRecommendations Hook', () => {
     (comprehensivePerformanceMonitor.generateOptimizationRecommendations as jest.Mock).mockClear();
 
     // Fast-forward 30 seconds
-    act(() => {
+    await act(async () => {
       jest.advanceTimersByTime(30000);
+      // Wait for async operations to complete
+      await new Promise(resolve => setTimeout(resolve, 0));
     });
 
     expect(comprehensivePerformanceMonitor.generateOptimizationRecommendations).toHaveBeenCalled();
@@ -626,11 +631,20 @@ describe('PerformanceProvider Component', () => {
 
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
-    const TestComponent = () => React.createElement('div', {}, 'Test');
+    const TestComponent = () => {
+      const { metrics } = usePerformanceMetrics();
+      return React.createElement('div', {}, metrics ? 'Metrics loaded' : 'Loading');
+    };
 
-    renderHook(() => {
-      return React.createElement(PerformanceProvider, { children: React.createElement(TestComponent) });
-    }, { wrapper: Wrapper });
+    const { getByText } = testRender(
+      React.createElement(PerformanceProvider, { 
+        children: React.createElement(TestComponent) 
+      })
+    );
+
+    await waitFor(() => {
+      expect(getByText('Metrics loaded')).toBeInTheDocument();
+    });
 
     await waitFor(() => {
       expect(consoleSpy).toHaveBeenCalledWith(

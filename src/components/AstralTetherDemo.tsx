@@ -247,7 +247,7 @@ export const AstralTetherDemo: React.FC = () => {
         <div className="testimonials-list">
           {astralTetherDemo.testimonials.map((testimonial, index) => (
             <div key={index} className="testimonial-item">
-              <p className="testimonial-text">"{testimonial.text}"</p>
+              <p className="testimonial-text">&ldquo;{testimonial.text}&rdquo;</p>
               <div className="testimonial-footer">
                 <span className="testimonial-author">- {testimonial.author}</span>
                 <div className="testimonial-rating">
@@ -268,7 +268,7 @@ export const AstralTetherDemo: React.FC = () => {
         <h3 className="instructions-title">How to Use Astral Tether</h3>
         <ol className="instructions-list">
           <li>Choose an energy mode that matches your current needs</li>
-          <li>Find a comfortable, quiet space where you won't be disturbed</li>
+          <li>Find a comfortable, quiet space where you won&apos;t be disturbed</li>
           <li>Start your session and focus on the pulsing visualization</li>
           <li>Breathe deeply and allow the energy to flow through you</li>
           <li>Continue for as long as feels comfortable (5-20 minutes recommended)</li>
@@ -276,7 +276,7 @@ export const AstralTetherDemo: React.FC = () => {
         </ol>
         <p className="instructions-note">
           <strong>Note:</strong> Astral Tether is a complementary wellness tool. 
-          For immediate crisis support, please use the "Need Help Now?" button or call 988.
+          For immediate crisis support, please use the &ldquo;Need Help Now?&rdquo; button or call 988.
         </p>
       </Card>
     </div>

@@ -511,7 +511,7 @@ describe('useEnhancedOffline Hook', () => {
   it('should handle browsers without storage API', async () => {
     // Mock navigator without storage API
     const originalStorage = navigator.storage;
-    delete (navigator as unknown).storage;
+    delete (navigator as any).storage;
 
     const { result } = renderHook(() => useEnhancedOffline(), { wrapper: Wrapper });
 
@@ -523,7 +523,7 @@ describe('useEnhancedOffline Hook', () => {
     expect(result.current.storageUsage.quota).toBe(0);
 
     // Restore storage API
-    (navigator as unknown).storage = originalStorage;
+    (navigator as any).storage = originalStorage;
   });
 
   it('should update storage usage periodically', async () => {

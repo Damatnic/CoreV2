@@ -89,15 +89,15 @@ describe('Error Tracking Service (Vite Version)', () => {
   describe('Vite-specific configuration', () => {
     it('should handle missing import.meta gracefully', () => {
       // Temporarily remove import.meta
-      const originalImportMeta = (window as unknown).import;
-      delete (window as unknown).import;
+      const originalImportMeta = (window as any).import;
+      delete (window as any).import;
 
       expect(() => {
         initializeSentry();
       }).not.toThrow();
 
       // Restore import.meta
-      (window as unknown).import = originalImportMeta;
+      (window as any).import = originalImportMeta;
     });
 
     it('should handle missing env variables gracefully', () => {
@@ -380,7 +380,7 @@ describe('Error Tracking Service (Vite Version)', () => {
     });
 
     it('should handle circular references in context', () => {
-      const circularObject = { name: 'test' };
+      const circularObject: any = { name: 'test' };
       circularObject.self = circularObject;
 
       expect(() => {

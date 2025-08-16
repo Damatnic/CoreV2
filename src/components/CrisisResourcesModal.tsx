@@ -139,7 +139,7 @@ export const CrisisResourcesModal: React.FC<CrisisResourcesModalProps> = ({
             )}
             {contact.textKeyword && (
               <span className="crisis-contact__text">
-                Text "{contact.textKeyword}" to {contact.number}
+                Text &ldquo;{contact.textKeyword}&rdquo; to {contact.number}
               </span>
             )}
           </div>

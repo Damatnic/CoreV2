@@ -229,8 +229,8 @@ describe('CSS Optimization Utilities', () => {
     global.PerformanceObserver = jest.fn().mockImplementation((_callback) => ({
       observe: jest.fn(),
       disconnect: jest.fn()
-    })) as unknown;
-    (global.PerformanceObserver as unknown).supportedEntryTypes = ['resource'];
+    })) as any;
+    (global.PerformanceObserver as any).supportedEntryTypes = ['resource'];
     
     cssOptimization.monitorCSSPerformance();
     

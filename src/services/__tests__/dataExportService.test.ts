@@ -137,7 +137,7 @@ describe('DataExportService', () => {
     });
 
     it('should throw error for unsupported format', async () => {
-      const invalidOptions = { ...mockOptions, format: 'xml' as unknown };
+      const invalidOptions = { ...mockOptions, format: 'xml' as any };
 
       await expect(service.exportUserData(invalidOptions)).rejects.toThrow('Unsupported export format: xml');
     });
@@ -188,7 +188,7 @@ describe('DataExportService', () => {
       };
 
       // Access private method through any type casting
-      const data = await (service as unknown).gatherUserData(options);
+      const data = await (service as any).gatherUserData(options);
 
       expect(data.metadata.userId).toBe('test-user-123');
     });
@@ -206,7 +206,7 @@ describe('DataExportService', () => {
         includeSettings: false,
       };
 
-      const data = await (service as unknown).gatherUserData(options);
+      const data = await (service as any).gatherUserData(options);
 
       expect(data.metadata.userId).toBeUndefined();
     });
@@ -216,7 +216,7 @@ describe('DataExportService', () => {
     it('should parse valid JSON data', () => {
       mockLocalStorage.getItem.mockReturnValue('{"key": "value"}');
 
-      const result = (service as unknown).getStoredData('testKey');
+      const result = (service as any).getStoredData('testKey');
 
       expect(result).toEqual({ key: 'value' });
       expect(mockLocalStorage.getItem).toHaveBeenCalledWith('testKey');
@@ -226,7 +226,7 @@ describe('DataExportService', () => {
       mockLocalStorage.getItem.mockReturnValue('invalid json');
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
 
-      const result = (service as unknown).getStoredData('testKey');
+      const result = (service as any).getStoredData('testKey');
 
       expect(result).toBeNull();
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -240,7 +240,7 @@ describe('DataExportService', () => {
     it('should return null when no data exists', () => {
       mockLocalStorage.getItem.mockReturnValue(null);
 
-      const result = (service as unknown).getStoredData('testKey');
+      const result = (service as any).getStoredData('testKey');
 
       expect(result).toBeNull();
     });
@@ -250,7 +250,7 @@ describe('DataExportService', () => {
     it('should return original data when no date range provided', () => {
       const data = [{ content: 'test' }];
 
-      const result = (service as unknown).filterByDateRange(data);
+      const result = (service as any).filterByDateRange(data);
 
       expect(result).toBe(data);
     });
@@ -258,7 +258,7 @@ describe('DataExportService', () => {
     it('should return original data when data is not an array', () => {
       const data = 'not an array';
 
-      const result = (service as unknown).filterByDateRange(data, { start: new Date(), end: new Date() });
+      const result = (service as any).filterByDateRange(data, { start: new Date(), end: new Date() });
 
       expect(result).toBe(data);
     });
@@ -274,7 +274,7 @@ describe('DataExportService', () => {
         { timestamp: tomorrow.getTime(), content: 'tomorrow' }
       ];
 
-      const result = (service as unknown).filterByDateRange(data, { start: yesterday, end: tomorrow });
+      const result = (service as any).filterByDateRange(data, { start: yesterday, end: tomorrow });
 
       expect(result).toHaveLength(2);
       expect(result[0].content).toBe('today');
@@ -284,7 +284,7 @@ describe('DataExportService', () => {
 
   describe('calculateMoodPatterns', () => {
     it('should return null for empty data', () => {
-      const result = (service as unknown).calculateMoodPatterns([]);
+      const result = (service as any).calculateMoodPatterns([]);
 
       expect(result).toBeNull();
     });
@@ -296,7 +296,7 @@ describe('DataExportService', () => {
         { primary: 'sad', timestamp: Date.now() },
       ];
 
-      const result = (service as unknown).calculateMoodPatterns(moodData);
+      const result = (service as any).calculateMoodPatterns(moodData);
 
       expect(result.dominantMoods).toHaveLength(2);
       expect(result.dominantMoods[0].mood).toBe('happy');
@@ -307,7 +307,7 @@ describe('DataExportService', () => {
 
   describe('calculateMoodTrends', () => {
     it('should return null for insufficient data', () => {
-      const result = (service as unknown).calculateMoodTrends([{ primary: 'happy' }]);
+      const result = (service as any).calculateMoodTrends([{ primary: 'happy' }]);
 
       expect(result).toBeNull();
     });
@@ -319,7 +319,7 @@ describe('DataExportService', () => {
         primary: 'happy'
       }));
 
-      const result = (service as unknown).calculateMoodTrends(moodData);
+      const result = (service as any).calculateMoodTrends(moodData);
 
       expect(result).toHaveProperty('recentAverageIntensity');
       expect(result).toHaveProperty('previousAverageIntensity');
@@ -332,7 +332,7 @@ describe('DataExportService', () => {
     it('should return stable for insufficient data', () => {
       const data = [{ intensity: 0.5 }, { intensity: 0.6 }];
 
-      const result = (service as unknown).calculateTrendDirection(data);
+      const result = (service as any).calculateTrendDirection(data);
 
       expect(result).toBe('stable');
     });
@@ -343,7 +343,7 @@ describe('DataExportService', () => {
         { intensity: 0.7 }, { intensity: 0.8 }
       ];
 
-      const result = (service as unknown).calculateTrendDirection(data);
+      const result = (service as any).calculateTrendDirection(data);
 
       expect(result).toBe('improving');
     });
@@ -354,7 +354,7 @@ describe('DataExportService', () => {
         { intensity: 0.4 }, { intensity: 0.3 }
       ];
 
-      const result = (service as unknown).calculateTrendDirection(data);
+      const result = (service as any).calculateTrendDirection(data);
 
       expect(result).toBe('declining');
     });
@@ -362,7 +362,7 @@ describe('DataExportService', () => {
 
   describe('calculateVolatility', () => {
     it('should return 0 for insufficient data', () => {
-      const result = (service as unknown).calculateVolatility([{ primary: 'happy' }]);
+      const result = (service as any).calculateVolatility([{ primary: 'happy' }]);
 
       expect(result).toBe(0);
     });
@@ -375,7 +375,7 @@ describe('DataExportService', () => {
         { primary: 'happy' }
       ];
 
-      const result = (service as unknown).calculateVolatility(data);
+      const result = (service as any).calculateVolatility(data);
 
       expect(result).toBeCloseTo(0.67, 2); // 2 changes out of 3 transitions
     });
@@ -543,7 +543,7 @@ describe('useDataExport hook', () => {
     const { result } = renderHook(() => useDataExport());
 
     const mockOptions: ExportOptions = {
-      format: 'invalid' as unknown,
+      format: 'invalid' as any,
       includePersonalData: true,
       includeMoodData: false,
       includeActivityData: false,

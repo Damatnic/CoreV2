@@ -64,7 +64,7 @@ describe('AIServiceManager', () => {
         dispose: jest.fn(),
       });
 
-      const result = await aiService.detectCrisis("I want to hurt myself");
+      const result = await aiService.detectCrisis("I want to hurt myself") as any;
 
       expect(result.hasCrisis).toBe(true);
       expect(result.confidence).toBeGreaterThan(0.8);
@@ -77,7 +77,7 @@ describe('AIServiceManager', () => {
         dispose: jest.fn(),
       });
 
-      const result = await aiService.detectCrisis("I'm having a good day");
+      const result = await aiService.detectCrisis("I'm having a good day") as any;
 
       expect(result.hasCrisis).toBe(false);
       expect(result.confidence).toBeLessThan(0.5);
@@ -90,7 +90,7 @@ describe('AIServiceManager', () => {
         dispose: jest.fn(),
       });
 
-      const result = await aiService.detectCrisis("I'm feeling down lately");
+      const result = await aiService.detectCrisis("I'm feeling down lately") as any;
 
       expect(result.riskLevel).toBe('medium');
       expect(result.confidence).toBeGreaterThan(0.5);
@@ -109,7 +109,7 @@ describe('AIServiceManager', () => {
         dispose: jest.fn(),
       });
 
-      const result = await aiService.analyzeSentiment("I'm feeling great today!");
+      const result = await aiService.analyzeSentiment("I'm feeling great today!") as any;
 
       expect(result.sentiment).toBe('positive');
       expect(result.confidence).toBeGreaterThan(0.8);
@@ -122,7 +122,7 @@ describe('AIServiceManager', () => {
         dispose: jest.fn(),
       });
 
-      const result = await aiService.analyzeSentiment("I'm feeling terrible");
+      const result = await aiService.analyzeSentiment("I'm feeling terrible") as any;
 
       expect(result.sentiment).toBe('negative');
       expect(result.confidence).toBeGreaterThan(0.7);
@@ -135,7 +135,7 @@ describe('AIServiceManager', () => {
         dispose: jest.fn(),
       });
 
-      const result = await aiService.analyzeSentiment("The weather is okay");
+      const result = await aiService.analyzeSentiment("The weather is okay") as any;
 
       expect(result.sentiment).toBe('neutral');
       expect(Math.abs(result.score)).toBeLessThan(0.3);
@@ -159,7 +159,7 @@ describe('AIServiceManager', () => {
       const response = await aiService.generateCrisisResponse(
         "I'm having thoughts of self-harm",
         { riskLevel: 'high', confidence: 0.9 }
-      );
+      ) as any;
 
       expect(response.text).toBeDefined();
       expect(response.urgency).toBe('immediate');
@@ -170,7 +170,7 @@ describe('AIServiceManager', () => {
       const response = await aiService.generateSupportiveResponse(
         "I'm feeling really down",
         { sentiment: 'negative', confidence: 0.7 }
-      );
+      ) as any;
 
       expect(response.text).toBeDefined();
       expect(response.tone).toBe('supportive');
@@ -185,7 +185,7 @@ describe('AIServiceManager', () => {
           userHistory: ['anxiety', 'work_related'],
           culturalBackground: 'western'
         }
-      );
+      ) as any;
 
       expect(response.text).toBeDefined();
       expect(response.personalized).toBe(true);
@@ -199,14 +199,14 @@ describe('AIServiceManager', () => {
     });
 
     it('should optimize model for mobile devices', async () => {
-      const optimizedModel = await aiService.optimizeForMobile();
+      const optimizedModel = await aiService.optimizeForMobile() as any;
 
       expect(optimizedModel.quantized).toBe(true);
       expect(optimizedModel.size).toBeLessThan(10 * 1024 * 1024); // Less than 10MB
     });
 
     it('should perform model quantization', async () => {
-      const result = await aiService.quantizeModel(mockModel);
+      const result = await aiService.quantizeModel(mockModel) as any;
 
       expect(result.quantized).toBe(true);
       expect(result.compressionRatio).toBeGreaterThan(0.5);
@@ -241,7 +241,7 @@ describe('AIServiceManager', () => {
       const accuracy = await aiService.evaluateModelAccuracy([
         { text: "I'm happy", expectedLabel: 'positive' },
         { text: "I'm sad", expectedLabel: 'negative' }
-      ]);
+      ]) as any;
 
       expect(accuracy.overall).toBeDefined();
       expect(accuracy.byClass).toBeDefined();
@@ -269,14 +269,14 @@ describe('AIServiceManager', () => {
         throw new Error('Prediction failed');
       });
 
-      const result = await aiService.detectCrisisWithFallback("I want to die");
+      const result = await aiService.detectCrisisWithFallback("I want to die") as any;
 
       expect(result.method).toBe('rule_based');
       expect(result.hasCrisis).toBe(true);
     });
 
     it('should handle malformed input gracefully', async () => {
-      const result = await aiService.detectCrisis("");
+      const result = await aiService.detectCrisis("") as any;
 
       expect(result.hasCrisis).toBe(false);
       expect(result.confidence).toBe(0);
@@ -285,7 +285,7 @@ describe('AIServiceManager', () => {
     it('should handle network errors in API calls', async () => {
       (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
 
-      const result = await aiService.generateCrisisResponse("test", { riskLevel: 'high' });
+      const result = await aiService.generateCrisisResponse("test", { riskLevel: 'high' }) as any;
 
       expect(result.text).toBeDefined(); // Should use fallback
       expect(result.source).toBe('fallback');
@@ -307,8 +307,8 @@ describe('AIServiceManager', () => {
 
       const storedData = aiService.getStoredData();
       
-      expect(storedData.some((item: unknown) => 
-        item.includes('depression') || item.includes('medication')
+      expect(storedData.some((item: any) => 
+        (item as any).includes('depression') || (item as any).includes('medication')
       )).toBe(false);
     });
 
@@ -328,12 +328,12 @@ describe('AIServiceManager', () => {
       const westernResponse = await aiService.generateCulturallyAdaptedResponse(
         "I'm struggling", 
         'western'
-      );
+      ) as any;
       
       const easternResponse = await aiService.generateCulturallyAdaptedResponse(
         "I'm struggling", 
         'eastern'
-      );
+      ) as any;
 
       expect(westernResponse.culturalContext).toBe('western');
       expect(easternResponse.culturalContext).toBe('eastern');
@@ -345,7 +345,7 @@ describe('AIServiceManager', () => {
         "Family problems", 
         'collectivist',
         { considerTaboos: true }
-      );
+      ) as any;
 
       expect(response.culturalSensitivity.checked).toBe(true);
       expect(response.containsTaboos).toBe(false);

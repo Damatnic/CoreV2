@@ -27,7 +27,10 @@ export { customRender as render };
 
 // Re-export commonly used testing utilities explicitly for better TypeScript support
 export { screen, fireEvent, waitFor, within, act, cleanup } from '@testing-library/react';
-export { default as userEvent } from '@testing-library/user-event';
+
+// Import and re-export userEvent properly
+import userEventLib from '@testing-library/user-event';
+export const userEvent = userEventLib;
 
 // Mock data creators for tests
 export const createMockButtonProps = (overrides = {}) => ({
@@ -38,6 +41,7 @@ export const createMockButtonProps = (overrides = {}) => ({
 });
 
 export const createMockCrisisAlert = (overrides = {}) => ({
+  show: true,
   severity: 'high' as const,
   message: 'Test crisis alert',
   onClose: jest.fn(),
@@ -91,4 +95,4 @@ export const mockUseFormAnimations = () => ({
 });
 
 // User event utilities alias
-export const user = userEvent;
+export const user = userEventLib;

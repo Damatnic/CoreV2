@@ -20,7 +20,7 @@ global.Date = class extends OriginalDate {
       super(...args as []);
     }
   }
-} as unknown;
+} as any;
 
 describe('chartUtils', () => {
   describe('groupCheckInsByDay', () => {

@@ -159,7 +159,7 @@ describe('EncryptionService', () => {
     });
 
     it('should handle encryption of undefined data', async () => {
-      await expect(getEncryptionService().encrypt(undefined as unknown, 'test-key')).rejects.toThrow();
+      await expect(getEncryptionService().encrypt(undefined as any, 'test-key')).rejects.toThrow();
     });
 
     it('should handle corrupted stored data', async () => {

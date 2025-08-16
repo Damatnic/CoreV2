@@ -299,7 +299,7 @@ describe('DataMigrationService', () => {
   describe('private methods', () => {
     describe('isSystemKey', () => {
       it('should identify system keys correctly', () => {
-        const isSystemKey = (service as unknown).isSystemKey.bind(service);
+        const isSystemKey = (service as any).isSystemKey.bind(service);
 
         expect(isSystemKey('_secure_storage_log')).toBe(true);
         expect(isSystemKey('security_logs')).toBe(true);
@@ -312,7 +312,7 @@ describe('DataMigrationService', () => {
 
     describe('isAlreadyEncrypted', () => {
       it('should detect encrypted data correctly', () => {
-        const isAlreadyEncrypted = (service as unknown).isAlreadyEncrypted.bind(service);
+        const isAlreadyEncrypted = (service as any).isAlreadyEncrypted.bind(service);
 
         expect(isAlreadyEncrypted(JSON.stringify({ encrypted: true }))).toBe(true);
         expect(isAlreadyEncrypted(JSON.stringify({ encrypted: false }))).toBe(false);
@@ -323,7 +323,7 @@ describe('DataMigrationService', () => {
 
     describe('shouldEncryptKey', () => {
       it('should identify keys that need encryption', () => {
-        const shouldEncryptKey = (service as unknown).shouldEncryptKey.bind(service);
+        const shouldEncryptKey = (service as any).shouldEncryptKey.bind(service);
 
         expect(shouldEncryptKey('safetyPlan')).toBe(true);
         expect(shouldEncryptKey('mood_analyses')).toBe(true);
@@ -348,7 +348,7 @@ describe('DataMigrationService', () => {
           return keys[index] || null;
         });
 
-        const keys = (service as unknown).getAllLocalStorageKeys();
+        const keys = (service as any).getAllLocalStorageKeys();
 
         expect(keys).toEqual(['key1', 'key2', 'key3']);
       });
@@ -356,7 +356,7 @@ describe('DataMigrationService', () => {
       it('should handle empty localStorage', () => {
         mockLocalStorage.length = 0;
 
-        const keys = (service as unknown).getAllLocalStorageKeys();
+        const keys = (service as any).getAllLocalStorageKeys();
 
         expect(keys).toEqual([]);
       });
@@ -367,7 +367,7 @@ describe('DataMigrationService', () => {
         const mockBackupData = { user: 'data' };
         mockSecureStorage.exportData.mockResolvedValue(mockBackupData);
 
-        await (service as unknown).createBackup();
+        await (service as any).createBackup();
 
         expect(mockSecureStorage.exportData).toHaveBeenCalledWith(true);
         expect(mockSecureStorage.setItem).toHaveBeenCalledWith(
@@ -394,7 +394,7 @@ describe('DataMigrationService', () => {
           migrationTime: 1000,
         };
 
-        (service as unknown).logMigrationReport(report);
+        (service as any).logMigrationReport(report);
 
         expect(consoleSpy).toHaveBeenCalledWith('=== Data Migration Report ===');
         expect(consoleSpy).toHaveBeenCalledWith('Total keys processed: 10');

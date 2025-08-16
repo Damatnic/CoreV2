@@ -14,7 +14,9 @@ interface LogEntry {
 }
 
 class Logger {
-  private isDevelopment = import.meta.env.DEV;
+  private isDevelopment = typeof process !== 'undefined' && process.env.NODE_ENV === 'test' 
+    ? false 
+    : (typeof (import.meta as any) !== 'undefined' && (import.meta as any).env?.DEV) || false;
   private logBuffer: LogEntry[] = [];
   private maxBufferSize = 100;
 

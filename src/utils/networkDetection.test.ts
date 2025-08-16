@@ -112,7 +112,7 @@ describe('networkDetection', () => {
 
     it('should handle missing effectiveType property', () => {
       const connectionWithoutEffectiveType = { ...mockConnection };
-      delete (connectionWithoutEffectiveType as unknown).effectiveType;
+      delete (connectionWithoutEffectiveType as any).effectiveType;
       
       Object.defineProperty(navigator, 'connection', {
         value: connectionWithoutEffectiveType,
@@ -485,7 +485,7 @@ describe('networkDetection', () => {
     });
 
     it('should return false for unknown feature', () => {
-      const result = shouldEnableFeature('unknown-feature' as unknown, mockConfig);
+      const result = shouldEnableFeature('unknown-feature' as any, mockConfig);
       expect(result).toBe(false);
     });
 
@@ -496,7 +496,7 @@ describe('networkDetection', () => {
     });
 
     it('should handle undefined config gracefully', () => {
-      const result = shouldEnableFeature('auto-play', undefined as unknown);
+      const result = shouldEnableFeature('auto-play', undefined as any);
       expect(typeof result).toBe('boolean');
     });
   });
@@ -622,8 +622,8 @@ describe('networkDetection', () => {
     });
 
     it('should handle string numbers in connection properties', () => {
-      (mockConnection as unknown).downlink = '2.5';
-      (mockConnection as unknown).rtt = '150';
+      (mockConnection as any).downlink = '2.5';
+      (mockConnection as any).rtt = '150';
       
       expect(() => {
         const quality = getNetworkQuality();

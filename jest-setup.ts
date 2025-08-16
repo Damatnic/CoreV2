@@ -57,6 +57,40 @@ if (!global.crypto.randomUUID) {
   };
 }
 
+// Mock import.meta for Vite compatibility in tests
+(global as any).importMeta = {
+  env: {
+    DEV: false,
+    PROD: true,
+    MODE: 'test',
+    VITE_OTEL_ENABLED: 'false',
+    VITE_USE_NEW_STORE: 'false',
+    VITE_FEATURE_NEW_CRISIS_DETECTION: 'false',
+    VITE_ROLLOUT_PERCENTAGE: '0',
+    VITE_APP_VERSION: '1.0.0',
+    VITE_OTEL_ENDPOINT: '',
+    VITE_OTEL_API_KEY: '',
+    VITE_GEMINI_API_KEY: ''
+  },
+  hot: {
+    accept: jest.fn()
+  }
+};
+
+// Mock import.meta global property
+Object.defineProperty(global, 'import', {
+  value: {
+    meta: (global as any).importMeta
+  },
+  writable: true,
+  configurable: true
+});
+
+// Mock scrollIntoView for JSDOM
+if (typeof Element !== 'undefined' && !Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = jest.fn();
+}
+
 // Mock Web APIs for testing
 global.Response = global.Response || class MockResponse {
   public body: any;

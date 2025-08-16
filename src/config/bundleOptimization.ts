@@ -7,6 +7,7 @@
 
 import { Plugin } from 'vite';
 import { advancedChunkSplitting } from './advancedBundleSplitting';
+import { logger } from '../utils/logger';
 
 // Bundle analysis configuration
 export const bundleAnalyzerConfig = {
@@ -113,9 +114,9 @@ export const performanceBudget = {
 export const terserConfig = {
   compress: {
     // Remove console logs in production but keep crisis-related logs
-    drop_console: true,
+    drop_console: false, // We handle this through logger utility
     drop_debugger: true,
-    pure_funcs: ['console.log', 'console.info'],
+    pure_funcs: [], // Removed console functions as we use logger utility
     // Keep crisis intervention function names for debugging
     keep_fnames: /crisis|emergency|safety/,
     passes: 2
@@ -169,9 +170,9 @@ export const codeSplittingPlugin = (): Plugin => {
       const chunks = Object.values(bundle).filter(item => item.type === 'chunk');
       const totalSize = chunks.reduce((sum, chunk) => sum + (chunk as any).code?.length || 0, 0);
       
-      console.log(`\n📦 Bundle Analysis:`);
-      console.log(`   Total chunks: ${chunks.length}`);
-      console.log(`   Total size: ${(totalSize / 1024).toFixed(2)}KB`);
+      logger.info(`\n📦 Bundle Analysis:`, undefined, 'bundleOptimization');
+      logger.info(`   Total chunks: ${chunks.length}`, undefined, 'bundleOptimization');
+      logger.info(`   Total size: ${(totalSize / 1024).toFixed(2)}KB`, undefined, 'bundleOptimization');
       
       // Find largest chunks
       const largeChunks = chunks
@@ -182,9 +183,9 @@ export const codeSplittingPlugin = (): Plugin => {
         .sort((a, b) => b.size - a.size)
         .slice(0, 5);
       
-      console.log(`   Largest chunks:`);
+      logger.info(`   Largest chunks:`, undefined, 'bundleOptimization');
       largeChunks.forEach(chunk => {
-        console.log(`     ${chunk.name}: ${(chunk.size / 1024).toFixed(2)}KB`);
+        logger.info(`     ${chunk.name}: ${(chunk.size / 1024).toFixed(2)}KB`, undefined, 'bundleOptimization');
       });
       
       // Crisis resource optimization check
@@ -194,9 +195,9 @@ export const codeSplittingPlugin = (): Plugin => {
       );
       
       if (crisisChunks.length > 0) {
-        console.log(`\n🆘 Crisis Resources Optimized:`);
+        logger.info(`\n🆘 Crisis Resources Optimized:`, undefined, 'bundleOptimization');
         crisisChunks.forEach(chunk => {
-          console.log(`     ${chunk.fileName}: ${((chunk as any).code?.length / 1024).toFixed(2)}KB`);
+          logger.info(`     ${chunk.fileName}: ${((chunk as any).code?.length / 1024).toFixed(2)}KB`, undefined, 'bundleOptimization');
         });
       }
     }

@@ -1,5 +1,4 @@
-import { useContext } from 'react';
-import { UNSAFE_LocationContext } from 'react-router-dom';
+import { useLocation as useRouterLocation } from 'react-router-dom';
 
 interface Location {
   pathname: string;
@@ -19,16 +18,16 @@ const fallbackLocation: Location = {
 
 /**
  * Safe wrapper for useLocation that provides a fallback when no Router context exists
- * This uses the internal location context directly to avoid hook ordering issues
+ * Uses try-catch to handle cases where no Router context is available
  */
 export const useSafeLocation = (): Location => {
-  const context = useContext(UNSAFE_LocationContext);
-  
-  // If we have a router context, return the location from it
-  if (context && context.location) {
-    return context.location;
+  try {
+    // Try to use the regular useLocation hook
+    const location = useRouterLocation();
+    return location;
+  } catch (error) {
+    // If useLocation throws (no Router context), return fallback
+    // This can happen in tests or when components are rendered outside a Router
+    return fallbackLocation;
   }
-  
-  // Return fallback location when no Router context is available
-  return fallbackLocation;
 };

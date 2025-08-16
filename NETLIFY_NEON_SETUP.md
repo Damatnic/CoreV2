@@ -1,4 +1,4 @@
-# Complete Netlify + Neon Setup Guide for CoreV2
+﻿# Complete Netlify + Neon Setup Guide for CoreV2
 
 ## Step 1: Neon Database Setup
 

@@ -72,16 +72,16 @@ describe('AccessibilityAuditSystem', () => {
   describe('ContrastAnalyzer', () => {
     test('should calculate contrast ratio correctly', () => {
       // Test black on white (maximum contrast)
-      const maxContrast = (auditSystem as unknown).contrastAnalyzer.calculateContrastRatio('#000000', '#ffffff');
+      const maxContrast = (auditSystem as any).contrastAnalyzer.calculateContrastRatio('#000000', '#ffffff');
       expect(maxContrast).toBeCloseTo(21, 0);
 
       // Test same color (no contrast)
-      const noContrast = (auditSystem as unknown).contrastAnalyzer.calculateContrastRatio('#ffffff', '#ffffff');
+      const noContrast = (auditSystem as any).contrastAnalyzer.calculateContrastRatio('#ffffff', '#ffffff');
       expect(noContrast).toBe(1);
     });
 
     test('should check WCAG contrast compliance', () => {
-      const meetsAA = (auditSystem as unknown).contrastAnalyzer.meetsWCAGContrast(
+      const meetsAA = (auditSystem as any).contrastAnalyzer.meetsWCAGContrast(
         '#000000', 
         '#ffffff', 
         WCAGLevel.AA, 
@@ -89,7 +89,7 @@ describe('AccessibilityAuditSystem', () => {
       );
       expect(meetsAA).toBe(true);
 
-      const failsAA = (auditSystem as unknown).contrastAnalyzer.meetsWCAGContrast(
+      const failsAA = (auditSystem as any).contrastAnalyzer.meetsWCAGContrast(
         '#999999', 
         '#aaaaaa', 
         WCAGLevel.AA, 
@@ -100,7 +100,7 @@ describe('AccessibilityAuditSystem', () => {
 
     test('should handle large text contrast differently', () => {
       // Large text has more lenient contrast requirements
-      const largeTextAA = (auditSystem as unknown).contrastAnalyzer.meetsWCAGContrast(
+      const largeTextAA = (auditSystem as any).contrastAnalyzer.meetsWCAGContrast(
         '#777777', 
         '#ffffff', 
         WCAGLevel.AA, 
@@ -108,7 +108,7 @@ describe('AccessibilityAuditSystem', () => {
       );
       expect(largeTextAA).toBe(true);
 
-      const smallTextAA = (auditSystem as unknown).contrastAnalyzer.meetsWCAGContrast(
+      const smallTextAA = (auditSystem as any).contrastAnalyzer.meetsWCAGContrast(
         '#777777', 
         '#ffffff', 
         WCAGLevel.AA, 

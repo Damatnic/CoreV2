@@ -3,19 +3,31 @@ import { WebAuthSession as AuthSession } from '../services/webAuthService';
 import { ApiClient } from '../utils/ApiClient';
 import { Helper } from '../types';
 import { useNotification } from './NotificationContext';
+import { logger } from '../utils/logger';
 
 // --- Auth0 Configuration ---
-const AUTH0_DOMAIN = import.meta.env.VITE_AUTH0_DOMAIN || 'demo.auth0.com';
-const AUTH0_CLIENT_ID = import.meta.env.VITE_AUTH0_CLIENT_ID || 'demo-client-id';
-const AUTH0_AUDIENCE = import.meta.env.VITE_AUTH0_AUDIENCE || 'demo-audience';
+// Handle both Vite and Jest environments
+const getEnvVar = (key: string, defaultValue: string) => {
+  if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
+    return defaultValue;
+  }
+  return (import.meta as any).env[key] || defaultValue;
+};
+
+const AUTH0_DOMAIN = getEnvVar('VITE_AUTH0_DOMAIN', 'demo.auth0.com');
+const AUTH0_CLIENT_ID = getEnvVar('VITE_AUTH0_CLIENT_ID', 'demo-client-id');
+const AUTH0_AUDIENCE = getEnvVar('VITE_AUTH0_AUDIENCE', 'demo-audience');
 
 // Only show info message on initial load for demo mode
-if (import.meta.env.DEV && (!import.meta.env.VITE_AUTH0_DOMAIN || !import.meta.env.VITE_AUTH0_CLIENT_ID || !import.meta.env.VITE_AUTH0_AUDIENCE)) {
+if (typeof process === 'undefined' || process.env.NODE_ENV !== 'test') {
+  const isDev = getEnvVar('DEV', 'false') === 'true' || (typeof (import.meta as any).env !== 'undefined' && (import.meta as any).env.DEV);
+  if (isDev && (!getEnvVar('VITE_AUTH0_DOMAIN', '') || !getEnvVar('VITE_AUTH0_CLIENT_ID', '') || !getEnvVar('VITE_AUTH0_AUDIENCE', ''))) {
     // Check if we're on non-Netlify dev port
     const currentPort = typeof window !== 'undefined' ? window.location.port : '';
     if (currentPort && currentPort !== '8888') {
-        console.info('✓ Running in demo mode - Auth0 not required');
+        logger.info('✓ Running in demo mode - Auth0 not required', undefined, 'AuthContext');
     }
+  }
 }
 
 
@@ -62,7 +74,7 @@ const jwtDecode = (token: string) => {
     try {
         const base64Url = token.split('.')[1];
         if (!base64Url) {
-            console.error("Invalid JWT: Missing payload part.");
+            logger.error("Invalid JWT: Missing payload part.", undefined, 'AuthContext');
             return null;
         }
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -72,7 +84,7 @@ const jwtDecode = (token: string) => {
 
         return JSON.parse(jsonPayload);
     } catch (e) {
-        console.error("Failed to decode JWT", e);
+        logger.error("Failed to decode JWT", e, 'AuthContext');
         return null;
     }
 };
@@ -112,7 +124,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setIsNewUser(true);
         }
     } catch (error) {
-        console.error("Failed to fetch helper profile", error);
+        logger.error("Failed to fetch helper profile", error, 'AuthContext');
         setHelperProfile(null);
         setIsNewUser(true);
     }
@@ -183,7 +195,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     const loadToken = async () => {
-        console.log("AuthContext: Starting token load, setting isLoading to true");
+        logger.debug("Starting token load, setting isLoading to true", undefined, 'AuthContext');
         setIsLoading(true);
         try {
             // Check for demo user first
@@ -191,7 +203,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const demoToken = localStorage.getItem('demo_token');
             
             if (demoUser && demoToken) {
-                console.log("AuthContext: Loading demo user");
+                logger.debug("Loading demo user", undefined, 'AuthContext');
                 const userData = JSON.parse(demoUser);
                 setUser(userData);
                 setUserToken(demoToken);
@@ -217,7 +229,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             
             // Original token loading logic for real authentication
             const storedToken = sessionStorage.getItem('accessToken');
-            console.log("AuthContext: Stored token:", storedToken ? "exists" : "none");
+            logger.debug("Stored token: " + (storedToken ? "exists" : "none"), undefined, 'AuthContext');
             if (storedToken) {
                 const decodedToken = jwtDecode(storedToken);
                 // Check if token is valid and not expired
@@ -228,15 +240,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     await setAuthData(null);
                 }
             } else {
-                console.log("AuthContext: No stored token, clearing auth data");
+                logger.debug("No stored token, clearing auth data", undefined, 'AuthContext');
                 await setAuthData(null);
             }
         } catch (error) {
-            console.error("Critical error during token loading:", error);
+            logger.error("Critical error during token loading:", error, 'AuthContext');
             // Ensure auth state is cleared on any error
             await setAuthData(null);
         } finally {
-            console.log("AuthContext: Token load complete, setting isLoading to false");
+            logger.debug("Token load complete, setting isLoading to false", undefined, 'AuthContext');
             setIsLoading(false);
         }
     };
@@ -248,7 +260,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setAuthData(response.params.access_token);
     } else if (response?.type === 'error') {
         addToast('Authentication error: ' + (response.params.error_description || response.error?.message), 'error');
-        console.error(response.error);
+        logger.error("Authentication error", response.error, 'AuthContext');
     }
   }, [response, setAuthData, addToast]);
 
@@ -256,7 +268,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = useCallback(async () => {
     if (!request || !AUTH0_DOMAIN || !AUTH0_CLIENT_ID) {
         const errorMessage = "Authentication service is not configured correctly.";
-        console.error(errorMessage);
+        logger.error(errorMessage, undefined, 'AuthContext');
         addToast(errorMessage, 'error');
         return;
     }
@@ -266,7 +278,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Global listener for auth errors (e.g., 401 Unauthorized)
   useEffect(() => {
     const handleAuthError = () => {
-        console.warn("Authentication error detected. Forcing logout.");
+        logger.warn("Authentication error detected. Forcing logout.", undefined, 'AuthContext');
         addToast("Your session has expired or is invalid. Please log in again.", 'error');
         logout();
     };
@@ -337,9 +349,9 @@ export const useLegalConsents = () => {
     const checkConsents = useCallback(async () => {
         try {
             const currentUserId = helperProfile?.id || userToken;
-            console.log("Consent check: currentUserId =", currentUserId);
+            logger.debug("Consent check: currentUserId = " + currentUserId, undefined, 'AuthContext');
             if (!currentUserId) {
-                console.log("Consent check: No user ID, setting allConsentsGiven to false");
+                logger.debug("Consent check: No user ID, setting allConsentsGiven to false", undefined, 'AuthContext');
                 setAllConsentsGiven(false);
                 return;
             }
@@ -350,16 +362,16 @@ export const useLegalConsents = () => {
             if (isAuthenticated) {
                 requiredDocs.push('helper_agreement');
             }
-            console.log("Consent check: Required docs =", requiredDocs);
+            logger.debug("Consent check: Required docs = " + JSON.stringify(requiredDocs), undefined, 'AuthContext');
 
             // For development: Skip consent checks and allow app to load
-            console.log("Consent check: Skipping consent verification for development");
+            logger.debug("Consent check: Skipping consent verification for development", undefined, 'AuthContext');
             // Uncomment the block below for production consent checking
-            console.log("Consent check: All consents satisfied, setting allConsentsGiven to true");
+            logger.debug("Consent check: All consents satisfied, setting allConsentsGiven to true", undefined, 'AuthContext');
             setRequiredConsent(null);
             setAllConsentsGiven(true);
         } catch (error) {
-            console.error("Failed to check consents:", error);
+            logger.error("Failed to check consents:", error, 'AuthContext');
             addToast("Could not verify legal agreements. Please try again later.", "error");
             setAllConsentsGiven(false); // Fail safe
         }
@@ -380,7 +392,7 @@ export const useLegalConsents = () => {
             await ApiClient.legal.recordConsent(currentUserId, userType, requiredConsent, requiredVersion);
             await checkConsents(); // Re-check after accepting
         } catch (err) {
-            console.error(err);
+            logger.error("Failed to save agreement", err, 'AuthContext');
             addToast("Failed to save your agreement. Please try again.", 'error');
         }
     };

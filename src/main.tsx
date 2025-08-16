@@ -20,6 +20,7 @@ import './styles/safe-ui-system.css';
 
 // Import i18n configuration
 import './i18n';
+import { logger } from './utils/logger';
 
 // Auth0 provider - not used with simple auth
 // import { auth0Service } from './services/auth0Service';
@@ -43,7 +44,7 @@ import { performanceMonitoringService } from './services/performanceMonitoringSe
 try {
   loadAndValidateEnv();
 } catch (error) {
-  console.error('Environment validation failed:', error);
+  logger.error('Environment validation failed:', error, 'main');
   if (process.env.NODE_ENV === 'production') {
     // In production, show a friendly error page
     document.body.innerHTML = `
@@ -67,7 +68,7 @@ if (process.env.NODE_ENV === 'production') {
 // Initialize OpenTelemetry (using stub)
 if (import.meta.env.VITE_OTEL_ENABLED === 'true') {
   openTelemetryService.initialize().catch(error => {
-    console.error('Failed to initialize OpenTelemetry:', error);
+    logger.error('Failed to initialize OpenTelemetry:', error, 'main');
   });
 }
 
@@ -76,7 +77,7 @@ performanceMonitoringService.initialize();
 
 // Skip Auth0 initialization - using simple auth instead
 // auth0Service.initialize().catch(error => {
-//   console.error('Failed to initialize Auth0:', error);
+//   logger.error('Failed to initialize Auth0:', error, 'main');
 // });
 
 // Get root element
@@ -113,11 +114,11 @@ if (import.meta.hot) {
 if (process.env.NODE_ENV === 'production') {
   // Report Web Vitals
   import('web-vitals').then(({ onCLS, onINP, onFCP, onLCP, onTTFB }) => {
-    onCLS(console.log);
-    onINP(console.log);
-    onFCP(console.log);
-    onLCP(console.log);
-    onTTFB(console.log);
+    onCLS((metric) => logger.debug('CLS metric', metric, 'web-vitals'));
+    onINP((metric) => logger.debug('INP metric', metric, 'web-vitals'));
+    onFCP((metric) => logger.debug('FCP metric', metric, 'web-vitals'));
+    onLCP((metric) => logger.debug('LCP metric', metric, 'web-vitals'));
+    onTTFB((metric) => logger.debug('TTFB metric', metric, 'web-vitals'));
   });
 }
 
@@ -141,7 +142,7 @@ if (typeof window !== 'undefined') {
 
 // Handle unhandled promise rejections
 window.addEventListener('unhandledrejection', event => {
-  console.error('Unhandled promise rejection:', event.reason);
+  logger.error('Unhandled promise rejection:', event.reason, 'global');
   
   // In production, report to error tracking
   if (process.env.NODE_ENV === 'production') {

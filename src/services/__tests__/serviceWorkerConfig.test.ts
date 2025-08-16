@@ -47,7 +47,7 @@ describe('Service Worker Configuration', () => {
     });
 
     it('should handle browsers without service worker support', async () => {
-      delete (navigator as unknown).serviceWorker;
+      delete (navigator as any).serviceWorker;
 
       const result = await registerServiceWorker();
 

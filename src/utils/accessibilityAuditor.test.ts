@@ -34,7 +34,7 @@ describe('accessibilityAuditor', () => {
             style: { outline: '2px solid blue' },
           } as CSSStyleRule,
         ],
-      } as unknown as CSSStyleSheet,
+      } as any as CSSStyleSheet,
     ];
 
     Object.defineProperty(document, 'styleSheets', {
@@ -77,7 +77,7 @@ describe('accessibilityAuditor', () => {
       getImageData: jest.fn(() => ({
         data: [0, 0, 0, 255], // Black color
       })),
-    } as unknown;
+    } as any;
     mockCanvas.getContext = jest.fn(() => mockContext);
 
     const originalCreateElement = document.createElement.bind(document);
@@ -223,7 +223,7 @@ describe('accessibilityAuditor', () => {
       // Mock getComputedStyle to return background image
       window.getComputedStyle = jest.fn(() => ({
         backgroundImage: 'url("bg-image.jpg")',
-      } as unknown));
+      } as any));
 
       const result = auditor.auditPage();
       const bgImageIssues = result.issues.filter(issue => 
@@ -374,7 +374,7 @@ describe('accessibilityAuditor', () => {
         backgroundColor: 'rgb(255, 255, 255)', // White background
         fontSize: '14px',
         fontWeight: '400',
-      } as unknown));
+      } as any));
 
       // Mock canvas context for color parsing
       const mockContext = {
@@ -391,7 +391,7 @@ describe('accessibilityAuditor', () => {
             width: 0,
             height: 0,
             getContext: () => mockContext,
-          } as unknown;
+          } as any;
         }
         return document.createElement.call(document, tagName);
       });
@@ -410,7 +410,7 @@ describe('accessibilityAuditor', () => {
         backgroundColor: 'rgba(0, 0, 0, 0)', // Transparent
         fontSize: '16px',
         fontWeight: '400',
-      } as unknown));
+      } as any));
 
       expect(() => {
         auditor.auditPage();
@@ -429,7 +429,7 @@ describe('accessibilityAuditor', () => {
               style: { color: 'blue' },
             } as CSSStyleRule,
           ],
-        }] as unknown as CSSStyleSheet[],
+        }] as any as CSSStyleSheet[],
         writable: true,
       });
 
@@ -451,7 +451,7 @@ describe('accessibilityAuditor', () => {
           get cssRules() {
             throw new Error('Cannot access cross-origin stylesheet');
           },
-        }] as unknown as CSSStyleSheet[],
+        }] as any as CSSStyleSheet[],
         writable: true,
       });
 
@@ -524,7 +524,7 @@ describe('accessibilityAuditor', () => {
         paddingBottom: '0px',
         paddingLeft: '0px',
         paddingRight: '0px',
-      } as unknown));
+      } as any));
 
       const result = mobileAuditor.auditPage();
       const touchTargetIssues = result.issues.filter(issue => 
@@ -567,7 +567,7 @@ describe('accessibilityAuditor', () => {
         paddingBottom: '12px',
         paddingLeft: '20px',
         paddingRight: '20px',
-      } as unknown));
+      } as any));
 
       const result = mobileAuditor.auditPage();
       const touchTargetIssues = result.issues.filter(issue => 
@@ -964,7 +964,7 @@ describe('accessibilityAuditor', () => {
     });
 
     test('should handle missing elements gracefully', () => {
-      document.querySelectorAll = jest.fn(() => [] as unknown);
+      document.querySelectorAll = jest.fn(() => [] as any);
 
       const result = auditor.auditPage();
       expect(result.score).toBeGreaterThanOrEqual(0);
@@ -993,7 +993,7 @@ describe('accessibilityAuditor', () => {
             width: 0,
             height: 0,
             getContext: () => null, // Return null to simulate error
-          } as unknown;
+          } as any;
         }
         return document.createElement.call(document, tagName);
       });

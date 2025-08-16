@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback, useMemo } from 'react';
 import simpleAuthService from '../services/simpleAuthService';
 import { useNotification } from './NotificationContext';
+import { logger } from '../utils/logger';
 
 interface User {
   id: string;
@@ -40,7 +41,7 @@ export const SimpleAuthProvider: React.FC<{ children: ReactNode }> = ({ children
           setUserToken(simpleAuthService.getToken());
         }
       } catch (error) {
-        console.error('Auth check failed:', error);
+        logger.error('Auth check failed:', error, 'SimpleAuthContext');
       } finally {
         setIsLoading(false);
       }
@@ -109,7 +110,7 @@ export const SimpleAuthProvider: React.FC<{ children: ReactNode }> = ({ children
       setUserToken(null);
       addToast('Successfully logged out', 'success');
     } catch (error) {
-      console.error('Logout error:', error);
+      logger.error('Logout error:', error, 'SimpleAuthContext');
       // Still clear local state even if API call fails
       setUser(null);
       setUserToken(null);

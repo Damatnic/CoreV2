@@ -626,9 +626,9 @@ describe('SecurityService', () => {
         return {};
       });
       
-      global.document.createElement = mockCreateElement as unknown;
+      global.document.createElement = mockCreateElement as any;
       
-      service.addFormProtection(mockForm as unknown);
+      service.addFormProtection(mockForm as any);
       
       expect(mockForm.appendChild).toHaveBeenCalled();
       expect(mockInput.type).toBe('hidden');
@@ -648,7 +648,7 @@ describe('SecurityService', () => {
         querySelectorAll: jest.fn(() => [mockInput])
       };
       
-      service.addFormProtection(mockForm as unknown);
+      service.addFormProtection(mockForm as any);
       
       expect(mockAddEventListener).toHaveBeenCalled();
     });
@@ -688,7 +688,7 @@ describe('SecurityService', () => {
       
       const logs = service.getSecurityLogs();
       expect(logs).toHaveLength(1);
-      expect(logs[0].event).toBe('test');
+      expect((logs[0] as any).event).toBe('test');
       
       consoleWarnSpy.mockRestore();
     });
@@ -821,7 +821,7 @@ describe('edge cases and error handling', () => {
       appendChild: jest.fn(),
       querySelectorAll: jest.fn(() => [])
     };
-    expect(() => service.addFormProtection(mockForm as unknown)).not.toThrow();
+    expect(() => service.addFormProtection(mockForm as any)).not.toThrow();
     expect(mockForm.appendChild).toHaveBeenCalled();
   });
 
@@ -833,7 +833,7 @@ describe('edge cases and error handling', () => {
       subtle: {
         digest: mockDigest
       }
-    } as unknown;
+    } as any;
     
     await expect(service.hashPassword('password')).rejects.toThrow('Crypto error');
   });

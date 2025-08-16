@@ -5,6 +5,7 @@
  */
 
 import { initializeSentry, ErrorTrackingService } from '../services/errorTrackingService';
+import { logger } from '../utils/logger';
 
 // Environment variables configuration
 export const sentryConfig = {
@@ -27,7 +28,7 @@ export const sentryConfig = {
 export const initializeErrorTracking = () => {
   // Only initialize if DSN is provided
   if (!sentryConfig.dsn) {
-    console.warn('Sentry DSN not configured. Error tracking disabled.');
+    logger.warn('Sentry DSN not configured. Error tracking disabled.', undefined, 'errorTracking');
     return false;
   }
 
@@ -46,10 +47,10 @@ export const initializeErrorTracking = () => {
       }
     );
 
-    console.log('Error tracking initialized successfully');
+    logger.info('Error tracking initialized successfully', undefined, 'errorTracking');
     return true;
   } catch (error) {
-    console.error('Failed to initialize error tracking:', error);
+    logger.error('Failed to initialize error tracking:', error, 'errorTracking');
     return false;
   }
 };

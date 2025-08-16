@@ -21,8 +21,10 @@ export const usePerformanceMetrics = (refreshInterval = 10000) => {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    const updateMetrics = () => {
+    const updateMetrics = async () => {
       try {
+        // Simulate async operation for consistency
+        await new Promise(resolve => setTimeout(resolve, 0));
         const currentMetrics = comprehensivePerformanceMonitor.getCurrentMetrics();
         setMetrics(currentMetrics);
         setIsLoading(false);
@@ -104,8 +106,10 @@ export const useOptimizationRecommendations = (maxRecommendations = 10) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const updateRecommendations = () => {
+    const updateRecommendations = async () => {
       try {
+        // Simulate async operation for consistency
+        await new Promise(resolve => setTimeout(resolve, 0));
         const recs = comprehensivePerformanceMonitor.generateOptimizationRecommendations();
         setRecommendations(recs.slice(0, maxRecommendations));
         setIsLoading(false);

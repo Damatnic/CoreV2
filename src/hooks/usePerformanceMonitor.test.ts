@@ -178,10 +178,10 @@ describe('usePerformanceMonitor Hook', () => {
 
     await act(async () => {
       // Simulate metric updates
-      // result.current.handleMetricUpdate?.({ name: 'LCP', value: 2000 });
-      // result.current.handleMetricUpdate?.({ name: 'FID', value: 90 });
-      // result.current.handleMetricUpdate?.({ name: 'CLS', value: 0.08 });
-      // result.current.handleMetricUpdate?.({ name: 'TTFB', value: 600 });
+      result.current.handleMetricUpdate?.({ name: 'LCP', value: 2000 });
+      result.current.handleMetricUpdate?.({ name: 'FID', value: 90 });
+      result.current.handleMetricUpdate?.({ name: 'CLS', value: 0.08 });
+      result.current.handleMetricUpdate?.({ name: 'TTFB', value: 600 });
     });
 
     expect(result.current.performanceScore).toBeGreaterThan(0);
@@ -197,7 +197,7 @@ describe('usePerformanceMonitor Hook', () => {
 
     await act(async () => {
       // LCP over crisis threshold (1.5s)
-      // result.current.handleMetricUpdate?.({ name: 'LCP', value: 2000 });
+      result.current.handleMetricUpdate?.({ name: 'LCP', value: 2000 });
     });
 
     expect(result.current.performanceScore).toBeLessThan(100);
@@ -208,12 +208,12 @@ describe('usePerformanceMonitor Hook', () => {
     const { result } = renderHook(() => usePerformanceMonitor(), { wrapper: Wrapper });
 
     await act(async () => {
-      // result.current.handleMetricUpdate?.({ name: 'LCP', value: 3000 });
+      result.current.handleMetricUpdate?.({ name: 'LCP', value: 3000 });
     });
 
-    expect(result.current.recommendations).toContain(
-      expect.stringContaining('Large Contentful Paint too slow')
-    );
+    expect(result.current.recommendations.some(r => 
+      r.includes('Large Contentful Paint too slow')
+    )).toBe(true);
   });
 
   it('should generate crisis-specific recommendations', async () => {
@@ -225,12 +225,12 @@ describe('usePerformanceMonitor Hook', () => {
     const { result } = renderHook(() => usePerformanceMonitor(), { wrapper: Wrapper });
 
     await act(async () => {
-      // result.current.handleMetricUpdate?.({ name: 'LCP', value: 2000 });
+      result.current.handleMetricUpdate?.({ name: 'LCP', value: 2000 });
     });
 
-    expect(result.current.recommendations).toContain(
-      expect.stringContaining('Crisis page LCP too slow')
-    );
+    expect(result.current.recommendations.some(r => 
+      r.includes('Crisis page LCP too slow')
+    )).toBe(true);
   });
 
   it('should monitor emergency button performance', async () => {
@@ -238,7 +238,15 @@ describe('usePerformanceMonitor Hook', () => {
     mockButton.className = 'crisis-button';
     document.body.appendChild(mockButton);
 
-    const { result: _result } = renderHook(() => usePerformanceMonitor({ enableRealTimeAlerts: true }), { wrapper: Wrapper });
+    renderHook(() => usePerformanceMonitor({ enableRealTimeAlerts: true }), { wrapper: Wrapper });
+
+    // Wait for initialization
+    await waitFor(() => {
+      expect(coreWebVitalsService.initialize).toHaveBeenCalled();
+    });
+
+    // Clear any previous calls to performance.now
+    (window.performance.now as jest.Mock).mockClear();
 
     await act(async () => {
       // Simulate click on emergency button
@@ -262,10 +270,10 @@ describe('usePerformanceMonitor Hook', () => {
 
     const consoleSpy = jest.spyOn(console, 'warn');
 
-    const { result: _result } = renderHook(() => usePerformanceMonitor({ enableRealTimeAlerts: true }), { wrapper: Wrapper });
+    const { result } = renderHook(() => usePerformanceMonitor({ enableRealTimeAlerts: true }), { wrapper: Wrapper });
 
     await act(async () => {
-      // result.current.handleMetricUpdate?.({ name: 'LCP', value: 3000 }); // Over crisis threshold
+      result.current.handleMetricUpdate?.({ name: 'LCP', value: 3000 }); // Over crisis threshold
     });
 
     expect(consoleSpy).toHaveBeenCalledWith(
@@ -301,8 +309,8 @@ describe('usePerformanceMonitor Hook', () => {
     const { result } = renderHook(() => usePerformanceMonitor(), { wrapper: Wrapper });
 
     await act(async () => {
-      // result.current.handleMetricUpdate?.({ name: 'LCP', value: 2000 }); // Over crisis threshold
-      // result.current.handleMetricUpdate?.({ name: 'FID', value: 100 }); // Over crisis threshold
+      result.current.handleMetricUpdate?.({ name: 'LCP', value: 2000 }); // Over crisis threshold
+      result.current.handleMetricUpdate?.({ name: 'FID', value: 100 }); // Over crisis threshold
     });
 
     expect(result.current.isPerformanceCritical()).toBe(true);
@@ -312,7 +320,7 @@ describe('usePerformanceMonitor Hook', () => {
     const { result } = renderHook(() => usePerformanceMonitor(), { wrapper: Wrapper });
 
     await act(async () => {
-      // result.current.handleMetricUpdate?.({ name: 'LCP', value: 3000 });
+      result.current.handleMetricUpdate?.({ name: 'LCP', value: 3000 });
     });
 
     // Should calculate score but not necessarily be critical
@@ -328,19 +336,19 @@ describe('usePerformanceMonitor Hook', () => {
     const { result } = renderHook(() => usePerformanceMonitor(), { wrapper: Wrapper });
 
     await act(async () => {
-      // result.current.handleMetricUpdate?.({ name: 'LCP', value: 3500 }); // Slow on mobile
+      result.current.handleMetricUpdate?.({ name: 'LCP', value: 3500 }); // Slow on mobile
     });
 
-    expect(result.current.recommendations).toContain(
-      expect.stringContaining('Mobile performance suboptimal')
-    );
+    expect(result.current.recommendations.some(r => 
+      r.includes('Mobile performance suboptimal')
+    )).toBe(true);
   });
 
   it('should reset metrics on route change', async () => {
     const { result, rerender } = renderHook(() => usePerformanceMonitor(), { wrapper: Wrapper });
 
     await act(async () => {
-      // result.current.handleMetricUpdate?.({ name: 'LCP', value: 2000 });
+      result.current.handleMetricUpdate?.({ name: 'LCP', value: 2000 });
     });
 
     expect(result.current.metrics.lcp).toBe(2000);
@@ -363,7 +371,7 @@ describe('usePerformanceMonitor Hook', () => {
       writable: true
     });
 
-    const { result: _result } = renderHook(() => usePerformanceMonitor({ enableCrisisOptimization: true }), { wrapper: Wrapper });
+    renderHook(() => usePerformanceMonitor({ enableCrisisOptimization: true }), { wrapper: Wrapper });
 
     await waitFor(() => {
       expect(document.head.children.length).toBeGreaterThan(0);
@@ -412,16 +420,21 @@ describe('usePerformanceMonitor Hook', () => {
       reportingInterval: 10000 
     }), { wrapper: Wrapper });
 
+    // Wait for initialization to complete
+    await waitFor(() => {
+      expect(coreWebVitalsService.initialize).toHaveBeenCalled();
+    });
+
+    // Now advance timers to trigger the interval
     act(() => {
       jest.advanceTimersByTime(10000);
     });
 
-    await waitFor(() => {
-      expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
-        'performance_reports',
-        expect.any(String)
-      );
-    });
+    // Check that localStorage was called
+    expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
+      'performance_reports',
+      expect.any(String)
+    );
 
     jest.useRealTimers();
   });
@@ -483,21 +496,26 @@ describe('usePerformanceMonitor Hook', () => {
       reportingInterval: 10000 
     }), { wrapper: Wrapper });
 
+    // Wait for initialization
+    await waitFor(() => {
+      expect(coreWebVitalsService.initialize).toHaveBeenCalled();
+    });
+
+    // Advance timers to trigger the interval
     act(() => {
       jest.advanceTimersByTime(10000);
     });
 
-    await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Could not store performance report:',
-        expect.any(Error)
-      );
-    });
+    // Check that error was logged
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Could not store performance report:',
+      expect.any(Error)
+    );
 
     jest.useRealTimers();
   });
 
-  it('should cleanup intervals and event listeners on unmount', () => {
+  it('should cleanup intervals and event listeners on unmount', async () => {
     jest.useFakeTimers();
 
     const addEventListenerSpy = jest.spyOn(document, 'addEventListener');
@@ -508,7 +526,10 @@ describe('usePerformanceMonitor Hook', () => {
       enableAutomaticReporting: true 
     }), { wrapper: Wrapper });
 
-    expect(addEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function));
+    // Wait for initialization
+    await waitFor(() => {
+      expect(addEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function));
+    });
 
     unmount();
 

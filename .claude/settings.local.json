@@ -54,7 +54,10 @@
       "Bash(then echo \"✅ $view.tsx\")",
       "Bash(else echo \"❌ $view.tsx MISSING\")",
       "Bash(sed:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(do)",
+      "Bash(if [ -f \"$file\" ])",
+      "Bash(then)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

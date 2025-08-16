@@ -77,11 +77,13 @@ export function CrisisAlert({
       setIsVisible(true);
       setTimeShown(new Date());
       
-      // Auto-focus for screen readers
-      const alertElement = document.getElementById('crisis-alert');
-      if (alertElement) {
-        alertElement.focus();
-      }
+      // Auto-focus for screen readers with a small delay to ensure element is rendered
+      setTimeout(() => {
+        const alertElement = document.getElementById('crisis-alert');
+        if (alertElement) {
+          alertElement.focus();
+        }
+      }, 0);
     } else {
       const timer = setTimeout(() => setIsVisible(false), 300);
       return () => clearTimeout(timer);
@@ -195,8 +197,8 @@ export function CrisisAlert({
         onClick={handleBackdropClick}
         onKeyDown={handleBackdropKeyDown}
         role="button"
-        tabIndex={0}
-        aria-label={emergencyMode ? undefined : "Close alert"}
+        tabIndex={emergencyMode ? -1 : 0}
+        aria-label={emergencyMode ? undefined : "Close alert backdrop"}
       />
       
       <div className="crisis-alert__container">

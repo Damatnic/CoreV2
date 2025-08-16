@@ -47,7 +47,7 @@ describe('bundleOptimization', () => {
         totalJSHeapSize: 100 * 1024 * 1024,
         jsHeapSizeLimit: 2 * 1024 * 1024 * 1024,
       },
-    } as unknown;
+    } as any;
     Object.defineProperty(global, 'performance', {
       value: mockPerformance,
       writable: true,
@@ -61,7 +61,7 @@ describe('bundleOptimization', () => {
         'vendor': { id: 'vendor' },
       },
     };
-    (global as unknown).__webpack_require__ = mockWebpackRequire;
+    (global as any).__webpack_require__ = mockWebpackRequire;
 
     // Mock window properties
     Object.defineProperty(window, 'innerWidth', { value: 768, writable: true });
@@ -83,7 +83,7 @@ describe('bundleOptimization', () => {
       Promise.resolve({
         headers: new Map([['content-length', '1024']]),
       })
-    ) as unknown;
+    ) as any;
 
     // Mock setTimeout and clearTimeout
     jest.useFakeTimers();
@@ -100,7 +100,7 @@ describe('bundleOptimization', () => {
       value: originalConsole,
       writable: true,
     });
-    delete (global as unknown).__webpack_require__;
+    delete (global as any).__webpack_require__;
     jest.useRealTimers();
     jest.restoreAllMocks();
   });
@@ -156,8 +156,8 @@ describe('bundleOptimization', () => {
         process.env.NODE_ENV = 'development';
         
         // Mock global objects that might indicate duplicates
-        (global as unknown).react = {};
-        (global as unknown).lodash = {};
+        (global as any).react = {};
+        (global as any).lodash = {};
 
         await BundleAnalyzer.analyzeBundlePerformance();
 
@@ -169,7 +169,7 @@ describe('bundleOptimization', () => {
 
     describe('getLoadedChunks', () => {
       test('should get chunks from webpack cache when available', async () => {
-        const analyzer = BundleAnalyzer as unknown;
+        const analyzer = BundleAnalyzer as any;
         const chunks = analyzer.getLoadedChunks();
 
         expect(chunks).toContain('module1');
@@ -178,9 +178,9 @@ describe('bundleOptimization', () => {
       });
 
       test('should fallback to script analysis when webpack not available', async () => {
-        delete (global as unknown).__webpack_require__;
+        delete (global as any).__webpack_require__;
 
-        const analyzer = BundleAnalyzer as unknown;
+        const analyzer = BundleAnalyzer as any;
         const chunks = analyzer.getLoadedChunks();
 
         expect(chunks).toContain('chunk.abc123.js');
@@ -188,10 +188,10 @@ describe('bundleOptimization', () => {
       });
 
       test('should handle missing webpack gracefully', async () => {
-        delete (global as unknown).__webpack_require__;
+        delete (global as any).__webpack_require__;
         Object.defineProperty(document, 'scripts', { value: [], writable: true });
 
-        const analyzer = BundleAnalyzer as unknown;
+        const analyzer = BundleAnalyzer as any;
         const chunks = analyzer.getLoadedChunks();
 
         expect(chunks).toEqual([]);
@@ -204,7 +204,7 @@ describe('bundleOptimization', () => {
           headers: new Map([['content-length', '2048']]),
         });
 
-        const analyzer = BundleAnalyzer as unknown;
+        const analyzer = BundleAnalyzer as any;
         const size = await analyzer.getChunkSize('test-chunk.js');
 
         expect(size).toBe(2048);
@@ -223,7 +223,7 @@ describe('bundleOptimization', () => {
           writable: true,
         });
 
-        const analyzer = BundleAnalyzer as unknown;
+        const analyzer = BundleAnalyzer as any;
         const size = await analyzer.getChunkSize('test-chunk.js');
 
         expect(size).toBeGreaterThan(0);
@@ -233,7 +233,7 @@ describe('bundleOptimization', () => {
         (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
         Object.defineProperty(document, 'scripts', { value: [], writable: true });
 
-        const analyzer = BundleAnalyzer as unknown;
+        const analyzer = BundleAnalyzer as any;
         const size = await analyzer.getChunkSize('nonexistent-chunk.js');
 
         expect(size).toBe(0);
@@ -390,7 +390,7 @@ describe('bundleOptimization', () => {
 
     describe('loadChunk', () => {
       test('should load chunk successfully', async () => {
-        const loadChunk = (ChunkLoadingOptimizer as unknown).loadChunk;
+        const loadChunk = (ChunkLoadingOptimizer as any).loadChunk;
         
         const promise = loadChunk('test-chunk');
         
@@ -405,7 +405,7 @@ describe('bundleOptimization', () => {
       });
 
       test('should prevent concurrent loading of same chunk', async () => {
-        const loadChunk = (ChunkLoadingOptimizer as unknown).loadChunk;
+        const loadChunk = (ChunkLoadingOptimizer as any).loadChunk;
         
         const promise1 = loadChunk('test-chunk');
         const promise2 = loadChunk('test-chunk'); // Should return immediately
@@ -422,7 +422,7 @@ describe('bundleOptimization', () => {
       });
 
       test('should queue chunks when max concurrent limit reached', async () => {
-        const loadChunk = (ChunkLoadingOptimizer as unknown).loadChunk;
+        const loadChunk = (ChunkLoadingOptimizer as any).loadChunk;
         
         // Load multiple chunks to hit the limit
         const promises = [];
@@ -435,10 +435,10 @@ describe('bundleOptimization', () => {
       });
 
       test('should handle load failures', async () => {
-        const loadChunk = (ChunkLoadingOptimizer as unknown).loadChunk;
+        const loadChunk = (ChunkLoadingOptimizer as any).loadChunk;
         
         // Mock setTimeout to simulate failure
-        jest.spyOn(global, 'setTimeout').mockImplementationOnce(() => {
+        jest.spyOn(global, 'setTimeout').mockImplementationOnce(((_callback: any) => {
           // Simulate error by throwing
           setTimeout(() => {
             try {
@@ -447,8 +447,8 @@ describe('bundleOptimization', () => {
               // This would be caught in the real implementation
             }
           }, 0);
-          return 1 as unknown;
-        });
+          return 1 as any;
+        }) as any);
 
         const promise = loadChunk('failing-chunk');
         
@@ -475,8 +475,8 @@ describe('bundleOptimization', () => {
 
     describe('processQueue', () => {
       test('should process queued chunks by priority', async () => {
-        const loadChunk = (ChunkLoadingOptimizer as unknown).loadChunk;
-        const processQueue = (ChunkLoadingOptimizer as unknown).processQueue;
+        const loadChunk = (ChunkLoadingOptimizer as any).loadChunk;
+        const processQueue = (ChunkLoadingOptimizer as any).processQueue;
         
         // Queue some chunks to exceed limit
         for (let i = 0; i < 5; i++) {
@@ -506,10 +506,10 @@ describe('bundleOptimization', () => {
               }),
               remove: jest.fn(),
             },
-          ] as unknown;
+          ] as any;
         }
-        return [] as unknown;
-      });
+        return [] as any;
+      }) as any;
     });
 
     describe('startMonitoring', () => {
@@ -565,7 +565,7 @@ describe('bundleOptimization', () => {
         MobileMemoryOptimizer.startMonitoring();
 
         // Simulate interval trigger
-        const checkMemoryUsage = (MobileMemoryOptimizer as unknown).checkMemoryUsage;
+        const checkMemoryUsage = (MobileMemoryOptimizer as any).checkMemoryUsage;
         checkMemoryUsage();
 
         expect(ComponentPreloader.clearCache).toHaveBeenCalled();
@@ -586,7 +586,7 @@ describe('bundleOptimization', () => {
         const { ComponentPreloader } = require('../components/EnhancedLazyComponent');
         ComponentPreloader.clearCache.mockClear();
 
-        const checkMemoryUsage = (MobileMemoryOptimizer as unknown).checkMemoryUsage;
+        const checkMemoryUsage = (MobileMemoryOptimizer as any).checkMemoryUsage;
         checkMemoryUsage();
 
         expect(ComponentPreloader.clearCache).not.toHaveBeenCalled();
@@ -600,9 +600,9 @@ describe('bundleOptimization', () => {
           remove: jest.fn(),
         };
 
-        document.querySelectorAll = jest.fn(() => [mockImage] as unknown);
+        document.querySelectorAll = jest.fn(() => [mockImage] as any);
 
-        const performCleanup = (MobileMemoryOptimizer as unknown).performCleanup;
+        const performCleanup = (MobileMemoryOptimizer as any).performCleanup;
         performCleanup();
 
         expect(mockImage.remove).toHaveBeenCalled();
@@ -620,19 +620,19 @@ describe('bundleOptimization', () => {
         Object.defineProperty(window, 'innerHeight', { value: 600, writable: true });
         Object.defineProperty(window, 'innerWidth', { value: 800, writable: true });
 
-        document.querySelectorAll = jest.fn(() => [mockImage] as unknown);
+        document.querySelectorAll = jest.fn(() => [mockImage] as any);
 
-        const performCleanup = (MobileMemoryOptimizer as unknown).performCleanup;
+        const performCleanup = (MobileMemoryOptimizer as any).performCleanup;
         performCleanup();
 
         expect(mockImage.remove).not.toHaveBeenCalled();
       });
 
       test('should handle missing performance.memory', () => {
-        delete (performance as unknown).memory;
+        delete (performance as any).memory;
 
         expect(() => {
-          const getCurrentMemoryUsage = (MobileMemoryOptimizer as unknown).getCurrentMemoryUsage;
+          const getCurrentMemoryUsage = (MobileMemoryOptimizer as any).getCurrentMemoryUsage;
           const usage = getCurrentMemoryUsage();
           expect(usage).toBe(0);
         }).not.toThrow();
@@ -642,21 +642,21 @@ describe('bundleOptimization', () => {
     describe('garbage collection', () => {
       test('should trigger garbage collection when available', () => {
         const mockGc = jest.fn();
-        (global as unknown).gc = mockGc;
+        (global as any).gc = mockGc;
 
-        const performCleanup = (MobileMemoryOptimizer as unknown).performCleanup;
+        const performCleanup = (MobileMemoryOptimizer as any).performCleanup;
         performCleanup();
 
         expect(mockGc).toHaveBeenCalled();
 
-        delete (global as unknown).gc;
+        delete (global as any).gc;
       });
 
       test('should handle missing garbage collection gracefully', () => {
-        delete (global as unknown).gc;
+        delete (global as any).gc;
 
         expect(() => {
-          const performCleanup = (MobileMemoryOptimizer as unknown).performCleanup;
+          const performCleanup = (MobileMemoryOptimizer as any).performCleanup;
           performCleanup();
         }).not.toThrow();
       });
@@ -687,7 +687,7 @@ describe('bundleOptimization', () => {
         Object.defineProperty(window, 'innerHeight', { value: 600, writable: true });
         Object.defineProperty(window, 'innerWidth', { value: 800, writable: true });
 
-        const isInViewport = (MobileMemoryOptimizer as unknown).isElementInViewport;
+        const isInViewport = (MobileMemoryOptimizer as any).isElementInViewport;
         expect(isInViewport(element)).toBe(true);
       });
 
@@ -701,7 +701,7 @@ describe('bundleOptimization', () => {
           }),
         } as HTMLElement;
 
-        const isInViewport = (MobileMemoryOptimizer as unknown).isElementInViewport;
+        const isInViewport = (MobileMemoryOptimizer as any).isElementInViewport;
         expect(isInViewport(element)).toBe(false);
       });
 
@@ -720,7 +720,7 @@ describe('bundleOptimization', () => {
           }),
         } as HTMLElement;
 
-        const isInViewport = (MobileMemoryOptimizer as unknown).isElementInViewport;
+        const isInViewport = (MobileMemoryOptimizer as any).isElementInViewport;
         expect(isInViewport(element)).toBe(true);
       });
     });
@@ -781,7 +781,7 @@ describe('bundleOptimization', () => {
 
   describe('Error Handling and Edge Cases', () => {
     test('should handle missing webpack require gracefully', async () => {
-      delete (global as unknown).__webpack_require__;
+      delete (global as any).__webpack_require__;
 
       expect(() => {
         BundleAnalyzer.analyzeBundlePerformance();
@@ -791,7 +791,7 @@ describe('bundleOptimization', () => {
     test('should handle fetch errors in chunk size detection', async () => {
       (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
 
-      const analyzer = BundleAnalyzer as unknown;
+      const analyzer = BundleAnalyzer as any;
       const size = await analyzer.getChunkSize('test-chunk.js');
 
       expect(size).toBe(0);
@@ -800,14 +800,14 @@ describe('bundleOptimization', () => {
     test('should handle missing script elements', async () => {
       Object.defineProperty(document, 'scripts', { value: [], writable: true });
 
-      const analyzer = BundleAnalyzer as unknown;
+      const analyzer = BundleAnalyzer as any;
       const chunks = analyzer.getLoadedChunks();
 
       expect(chunks).toEqual([]);
     });
 
     test('should handle missing performance API', () => {
-      delete (global as unknown).performance;
+      delete (global as any).performance;
 
       expect(() => {
         new BundleAnalyzer();
@@ -821,10 +821,10 @@ describe('bundleOptimization', () => {
     });
 
     test('should handle missing DOM elements in memory cleanup', () => {
-      document.querySelectorAll = jest.fn(() => [] as unknown);
+      document.querySelectorAll = jest.fn(() => [] as any);
 
       expect(() => {
-        const performCleanup = (MobileMemoryOptimizer as unknown).performCleanup;
+        const performCleanup = (MobileMemoryOptimizer as any).performCleanup;
         performCleanup();
       }).not.toThrow();
     });
@@ -835,7 +835,7 @@ describe('bundleOptimization', () => {
       const startTime = performance.now();
 
       // Simulate many memory checks
-      const getCurrentMemoryUsage = (MobileMemoryOptimizer as unknown).getCurrentMemoryUsage;
+      const getCurrentMemoryUsage = (MobileMemoryOptimizer as any).getCurrentMemoryUsage;
       for (let i = 0; i < 1000; i++) {
         getCurrentMemoryUsage();
       }
@@ -906,7 +906,7 @@ describe('bundleOptimization', () => {
       // Simulate chunk loading while memory optimization is active
       MobileMemoryOptimizer.startMonitoring();
       
-      const loadChunk = (ChunkLoadingOptimizer as unknown).loadChunk;
+      const loadChunk = (ChunkLoadingOptimizer as any).loadChunk;
       loadChunk('test-chunk');
 
       // Fast forward timers

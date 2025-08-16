@@ -29,7 +29,7 @@ const Custom404Page: React.FC = () => {
           </h1>
           
           <p className="error-description">
-            We couldn't find the page you're looking for. It might have been moved, 
+            We couldn&apos;t find the page you&apos;re looking for. It might have been moved, 
             deleted, or you may have typed the URL incorrectly.
           </p>
 
@@ -175,7 +175,7 @@ const Custom404Page: React.FC = () => {
         aria-atomic="true" 
         className="sr-only"
       >
-        Page not found. You are now on the 404 error page. Use the navigation links or search to find what you're looking for.
+        Page not found. You are now on the 404 error page. Use the navigation links or search to find what you&apos;re looking for.
       </div>
     </main>
   );

@@ -3,10 +3,14 @@
  * Handles all API communication with Netlify Functions
  */
 
+import { logger } from '../utils/logger';
+
 // Determine API base URL based on environment
-const API_BASE_URL = import.meta.env.DEV 
+const API_BASE_URL = (typeof process !== 'undefined' && process.env.NODE_ENV === 'test')
   ? 'http://localhost:8888/.netlify/functions/api'
-  : '/.netlify/functions/api';
+  : ((typeof (import.meta as any) !== 'undefined' && (import.meta as any).env?.DEV) 
+    ? 'http://localhost:8888/.netlify/functions/api'
+    : '/.netlify/functions/api');
 
 // Helper function for API calls
 async function apiCall(
@@ -34,7 +38,7 @@ async function apiCall(
 
     return await response.json();
   } catch (error) {
-    console.error('API Call Failed:', error);
+    logger.error('API Call Failed:', error, 'backendService');
     throw error;
   }
 }

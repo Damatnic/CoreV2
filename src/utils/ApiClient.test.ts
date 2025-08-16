@@ -171,7 +171,7 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: jest.fn().mockResolvedValue(mockResources),
-      } as unknown);
+      } as any);
 
       const result = await ApiClient.resources.getResources();
 
@@ -195,7 +195,7 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: jest.fn().mockResolvedValue(mockAssessment),
-      } as unknown);
+      } as any);
 
       const result = await ApiClient.assessments.submitPhq9Result(
         'user123',
@@ -225,7 +225,7 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: jest.fn().mockResolvedValue(mockAssessment),
-      } as unknown);
+      } as any);
 
       const result = await ApiClient.assessments.submitGad7Result(
         'user123',
@@ -258,7 +258,7 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: jest.fn().mockResolvedValue(mockHistory),
-      } as unknown);
+      } as any);
 
       const result = await ApiClient.assessments.getHistory('user123');
 
@@ -277,7 +277,7 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: jest.fn().mockResolvedValue(mockHabits),
-      } as unknown);
+      } as any);
 
       const result = await ApiClient.habits.getPredefinedHabits();
 
@@ -292,7 +292,7 @@ describe('ApiClient', () => {
         ok: true,
         status: 204,
         headers: new Headers(),
-      } as unknown);
+      } as any);
 
       await ApiClient.habits.trackHabit('user123', 'habit456');
 
@@ -319,7 +319,7 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: jest.fn().mockResolvedValue(mockCompletion),
-      } as unknown);
+      } as any);
 
       const result = await ApiClient.habits.logCompletion(
         'user123',
@@ -364,7 +364,7 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: jest.fn().mockResolvedValue(mockCheckIn),
-      } as unknown);
+      } as any);
 
       const result = await ApiClient.mood.postCheckIn(checkInData, 'user123');
 
@@ -388,7 +388,7 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: jest.fn().mockResolvedValue(mockHistory),
-      } as unknown);
+      } as any);
 
       const result = await ApiClient.mood.getHistory('user123');
 
@@ -422,7 +422,7 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: jest.fn().mockResolvedValue(mockEntry),
-      } as unknown);
+      } as any);
 
       const result = await ApiClient.journal.postEntry(
         'Today was a good day',
@@ -454,7 +454,7 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: jest.fn().mockResolvedValue(mockVideos),
-      } as unknown);
+      } as any);
 
       const result = await ApiClient.videos.getVideos();
 
@@ -471,7 +471,7 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: jest.fn().mockResolvedValue(mockVideo),
-      } as unknown);
+      } as any);
 
       const result = await ApiClient.videos.likeVideo('video1');
 
@@ -494,7 +494,7 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: jest.fn().mockResolvedValue(mockVideo),
-      } as unknown);
+      } as any);
 
       const result = await ApiClient.videos.uploadVideo(
         mockFile,
@@ -529,7 +529,7 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: jest.fn().mockResolvedValue(mockSafetyPlan),
-      } as unknown);
+      } as any);
 
       const result = await ApiClient.safetyPlan.get('user123');
 
@@ -549,9 +549,9 @@ describe('ApiClient', () => {
         ok: true,
         status: 204,
         headers: new Headers(),
-      } as unknown);
+      } as any);
 
-      await ApiClient.safetyPlan.save(safetyPlan as unknown, 'user123');
+      await ApiClient.safetyPlan.save(safetyPlan as any, 'user123');
 
       expect(mockFetch).toHaveBeenCalledWith(
         '/.netlify/functions/users/safety-plan',
@@ -577,7 +577,7 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: jest.fn().mockResolvedValue(mockConsent),
-      } as unknown);
+      } as any);
 
       const result = await ApiClient.legal.checkConsent('user123', 'privacy-policy');
 
@@ -592,7 +592,7 @@ describe('ApiClient', () => {
         ok: true,
         status: 204,
         headers: new Headers(),
-      } as unknown);
+      } as any);
 
       await ApiClient.legal.recordConsent(
         'user123',
@@ -686,7 +686,7 @@ describe('ApiClient', () => {
         ok: false,
         status: 401,
         headers: new Headers(),
-      } as unknown);
+      } as any);
 
       await expect(ApiClient.resources.getResources()).rejects.toThrow(
         'Unauthorized'
@@ -713,7 +713,7 @@ describe('ApiClient', () => {
         status: 500,
         headers: new Headers({ 'content-type': 'text/plain' }),
         json: jest.fn().mockRejectedValue(new Error('Not JSON')),
-      } as unknown);
+      } as any);
 
       await expect(ApiClient.resources.getResources()).rejects.toThrow(
         'Request failed with status 500'
@@ -726,7 +726,7 @@ describe('ApiClient', () => {
         ok: false,
         status: 404,
         headers: new Headers({ 'content-type': 'text/html' }),
-      } as unknown);
+      } as any);
 
       await expect(ApiClient.resources.getResources()).rejects.toThrow(
         'API endpoint not available in development mode'
@@ -739,7 +739,7 @@ describe('ApiClient', () => {
         ok: true,
         status: 200,
         headers: new Headers({ 'content-type': 'text/html' }),
-      } as unknown);
+      } as any);
 
       await expect(ApiClient.resources.getResources()).rejects.toThrow(
         'API endpoint not available in development mode'
@@ -755,7 +755,7 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: jest.fn().mockResolvedValue([]),
-      } as unknown);
+      } as any);
 
       await ApiClient.resources.getResources();
 
@@ -776,12 +776,12 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: jest.fn().mockResolvedValue([]),
-      } as unknown);
+      } as any);
 
       await ApiClient.resources.getResources();
 
       const call = mockFetch.mock.calls[0];
-      const headers = (call[1] as unknown).headers;
+      const headers = (call[1] as any).headers;
       expect(headers).not.toHaveProperty('Authorization');
     });
   });
@@ -814,7 +814,7 @@ describe('ApiClient', () => {
       });
 
       const error = new Error('Demo mode - API skipped');
-      (error as unknown).isDevelopmentError = true;
+      (error as any).isDevelopmentError = true;
       mockFetch.mockRejectedValueOnce(error);
 
       const result = await ApiClient.dilemmas.getDilemmas();
@@ -833,10 +833,10 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: jest.fn().mockResolvedValue(mockDilemma),
-      } as unknown);
+      } as any);
 
       const result = await ApiClient.dilemmas.postDilemma(
-        dilemmaData as unknown,
+        dilemmaData as any,
         'user123'
       );
 
@@ -870,7 +870,7 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: jest.fn().mockResolvedValue(25),
-      } as unknown);
+      } as any);
 
       const result = await ApiClient.helpers.getOnlineHelperCount();
 
@@ -887,7 +887,7 @@ describe('ApiClient', () => {
 
     test('should fallback to demo count on error', async () => {
       const error = new Error('Demo mode - API skipped');
-      (error as unknown).isDevelopmentError = true;
+      (error as any).isDevelopmentError = true;
       mockFetch.mockRejectedValueOnce(error);
 
       const result = await ApiClient.helpers.getOnlineHelperCount();
@@ -910,7 +910,7 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: jest.fn().mockResolvedValue(mockResponse),
-      } as unknown);
+      } as any);
 
       const result = await ApiClient.ai.chat(messages, systemInstruction);
 
@@ -930,7 +930,7 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: jest.fn().mockResolvedValue({}), // Missing text property
-      } as unknown);
+      } as any);
 
       await expect(
         ApiClient.ai.chat([], 'Be helpful')
@@ -939,7 +939,7 @@ describe('ApiClient', () => {
 
     test('should load chat history with demo fallback', async () => {
       const error = new Error('Demo mode - API skipped');
-      (error as unknown).isDevelopmentError = true;
+      (error as any).isDevelopmentError = true;
       mockFetch.mockRejectedValueOnce(error);
 
       const result = await ApiClient.ai.loadChatHistory('test-user-id');
@@ -956,7 +956,7 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: jest.fn().mockResolvedValue([]),
-      } as unknown);
+      } as any);
 
       await ApiClient.resources.getResources();
 
@@ -973,7 +973,7 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: jest.fn().mockResolvedValue([]),
-      } as unknown);
+      } as any);
 
       await ApiClient.resources.getResources();
 
@@ -990,7 +990,7 @@ describe('ApiClient', () => {
         ok: true,
         status: 204,
         headers: new Headers(),
-      } as unknown);
+      } as any);
 
       const result = await ApiClient.habits.trackHabit('user123', 'habit456');
 
@@ -1003,7 +1003,7 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers(),
         json: jest.fn().mockResolvedValue({ success: true }),
-      } as unknown);
+      } as any);
 
       const result = await ApiClient.resources.getResources();
 
@@ -1020,7 +1020,7 @@ describe('ApiClient', () => {
           status: 200,
           headers: new Headers({ 'content-type': 'application/json' }),
           json: jest.fn().mockResolvedValue([]),
-        } as unknown);
+        } as any);
       }
 
       const promises = [
@@ -1046,7 +1046,7 @@ describe('ApiClient', () => {
         status: 200,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: jest.fn().mockResolvedValue([]),
-      } as unknown);
+      } as any);
 
       const promises = [
         ApiClient.resources.getResources().catch(e => e.message),

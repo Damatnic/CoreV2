@@ -157,6 +157,20 @@ class EnhancedCrisisKeywordDetectionService {
       riskWeight: 95
     },
 
+    // Direct suicide intent
+    {
+      pattern: /(?:i want to|i need to|i'm going to|going to)\s*(?:kill myself|end my life|commit suicide|take my life)/gi,
+      description: 'Direct suicide intent statement',
+      severity: 'emergency',
+      category: 'suicidal-ideation',
+      contextRequirement: ['tonight', 'today', 'now', 'need', 'want', 'going'],
+      negativeFlagWords: ['not', 'never', 'don\'t', 'wouldn\'t'],
+      positiveAmplifiers: ['really', 'definitely', 'tonight', 'today', 'now'],
+      timelineIndicators: ['tonight', 'today', 'now', 'soon', 'immediately'],
+      emotionalIndicators: ['desperate', 'done', 'finished', 'can\'t'],
+      riskWeight: 95
+    },
+    
     // Active suicide ideation
     {
       pattern: /(?:want to die|wish i was dead|don't want to be alive|better off dead|life isn't worth living|think about it constantly|tired of living)/gi,
@@ -674,7 +688,9 @@ class EnhancedCrisisKeywordDetectionService {
     context: string,
     pattern: ContextualCrisisPattern
   ): number {
-    let confidence = 0.5; // Base confidence
+    // Higher base confidence for emergency severity
+    let confidence = pattern.severity === 'emergency' ? 0.75 : 
+                     pattern.severity === 'critical' ? 0.65 : 0.5;
 
     // Check for positive amplifiers
     for (const amplifier of pattern.positiveAmplifiers) {

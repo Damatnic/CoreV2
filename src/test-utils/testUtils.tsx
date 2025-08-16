@@ -174,7 +174,7 @@ export const mockIntersectionObserver = () => {
     unobserve: jest.fn(),
     disconnect: jest.fn()
   });
-  window.IntersectionObserver = mockIntersectionObserver as unknown;
+  window.IntersectionObserver = mockIntersectionObserver as any;
   return mockIntersectionObserver;
 };
 
@@ -185,7 +185,7 @@ export const mockResizeObserver = () => {
     unobserve: jest.fn(),
     disconnect: jest.fn()
   });
-  window.ResizeObserver = mockResizeObserver as unknown;
+  window.ResizeObserver = mockResizeObserver as any;
   return mockResizeObserver;
 };
 
@@ -270,7 +270,7 @@ export class MockWebSocket {
 }
 
 export const mockWebSocket = () => {
-  global.WebSocket = MockWebSocket as unknown;
+  global.WebSocket = MockWebSocket as any;
   return MockWebSocket;
 };
 

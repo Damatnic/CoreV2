@@ -3,10 +3,10 @@ import ConsentBanner from '../ConsentBanner';
 
 // Mock the analytics service
 jest.mock('../../../services/analyticsService', () => ({
-  getAnalyticsService: () => ({
+  getAnalyticsService: jest.fn(() => ({
     getConsentStatus: jest.fn(),
     updateConsent: jest.fn(),
-  }),
+  })),
   ConsentStatus: {}
 }));
 

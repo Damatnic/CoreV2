@@ -558,7 +558,7 @@ describe('EmergencyContactsWidget', () => {
 
       render(
         <AuthWrapper>
-          <EmergencyContactsWidget contacts={incompleteContact as unknown} />
+          <EmergencyContactsWidget contacts={incompleteContact as any} />
         </AuthWrapper>
       );
 
