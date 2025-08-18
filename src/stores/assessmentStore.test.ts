@@ -64,18 +64,25 @@ describe('assessmentStore', () => {
       await useAssessmentStore.getState().submitPhq9Result(score, answers);
     });
 
-    expect(mockedFetch).toHaveBeenCalledWith('/api/assessments/submit', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer user123',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        type: 'phq-9',
-        score,
-        answers,
-        timestamp: expect.any(String)
+    expect(mockedFetch).toHaveBeenCalledWith('/api/assessments/submit', 
+      expect.objectContaining({
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer user123',
+          'Content-Type': 'application/json'
+        },
+        body: expect.stringMatching(/"type":"phq-9"/)
       })
+    );
+    
+    // Verify the body contains the expected data
+    const callArgs = mockedFetch.mock.calls[0];
+    const bodyData = JSON.parse(callArgs[1].body);
+    expect(bodyData).toEqual({
+      type: 'phq-9',
+      score,
+      answers,
+      timestamp: expect.any(String)
     });
     expect(mockedFetch).toHaveBeenCalledTimes(2); // Submit + refresh
   });
@@ -100,18 +107,25 @@ describe('assessmentStore', () => {
       await useAssessmentStore.getState().submitGad7Result(score, answers);
     });
 
-    expect(mockedFetch).toHaveBeenCalledWith('/api/assessments/submit', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer user123',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        type: 'gad-7',
-        score,
-        answers,
-        timestamp: expect.any(String)
+    expect(mockedFetch).toHaveBeenCalledWith('/api/assessments/submit', 
+      expect.objectContaining({
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer user123',
+          'Content-Type': 'application/json'
+        },
+        body: expect.stringMatching(/"type":"gad-7"/)
       })
+    );
+    
+    // Verify the body contains the expected data
+    const callArgs = mockedFetch.mock.calls[0];
+    const bodyData = JSON.parse(callArgs[1].body);
+    expect(bodyData).toEqual({
+      type: 'gad-7',
+      score,
+      answers,
+      timestamp: expect.any(String)
     });
     expect(mockedFetch).toHaveBeenCalledTimes(2); // Submit + refresh
   });

@@ -37,12 +37,18 @@ class MultilingualCrisisDetectionService {
       language: 'en',
       urgent_keywords: [
         { word: 'suicide', weight: 10 },
+        { word: 'suicidal', weight: 10 },
         { word: 'kill myself', weight: 10 },
         { word: 'end it all', weight: 9 },
+        { word: 'end it', weight: 9 },
         { word: 'want to die', weight: 9 },
         { word: 'no way out', weight: 8 },
         { word: 'can\'t go on', weight: 8 },
-        { word: 'self harm', weight: 8 }
+        { word: 'self harm', weight: 8 },
+        { word: 'self-harm', weight: 8 },
+        { word: 'ending things', weight: 9 },
+        { word: 'done with this shit', weight: 8 },
+        { word: 'gonna end it', weight: 9 }
       ],
       moderate_keywords: [
         { word: 'hopeless', weight: 7 },
@@ -50,12 +56,16 @@ class MultilingualCrisisDetectionService {
         { word: 'burden', weight: 6 },
         { word: 'alone', weight: 5 },
         { word: 'trapped', weight: 7 },
-        { word: 'pain', weight: 5 }
+        { word: 'pain', weight: 5 },
+        { word: 'can\'t take it', weight: 6 },
+        { word: 'thinking about', weight: 4 }
       ],
       cultural_expressions: [
         { word: 'rock bottom', weight: 7 },
         { word: 'at the end of my rope', weight: 8 },
-        { word: 'drowning', weight: 6, cultural_context: ['metaphorical'] }
+        { word: 'drowning', weight: 6, cultural_context: ['metaphorical'] },
+        { word: 'done with', weight: 7 },
+        { word: 'over it', weight: 6 }
       ],
       help_seeking_phrases: [
         { word: 'need help', weight: 6 },
@@ -427,9 +437,16 @@ class MultilingualCrisisDetectionService {
     const detectedLanguage = language || await this.detectLanguage(text);
     const result = this.analyzeCrisisRisk(text, detectedLanguage);
     
+    // Calculate confidence ensuring minimum value for non-empty text
+    let confidence = result.score / 10; // Normalize score to 0-1
+    if (text.trim().length > 0 && confidence === 0) {
+      // If we have text but no keywords detected, still assign a minimal confidence
+      confidence = 0.1;
+    }
+    
     return {
       riskLevel: result.riskLevel,
-      confidence: result.score / 10, // Normalize score to 0-1
+      confidence,
       triggers: result.detectedKeywords,
       culturalRecommendations: [result.recommendedResponse],
       detectedLanguage,
@@ -441,11 +458,49 @@ class MultilingualCrisisDetectionService {
    * Simple language detection (mock implementation)
    */
   private async detectLanguage(text: string): Promise<string> {
-    // Simple language detection based on character patterns
+    const textLower = text.toLowerCase();
+    
+    // More comprehensive language detection
+    // Chinese characters
     if (/[\u4e00-\u9fff]/.test(text)) return 'zh';
+    
+    // Arabic characters
     if (/[\u0600-\u06ff]/.test(text)) return 'ar';
-    if (/[áéíóúñü]/.test(text.toLowerCase())) return 'es';
-    if (/[àâäéèêëîïôöùûüÿç]/.test(text.toLowerCase())) return 'fr';
+    
+    // Hebrew characters
+    if (/[\u0590-\u05ff]/.test(text)) return 'he';
+    
+    // Cyrillic (Russian)
+    if (/[\u0400-\u04ff]/.test(text)) return 'ru';
+    
+    // Hindi/Devanagari
+    if (/[\u0900-\u097f]/.test(text)) return 'hi';
+    
+    // Spanish indicators - check for common Spanish words and patterns
+    if (/\b(quiero|terminar|vida|morir|puedo|más|muy|triste)\b/.test(textLower) ||
+        /[áéíóúñü]/.test(textLower)) {
+      return 'es';
+    }
+    
+    // French indicators - check for common French words and patterns
+    if (/\b(je|veux|mourir|plus|vivre|mal)\b/.test(textLower) ||
+        /[àâäéèêëîïôöùûüÿç]/.test(textLower)) {
+      return 'fr';
+    }
+    
+    // German indicators
+    if (/\b(ich|nicht|mehr|leben|will|sterben)\b/.test(textLower) ||
+        /[äöüß]/.test(textLower)) {
+      return 'de';
+    }
+    
+    // Portuguese indicators
+    if (/\b(não|aguento|mais|quero|morrer)\b/.test(textLower) ||
+        /[ãõáéíóúâê]/.test(textLower)) {
+      return 'pt';
+    }
+    
+    // Default to English
     return 'en';
   }
 

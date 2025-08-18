@@ -28,7 +28,7 @@ export const authState: {
   isAuthenticated: false,
   user: null,
   helperProfile: null,
-  userToken: null,
+  userToken: 'test-token', // Provide default test token
 };
 
 const defaultAuthContext: AuthContextType = {
@@ -41,7 +41,7 @@ const defaultAuthContext: AuthContextType = {
   logout: jest.fn(() => Promise.resolve()),
   reloadProfile: jest.fn(() => Promise.resolve()),
   updateHelperProfile: jest.fn(),
-  userToken: null,
+  userToken: 'test-token', // Provide default test token
   isAnonymous: false,
   authState: authState,
   register: jest.fn(() => Promise.resolve()),
@@ -49,9 +49,23 @@ const defaultAuthContext: AuthContextType = {
 
 const AuthContext = createContext<AuthContextType>(defaultAuthContext);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+// Export the context for testing
+export { AuthContext };
+
+export const AuthProvider: React.FC<{ children: ReactNode; value?: Partial<AuthContextType> }> = ({ 
+  children, 
+  value = {} 
+}) => {
+  const contextValue = { ...defaultAuthContext, ...value };
+  
+  // Update global authState when value changes
+  if (value.userToken !== undefined) authState.userToken = value.userToken;
+  if (value.user !== undefined) authState.user = value.user;
+  if (value.helperProfile !== undefined) authState.helperProfile = value.helperProfile;
+  if (value.isAuthenticated !== undefined) authState.isAuthenticated = value.isAuthenticated;
+  
   return (
-    <AuthContext.Provider value={defaultAuthContext}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
@@ -64,5 +78,20 @@ export const useAuth = () => {
   }
   return context;
 };
+
+// Mock useLegalConsents hook
+export const useLegalConsents = () => ({
+  requiredConsent: null,
+  allConsentsGiven: true,
+  acceptConsent: jest.fn(() => Promise.resolve()),
+  getConsentContent: jest.fn(() => ({ title: '', text: '' })),
+});
+
+// Additional exports for testing convenience
+export const mockLogin = jest.fn(() => Promise.resolve());
+export const mockLogout = jest.fn(() => Promise.resolve());
+export const mockReloadProfile = jest.fn(() => Promise.resolve());
+export const mockUpdateHelperProfile = jest.fn();
+export const mockRegister = jest.fn(() => Promise.resolve());
 
 export default AuthContext;

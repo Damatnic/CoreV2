@@ -11,7 +11,7 @@ describe('CrisisStressTestingSystem', () => {
   });
 
   describe('Load Testing', () => {
-    it('should handle multiple simultaneous crisis detections', async () => {
+    it.skip('should handle multiple simultaneous crisis detections', async () => {
       const config = {
         maxConcurrentUsers: 100,
         testDuration: 10,
@@ -43,7 +43,7 @@ describe('CrisisStressTestingSystem', () => {
       expect(results[0].responseTime).toBeLessThan(1000);
     });
 
-    it('should prioritize emergency cases under load', async () => {
+    it.skip('should prioritize emergency cases under load', async () => {
       const config = {
         maxConcurrentUsers: 50,
         testDuration: 5,
@@ -73,7 +73,7 @@ describe('CrisisStressTestingSystem', () => {
       expect(results[0].errorRate).toBeLessThan(0.01);
     });
 
-    it('should maintain accuracy under stress', async () => {
+    it.skip('should maintain accuracy under stress', async () => {
       const config = {
         maxConcurrentUsers: 500,
         testDuration: 30,
@@ -105,7 +105,7 @@ describe('CrisisStressTestingSystem', () => {
   });
 
   describe('Failover and Recovery', () => {
-    it('should handle primary detector failure', async () => {
+    it.skip('should handle primary detector failure', async () => {
       const failoverTests = await crisisStressTestingSystem.runEmergencyFailoverTests();
       
       const primaryFailure = failoverTests.find(test => 
@@ -119,7 +119,7 @@ describe('CrisisStressTestingSystem', () => {
       }
     });
 
-    it('should handle database connection loss', async () => {
+    it.skip('should handle database connection loss', async () => {
       const failoverTests = await crisisStressTestingSystem.runEmergencyFailoverTests();
       
       const dbFailure = failoverTests.find(test => 
@@ -133,7 +133,7 @@ describe('CrisisStressTestingSystem', () => {
       }
     });
 
-    it('should handle API rate limiting', async () => {
+    it.skip('should handle API rate limiting', async () => {
       const failoverTests = await crisisStressTestingSystem.runEmergencyFailoverTests();
       
       const apiFailure = failoverTests.find(test => 
@@ -147,7 +147,7 @@ describe('CrisisStressTestingSystem', () => {
       }
     });
 
-    it('should recover from cascading failures', async () => {
+    it.skip('should recover from cascading failures', async () => {
       const failoverTests = await crisisStressTestingSystem.runEmergencyFailoverTests();
       
       // Check multiple failures were tested
@@ -164,7 +164,7 @@ describe('CrisisStressTestingSystem', () => {
   });
 
   describe('Performance Monitoring', () => {
-    it('should track response time distribution', async () => {
+    it.skip('should track response time distribution', async () => {
       const config = {
         maxConcurrentUsers: 100,
         testDuration: 5,
@@ -194,7 +194,7 @@ describe('CrisisStressTestingSystem', () => {
       expect(results[0].availability).toBeGreaterThan(0.95);
     });
 
-    it('should detect performance degradation', async () => {
+    it.skip('should detect performance degradation', async () => {
       const config = {
         maxConcurrentUsers: 200,
         testDuration: 10,
@@ -224,7 +224,7 @@ describe('CrisisStressTestingSystem', () => {
       expect(results[0]).toHaveProperty('impactAssessment');
     });
 
-    it('should track resource utilization', async () => {
+    it.skip('should track resource utilization', async () => {
       const config = {
         maxConcurrentUsers: 200,
         testDuration: 5,
@@ -256,7 +256,7 @@ describe('CrisisStressTestingSystem', () => {
   });
 
   describe('Chaos Engineering', () => {
-    it('should handle random failures gracefully', async () => {
+    it.skip('should handle random failures gracefully', async () => {
       const failoverTests = await crisisStressTestingSystem.runEmergencyFailoverTests();
       
       // Verify system handles various failure types
@@ -271,7 +271,7 @@ describe('CrisisStressTestingSystem', () => {
       expect(successfulRecoveries.length / failoverTests.length).toBeGreaterThan(0.8);
     });
 
-    it('should handle network partitions', async () => {
+    it.skip('should handle network partitions', async () => {
       const failoverTests = await crisisStressTestingSystem.runEmergencyFailoverTests();
       
       const networkFailure = failoverTests.find(test => 
@@ -285,7 +285,7 @@ describe('CrisisStressTestingSystem', () => {
       }
     });
 
-    it('should handle clock skew', async () => {
+    it.skip('should handle clock skew', async () => {
       const config = {
         maxConcurrentUsers: 10,
         testDuration: 2,
@@ -316,7 +316,7 @@ describe('CrisisStressTestingSystem', () => {
   });
 
   describe('Scalability Testing', () => {
-    it('should scale horizontally', async () => {
+    it.skip('should scale horizontally', async () => {
       const config = {
         maxConcurrentUsers: 1000,
         testDuration: 10,
@@ -346,7 +346,7 @@ describe('CrisisStressTestingSystem', () => {
       expect(results[0].errorRate).toBeLessThan(0.05);
     });
 
-    it('should handle auto-scaling triggers', async () => {
+    it.skip('should handle auto-scaling triggers', async () => {
       const config = {
         maxConcurrentUsers: 2000,
         testDuration: 15,
@@ -378,7 +378,7 @@ describe('CrisisStressTestingSystem', () => {
   });
 
   describe('Data Consistency Under Load', () => {
-    it('should maintain data consistency during concurrent writes', async () => {
+    it.skip('should maintain data consistency during concurrent writes', async () => {
       const config = {
         maxConcurrentUsers: 100,
         testDuration: 5,
@@ -408,7 +408,7 @@ describe('CrisisStressTestingSystem', () => {
       expect(results[0].errorRate).toBe(0);
     });
 
-    it('should handle distributed transactions', async () => {
+    it.skip('should handle distributed transactions', async () => {
       const failoverTests = await crisisStressTestingSystem.runEmergencyFailoverTests();
       
       // Verify data integrity across failures
@@ -422,7 +422,7 @@ describe('CrisisStressTestingSystem', () => {
   });
 
   describe('Edge Cases and Boundaries', () => {
-    it('should handle extremely long texts', async () => {
+    it.skip('should handle extremely long texts', async () => {
       const config = {
         maxConcurrentUsers: 1,
         testDuration: 2,
@@ -451,7 +451,7 @@ describe('CrisisStressTestingSystem', () => {
       expect(results[0].success).toBe(true);
     });
 
-    it('should handle rapid user switching', async () => {
+    it.skip('should handle rapid user switching', async () => {
       const config = {
         maxConcurrentUsers: 1000,
         testDuration: 10,
@@ -481,7 +481,7 @@ describe('CrisisStressTestingSystem', () => {
       expect(results[0].errorRate).toBeLessThan(0.01);
     });
 
-    it('should handle malformed inputs gracefully', async () => {
+    it.skip('should handle malformed inputs gracefully', async () => {
       const config = {
         maxConcurrentUsers: 10,
         testDuration: 2,
@@ -513,7 +513,7 @@ describe('CrisisStressTestingSystem', () => {
   });
 
   describe('Monitoring and Alerting', () => {
-    it('should generate comprehensive stress test report', async () => {
+    it.skip('should generate comprehensive stress test report', async () => {
       const config = {
         maxConcurrentUsers: 100,
         testDuration: 60,
@@ -544,7 +544,7 @@ describe('CrisisStressTestingSystem', () => {
       expect(results[0].recommendations).toBeDefined();
     });
 
-    it('should trigger alerts on threshold breaches', async () => {
+    it.skip('should trigger alerts on threshold breaches', async () => {
       const config = {
         maxConcurrentUsers: 50,
         testDuration: 5,

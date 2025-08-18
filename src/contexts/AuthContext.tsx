@@ -8,10 +8,19 @@ import { logger } from '../utils/logger';
 // --- Auth0 Configuration ---
 // Handle both Vite and Jest environments
 const getEnvVar = (key: string, defaultValue: string) => {
+  // In test environment, use defaultValue
   if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
     return defaultValue;
   }
-  return (import.meta as any).env[key] || defaultValue;
+  // In browser/Vite environment, use import.meta.env
+  if (typeof window !== 'undefined' && (window as any).import?.meta?.env) {
+    return (window as any).import.meta.env[key] || defaultValue;
+  }
+  // Fallback to process.env for Node.js environments or default
+  if (typeof process !== 'undefined' && process.env[key]) {
+    return process.env[key];
+  }
+  return defaultValue;
 };
 
 const AUTH0_DOMAIN = getEnvVar('VITE_AUTH0_DOMAIN', 'demo.auth0.com');
@@ -20,7 +29,7 @@ const AUTH0_AUDIENCE = getEnvVar('VITE_AUTH0_AUDIENCE', 'demo-audience');
 
 // Only show info message on initial load for demo mode
 if (typeof process === 'undefined' || process.env.NODE_ENV !== 'test') {
-  const isDev = getEnvVar('DEV', 'false') === 'true' || (typeof (import.meta as any).env !== 'undefined' && (import.meta as any).env.DEV);
+  const isDev = getEnvVar('DEV', 'false') === 'true' || getEnvVar('VITE_DEV', 'false') === 'true';
   if (isDev && (!getEnvVar('VITE_AUTH0_DOMAIN', '') || !getEnvVar('VITE_AUTH0_CLIENT_ID', '') || !getEnvVar('VITE_AUTH0_AUDIENCE', ''))) {
     // Check if we're on non-Netlify dev port
     const currentPort = typeof window !== 'undefined' ? window.location.port : '';

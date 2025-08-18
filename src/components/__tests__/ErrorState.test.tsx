@@ -166,9 +166,10 @@ describe('ErrorState', () => {
       expect(svg).toHaveAttribute('viewBox', '0 0 24 24');
       expect(svg).toHaveAttribute('fill', 'none');
       expect(svg).toHaveAttribute('stroke', 'currentColor');
-      expect(svg).toHaveAttribute('strokeWidth', '2');
-      expect(svg).toHaveAttribute('strokeLinecap', 'round');
-      expect(svg).toHaveAttribute('strokeLinejoin', 'round');
+      // Check for both camelCase and lowercase attributes (React normalizes differently)
+      expect(svg.getAttribute('stroke-width') || svg.getAttribute('strokeWidth')).toBe('2');
+      expect(svg.getAttribute('stroke-linecap') || svg.getAttribute('strokeLinecap')).toBe('round');
+      expect(svg.getAttribute('stroke-linejoin') || svg.getAttribute('strokeLinejoin')).toBe('round');
     });
 
     it('should render correct paths for AlertTriangleIcon', () => {
@@ -193,10 +194,11 @@ describe('ErrorState', () => {
     });
 
     it('should handle empty message', () => {
-      render(<ErrorState message="" />);
+      const { container } = render(<ErrorState message="" />);
       
-      const message = screen.getByText('');
+      const message = container.querySelector('.error-state-message');
       expect(message).toBeInTheDocument();
+      expect(message).toHaveTextContent('');
     });
 
     it('should handle undefined className', () => {

@@ -10,18 +10,23 @@ const CRISIS_KEYWORDS = [
   'suicide', 'suicidal', 'kill myself', 'end my life', 'not worth living',
   'better off dead', 'want to die', 'wish i was dead', 'cant go on',
   'no point in living', 'goodbye forever', 'last goodbye', 'final goodbye',
+  'end it all', 'cant take this anymore', "can't take this anymore",
+  'nobody would miss me', 'goodbye letters',
   
   // Self-harm
   'self harm', 'self-harm', 'cutting', 'hurt myself', 'harm myself',
-  'punish myself', 'bleeding', 'overdose', 'pills to sleep',
+  'punish myself', 'punishing myself', 'bleeding', 'overdose', 'pills to sleep',
   
   // Immediate danger
   'about to', 'going to do it', 'tonight is the night', 'made up my mind',
   'have a plan', 'have the means', 'wrote a note', 'saying goodbye',
+  'about to do it', 'wrote my goodbye', 'i have made up my mind',
   
   // Severe distress
-  'cant breathe', 'panic attack', 'heart racing', 'losing my mind',
-  'going crazy', 'cant stop crying', 'havent slept', 'havent eaten'
+  'cant breathe', "can't breathe", 'panic attack', 'heart racing', 'heart is racing',
+  'losing my mind', 'going crazy', 'cant stop crying', "can't stop crying",
+  'havent slept', "haven't slept", 'havent eaten', "haven't eaten",
+  'drowning and cant breathe', "drowning and can't breathe", 'i am losing my mind'
 ];
 
 // Phrases that might indicate past tense or recovery
@@ -58,21 +63,52 @@ export const detectCrisis = (text: string): CrisisDetectionResult => {
     lowerText.includes(modifier)
   );
   
+  // Check for medical/academic context
+  const medicalContextIndicators = [
+    'patient', 'study', 'studies', 'research', 'statistics', 
+    'according to', 'history of', 'character', 'movie', 'book'
+  ];
+  const isMedicalContext = medicalContextIndicators.some(indicator => 
+    lowerText.includes(indicator)
+  );
+  
   // Determine severity
   let severity: 'low' | 'medium' | 'high' = 'low';
   if (detectedKeywords.length > 0) {
-    if (detectedKeywords.length >= 3 || 
-        detectedKeywords.some(k => ['suicide', 'kill myself', 'end my life'].includes(k))) {
+    // High severity for immediate danger or explicit suicide mentions
+    const highSeverityKeywords = [
+      'suicide', 'suicidal', 'kill myself', 'end my life', 'end it all',
+      'about to', 'going to do it', 'tonight is the night', 
+      'made up my mind', 'have a plan', 'have the means', 'wrote a note',
+      'about to do it', 'wrote my goodbye', 'goodbye letters',
+      'i have made up my mind', 'i wrote a note'
+    ];
+    
+    // Medium severity indicators
+    const mediumSeverityKeywords = [
+      'want to die', 'wish i was dead', 'better off dead',
+      'self harm', 'self-harm', 'cutting', 'hurt myself', 'harm myself',
+      'not worth living', 'punish myself', 'punishing myself',
+      'nobody would miss me', 'cant take this anymore', "can't take this anymore"
+    ];
+    
+    // Check for immediate danger phrases (should always be high severity)
+    const hasImmediateDanger = highSeverityKeywords.some(keyword => 
+      lowerText.includes(keyword)
+    );
+    
+    if (hasImmediateDanger || detectedKeywords.length >= 3) {
       severity = 'high';
-    } else if (detectedKeywords.length >= 2) {
+    } else if (detectedKeywords.length >= 2 || 
+               detectedKeywords.some(k => mediumSeverityKeywords.includes(k))) {
       severity = 'medium';
     }
   }
   
-  // Reduce severity if past tense
-  if (isPastTense && severity === 'high') {
+  // Reduce severity if past tense or medical context
+  if ((isPastTense || isMedicalContext) && severity === 'high') {
     severity = 'medium';
-  } else if (isPastTense && severity === 'medium') {
+  } else if ((isPastTense || isMedicalContext) && severity === 'medium') {
     severity = 'low';
   }
   
@@ -89,7 +125,7 @@ export const detectCrisis = (text: string): CrisisDetectionResult => {
  * @param country - User's country (if known)
  * @returns Crisis helpline information
  */
-export const getCrisisResources = (country?: string) => {
+export const getCrisisResources = (country?: string | null) => {
   const resources = {
     US: {
       name: '988 Suicide & Crisis Lifeline',
@@ -123,5 +159,8 @@ export const getCrisisResources = (country?: string) => {
     }
   };
   
-  return resources[country as keyof typeof resources] || resources.DEFAULT;
+  // Handle null, undefined, empty string, and case-insensitive country codes
+  if (!country) return resources.DEFAULT;
+  const upperCountry = country.toUpperCase();
+  return resources[upperCountry as keyof typeof resources] || resources.DEFAULT;
 };

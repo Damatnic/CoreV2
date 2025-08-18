@@ -1,9 +1,5 @@
-import React from 'react';
-import { renderHook, act } from '../test-utils';
+import { renderHook, act } from '@testing-library/react';
 import { useInterval } from './useInterval';
-
-const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => 
-  React.createElement('div', {}, children);
 
 describe('useInterval Hook', () => {
   beforeEach(() => {
@@ -12,14 +8,16 @@ describe('useInterval Hook', () => {
   });
 
   afterEach(() => {
+    jest.runOnlyPendingTimers();
     jest.useRealTimers();
+    jest.clearAllMocks();
   });
 
   it('should not start interval when delay is null', () => {
     const mockCallback = jest.fn();
     const setIntervalSpy = jest.spyOn(global, 'setInterval');
     
-    renderHook(() => useInterval(mockCallback, null), { wrapper: Wrapper });
+    renderHook(() => useInterval(mockCallback, null));
     
     expect(setIntervalSpy).not.toHaveBeenCalled();
     expect(mockCallback).not.toHaveBeenCalled();
@@ -29,7 +27,7 @@ describe('useInterval Hook', () => {
     const mockCallback = jest.fn();
     const setIntervalSpy = jest.spyOn(global, 'setInterval');
     
-    renderHook(() => useInterval(mockCallback, 1000), { wrapper: Wrapper });
+    renderHook(() => useInterval(mockCallback, 1000));
     
     expect(setIntervalSpy).toHaveBeenCalledWith(expect.any(Function), 1000);
   });
@@ -37,7 +35,7 @@ describe('useInterval Hook', () => {
   it('should call callback at specified intervals', () => {
     const mockCallback = jest.fn();
     
-    renderHook(() => useInterval(mockCallback, 1000), { wrapper: Wrapper });
+    renderHook(() => useInterval(mockCallback, 1000));
     
     expect(mockCallback).not.toHaveBeenCalled();
     
@@ -68,9 +66,11 @@ describe('useInterval Hook', () => {
     const mockCallback2 = jest.fn();
     
     const { rerender } = renderHook(
-      ({ callback, delay }) => useInterval(callback, delay),
+      (props?: { callback: jest.Mock; delay: number }) => {
+        const { callback, delay } = props || { callback: mockCallback1, delay: 1000 };
+        return useInterval(callback, delay);
+      },
       {
-        wrapper: Wrapper,
         initialProps: { callback: mockCallback1, delay: 1000 }
       }
     );
@@ -100,9 +100,11 @@ describe('useInterval Hook', () => {
     const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
     
     const { rerender } = renderHook(
-      ({ delay }: { delay: number | null }) => useInterval(mockCallback, delay),
+      (props?: { delay: number | null }) => {
+        const delay = props?.delay ?? 1000;
+        return useInterval(mockCallback, delay);
+      },
       {
-        wrapper: Wrapper,
         initialProps: { delay: 1000 as number | null }
       }
     );
@@ -132,9 +134,11 @@ describe('useInterval Hook', () => {
     const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
     
     const { rerender } = renderHook(
-      ({ delay }) => useInterval(mockCallback, delay),
+      (props?: { delay: number }) => {
+        const delay = props?.delay ?? 1000;
+        return useInterval(mockCallback, delay);
+      },
       {
-        wrapper: Wrapper,
         initialProps: { delay: 1000 }
       }
     );
@@ -155,7 +159,7 @@ describe('useInterval Hook', () => {
     const mockCallback = jest.fn();
     const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
     
-    const { unmount } = renderHook(() => useInterval(mockCallback, 1000), { wrapper: Wrapper });
+    const { unmount } = renderHook(() => useInterval(mockCallback, 1000));
     
     unmount();
     
@@ -166,8 +170,8 @@ describe('useInterval Hook', () => {
     const mockCallback1 = jest.fn();
     const mockCallback2 = jest.fn();
     
-    renderHook(() => useInterval(mockCallback1, 500), { wrapper: Wrapper });
-    renderHook(() => useInterval(mockCallback2, 1000), { wrapper: Wrapper });
+    renderHook(() => useInterval(mockCallback1, 500));
+    renderHook(() => useInterval(mockCallback2, 1000));
     
     // Advance 500ms - only first callback should fire
     act(() => {
@@ -189,7 +193,7 @@ describe('useInterval Hook', () => {
   it('should work with zero delay', () => {
     const mockCallback = jest.fn();
     
-    renderHook(() => useInterval(mockCallback, 0), { wrapper: Wrapper });
+    renderHook(() => useInterval(mockCallback, 0));
     
     // With zero delay, callback should be called immediately and continuously
     act(() => {
@@ -206,7 +210,7 @@ describe('useInterval Hook', () => {
     
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
     
-    renderHook(() => useInterval(mockCallback, 1000), { wrapper: Wrapper });
+    renderHook(() => useInterval(mockCallback, 1000));
     
     // Should not throw when callback throws
     expect(() => {
@@ -224,12 +228,12 @@ describe('useInterval Hook', () => {
     const logs: string[] = [];
     
     const { rerender } = renderHook(
-      ({ message }) => {
+      (props?: { message: string }) => {
+        const message = props?.message ?? 'first';
         const callback = () => logs.push(message);
         useInterval(callback, 1000);
       },
       {
-        wrapper: Wrapper,
         initialProps: { message: 'first' }
       }
     );
@@ -260,9 +264,11 @@ describe('useInterval Hook', () => {
     const mockCallback = jest.fn();
     
     const { rerender } = renderHook(
-      ({ callback }: { callback: jest.Mock | null }) => useInterval(callback as (() => void), 1000),
+      (props?: { callback: jest.Mock | null }) => {
+        const callback = props?.callback ?? mockCallback;
+        return useInterval(callback as (() => void), 1000);
+      },
       {
-        wrapper: Wrapper,
         initialProps: { callback: mockCallback as jest.Mock | null }
       }
     );
@@ -282,7 +288,7 @@ describe('useInterval Hook', () => {
     const mockCallback = jest.fn();
     const largeDelay = Number.MAX_SAFE_INTEGER;
     
-    renderHook(() => useInterval(mockCallback, largeDelay), { wrapper: Wrapper });
+    renderHook(() => useInterval(mockCallback, largeDelay));
     
     // Even advancing by a large amount shouldn't trigger with MAX_SAFE_INTEGER delay
     act(() => {
@@ -296,12 +302,11 @@ describe('useInterval Hook', () => {
     let callCount = 0;
     
     const { rerender } = renderHook(
-      ({ id: _id }) => {
+      (_props?: { id: number }) => {
         const callback = () => { callCount += 1; };
         useInterval(callback, 100);
       },
       {
-        wrapper: Wrapper,
         initialProps: { id: 1 }
       }
     );

@@ -15,7 +15,12 @@ export function useInterval(callback: () => void, delay: number | null) {
     }
     if (delay !== null) {
       let id = setInterval(tick, delay);
-      return () => clearInterval(id);
+      return () => {
+        // Safely clear interval - check if clearInterval exists
+        if (typeof clearInterval !== 'undefined') {
+          clearInterval(id);
+        }
+      };
     }
   }, [delay]);
 }

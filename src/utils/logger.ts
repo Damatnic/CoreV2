@@ -14,11 +14,20 @@ interface LogEntry {
 }
 
 class Logger {
-  private isDevelopment = typeof process !== 'undefined' && process.env.NODE_ENV === 'test' 
-    ? false 
-    : (typeof (import.meta as any) !== 'undefined' && (import.meta as any).env?.DEV) || false;
   private logBuffer: LogEntry[] = [];
   private maxBufferSize = 100;
+
+  private get isDevelopment(): boolean {
+    // Check current NODE_ENV dynamically for testing
+    if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
+      return true;
+    }
+    if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
+      return false;
+    }
+    // Check Vite's import.meta.env
+    return (typeof (import.meta as any) !== 'undefined' && (import.meta as any).env?.DEV) || false;
+  }
 
   private shouldLog(level: LogLevel): boolean {
     // In production, only log warnings and errors

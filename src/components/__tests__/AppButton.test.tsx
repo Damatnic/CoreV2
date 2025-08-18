@@ -12,8 +12,9 @@ describe('AppButton', () => {
       const props = createMockButtonProps({ children: 'Test Button' });
       render(<AppButton {...props} />);
       
-      expect(screen.getByRole('button')).toBeInTheDocument();
-      expect(screen.getByText('Test Button')).toBeInTheDocument();
+      const button = screen.getByRole('button');
+      expect(button).toBeInTheDocument();
+      expect(button).toHaveTextContent('Test Button');
     });
 
     it('should render button with correct type attribute', () => {
@@ -35,7 +36,7 @@ describe('AppButton', () => {
       render(<AppButton {...props} />);
       
       expect(screen.getByTestId('test-icon')).toBeInTheDocument();
-      expect(screen.getByText('Search')).toBeInTheDocument();
+      expect(screen.getByRole('button')).toHaveTextContent('Search');
     });
 
     it('should render icon-only button correctly', () => {
@@ -77,15 +78,15 @@ describe('AppButton', () => {
         
         const button = screen.getByRole('button');
         // Check for glass-button base class for enhanced mode
-        if (variant === 'glass' || variant === 'neumorph' || variant === 'crisis') {
-          expect(button).toHaveClass(variant === 'glass' ? 'glass-button' : 
-                                     variant === 'neumorph' ? 'neumorph-button' : 
-                                     'crisis-button');
-        } else {
-          expect(button).toHaveClass('glass-button');
-          if (variant !== 'ghost') {
-            expect(button).toHaveClass(`btn-${variant}-therapeutic`);
-          }
+        // All enhanced variants use glass-button as base
+        expect(button).toHaveClass('glass-button');
+        
+        // Check for variant-specific therapeutic classes
+        if (variant === 'primary' || variant === 'secondary' || variant === 'success' || variant === 'danger') {
+          expect(button).toHaveClass(`btn-${variant}-therapeutic`);
+        } else if (variant === 'ghost') {
+          // Ghost variant just gets passed through as is
+          expect(button).toHaveClass('ghost');
         }
       });
 
@@ -448,10 +449,12 @@ describe('AppButton', () => {
       
       // Rapidly change loading state
       rerender(<AppButton {...props} isLoading={true} />);
-      expect(document.querySelector('.loading-dots')).toBeInTheDocument();
+      const loadingDots = document.querySelector('.loading-dots');
+      expect(loadingDots).toBeInTheDocument();
       
       rerender(<AppButton {...props} isLoading={false} />);
-      expect(document.querySelector('.loading-dots')).not.toBeInTheDocument();
+      const noLoadingDots = document.querySelector('.loading-dots');
+      expect(noLoadingDots).not.toBeInTheDocument();
       
       rerender(<AppButton {...props} disabled={true} />);
       expect(screen.getByRole('button')).toBeDisabled();

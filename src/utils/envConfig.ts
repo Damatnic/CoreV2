@@ -67,11 +67,19 @@ export function isProd(): boolean {
 
 // Initialize the global env object for Vite runtime
 if (typeof window !== 'undefined' && !window.__VITE_ENV__) {
+  // Safe assignment for both Vite and Jest environments
+  // Check if we're in a Vite environment (import.meta is available)
   try {
     // @ts-ignore - This will only work in Vite environment
-    window.__VITE_ENV__ = import.meta.env;
-  } catch (e) {
-    // Not in Vite environment
+    const importMeta = (globalThis as any).import?.meta;
+    if (importMeta?.env && typeof importMeta.env === 'object') {
+      // @ts-ignore - This will only work in Vite environment
+      window.__VITE_ENV__ = importMeta.env;
+    } else {
+      window.__VITE_ENV__ = {};
+    }
+  } catch {
+    // Not in Vite environment (Jest, Node, etc.)
     window.__VITE_ENV__ = {};
   }
 }

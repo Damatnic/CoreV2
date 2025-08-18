@@ -1,5 +1,7 @@
 import '@testing-library/jest-dom';
 
+// Note: DOM element mocking is now handled in jest-env-setup.js to avoid conflicts
+
 // Extend Jest matchers with @testing-library/jest-dom
 declare global {
   namespace jest {
@@ -246,32 +248,7 @@ if (typeof MutationObserver === 'undefined') {
   };
 }
 
-// Import cleanup at the top level to avoid nested hook issues
-const { cleanup } = require('@testing-library/react');
-
-// Ensure document.body exists and has a container for React Testing Library
-if (typeof document !== 'undefined') {
-  // Clear and set up document body for each test
-  beforeEach(() => {
-    // Create a root container for React Testing Library
-    document.body.innerHTML = '';
-    const root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-    
-    // Also create a container div that RTL can use
-    const container = document.createElement('div');
-    container.setAttribute('data-testid', 'rtl-container');
-    document.body.appendChild(container);
-  });
-  
-  afterEach(() => {
-    // Clean up the DOM after each test
-    document.body.innerHTML = '';
-    // Also clean up any React roots
-    cleanup();
-  });
-}
+// Note: DOM setup is now consolidated in src/setupTests.ts to avoid conflicts
 
 // Mock Web APIs for testing
 global.Response = global.Response || class MockResponse {

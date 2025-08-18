@@ -1130,11 +1130,21 @@ describe('tetherStore', () => {
       expect(state.activeTether?.connectionStrength).toBe(100);
 
       act(() => {
-        useTetherStore.getState().updateConnectionStrength(Number.MIN_VALUE);
+        // Use a negative number to test the minimum clamping
+        useTetherStore.getState().updateConnectionStrength(-100);
       });
 
       state = useTetherStore.getState();
       expect(state.activeTether?.connectionStrength).toBe(0);
+
+      // Also test Number.MIN_VALUE (smallest positive number)
+      act(() => {
+        useTetherStore.getState().updateConnectionStrength(Number.MIN_VALUE);
+      });
+
+      state = useTetherStore.getState();
+      // Number.MIN_VALUE is a very small positive number, so it stays as is (within 0-100 range)
+      expect(state.activeTether?.connectionStrength).toBeCloseTo(Number.MIN_VALUE);
     });
 
     test('should handle missing session token gracefully', async () => {

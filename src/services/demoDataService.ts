@@ -297,6 +297,7 @@ export class DemoDataService {
                 helperDisplayName: 'Luna ✨',
                 startedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
                 isFavorited: false,
+                kudosGiven: false,
                 summary: "Ongoing session - relationship anxiety support"
             }
         ];
@@ -350,25 +351,37 @@ export class DemoDataService {
         return [
             {
                 id: 'mod-001',
+                type: 'content_removal',
+                targetId: 'dilemma-removed-001',
+                moderatorId: 'admin-001',
                 userId: 'user-flagged-001',
                 action: 'Post Removed',
                 reason: 'Inappropriate content - sharing personal contact information',
                 timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+                status: 'completed',
                 relatedContentId: 'dilemma-removed-001'
             },
             {
                 id: 'mod-002',
+                type: 'user_warning',
+                targetId: 'user-warned-001',
+                moderatorId: 'admin-001',
                 userId: 'user-warned-001',
                 action: 'Warning Issued',
                 reason: 'Multiple reports for aggressive language in chat sessions',
-                timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()
+                timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+                status: 'completed'
             },
             {
                 id: 'mod-003',
+                type: 'helper_suspension',
+                targetId: 'helper-suspended-001',
+                moderatorId: 'admin-001',
                 userId: 'helper-suspended-001',
                 action: 'Helper Suspended',
                 reason: 'Violation of helper guidelines - providing medical advice beyond scope',
-                timestamp: new Date(Date.now() - 18 * 60 * 60 * 1000).toISOString()
+                timestamp: new Date(Date.now() - 18 * 60 * 60 * 1000).toISOString(),
+                status: 'active'
             }
         ];
     }
@@ -387,7 +400,8 @@ export class DemoDataService {
         return {
             id: 'admin-001',
             name: 'Dr. Michael Torres',
-            role: 'Astral Admin',
+            displayName: 'Dr. Michael Torres',
+            role: 'Admin',
             department: 'Platform Operations & Safety',
             clearanceLevel: 'Executive',
             yearsWithPlatform: 3,
@@ -646,6 +660,9 @@ export class DemoDataService {
     // AI Chat Demo Scenarios
     getAIChatDemoSession(): AIChatSession {
         return {
+            id: 'ai-session-001',
+            startedAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+            status: 'active',
             messages: [
                 {
                     id: 'ai-msg-001',
@@ -1168,15 +1185,34 @@ export class DemoDataService {
 
     // Get demo data for current user
     getDemoData(userType: 'user' | 'helper' | 'admin'): any {
-        const stored = localStorage.getItem(`demo_data_${userType}`);
-        if (stored) {
-            return JSON.parse(stored);
+        try {
+            const stored = localStorage.getItem(`demo_data_${userType}`);
+            if (stored) {
+                try {
+                    return JSON.parse(stored);
+                } catch (parseError) {
+                    // If stored data is malformed, regenerate it
+                    console.warn('Malformed demo data found, regenerating...');
+                }
+            }
+        } catch (storageError) {
+            // If localStorage is not available or throws an error
+            console.warn('localStorage error, generating fresh demo data');
         }
         
-        // Initialize if not found
-        const userToken = localStorage.getItem('demo_user') ? 
-            JSON.parse(localStorage.getItem('demo_user')!).sub : 
-            'demo-token-' + Date.now();
+        // Initialize if not found or on error
+        let userToken = 'demo-token-' + Date.now();
+        try {
+            const demoUser = localStorage.getItem('demo_user');
+            if (demoUser) {
+                const parsed = JSON.parse(demoUser);
+                if (parsed && parsed.sub) {
+                    userToken = parsed.sub;
+                }
+            }
+        } catch (e) {
+            // Use default token if parsing fails
+        }
             
         return this.initializeDemoData(userType, userToken);
     }

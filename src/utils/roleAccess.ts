@@ -190,7 +190,14 @@ export const ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
 
 // Helper functions for role-based access control
 export const getRolePermissions = (role: UserRole): RolePermissions => {
-  return ROLE_PERMISSIONS[role];
+  // Return a deep clone to ensure immutability
+  const permissions = ROLE_PERMISSIONS[role];
+  return {
+    ...permissions,
+    allowedViews: [...permissions.allowedViews],
+    deniedViews: [...permissions.deniedViews],
+    features: { ...permissions.features }
+  };
 };
 
 export const canAccessView = (userRole: UserRole | undefined, view: View): boolean => {
@@ -214,7 +221,7 @@ export const isViewDenied = (userRole: UserRole | undefined, view: View): boolea
 };
 
 export const getUserRole = (helper: Helper | null): UserRole => {
-  if (!helper) {
+  if (!helper || !helper.role) {
     return 'Starkeeper';
   }
   

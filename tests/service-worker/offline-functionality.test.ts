@@ -4,12 +4,12 @@
  */
 
 describe('Offline Functionality', () => {
-  let mockCaches: jest.Mocked<CacheStorage>;
-  let mockCache: jest.Mocked<Cache>;
+  let mockCaches: any;
+  let mockCache: any;
   let originalOnLine: boolean;
 
   beforeEach(() => {
-    mockCaches = global.caches as jest.Mocked<CacheStorage>;
+    // Create mock cache object
     mockCache = {
       match: jest.fn(),
       matchAll: jest.fn(),
@@ -18,9 +18,20 @@ describe('Offline Functionality', () => {
       put: jest.fn(),
       delete: jest.fn(),
       keys: jest.fn()
-    } as jest.Mocked<Cache>;
+    };
 
-    mockCaches.open.mockResolvedValue(mockCache);
+    // Create mock caches object
+    mockCaches = {
+      open: jest.fn().mockResolvedValue(mockCache),
+      has: jest.fn().mockResolvedValue(false),
+      delete: jest.fn().mockResolvedValue(true),
+      keys: jest.fn().mockResolvedValue([]),
+      match: jest.fn()
+    };
+    
+    // Set global caches
+    (global as any).caches = mockCaches;
+    
     jest.clearAllMocks();
 
     // Store original online state
@@ -343,19 +354,7 @@ describe('Offline Functionality', () => {
         }
       };
 
-      // Mock localStorage
-      const localStorageMock = {
-        getItem: jest.fn(),
-        setItem: jest.fn(),
-        removeItem: jest.fn(),
-        clear: jest.fn()
-      };
-
-      Object.defineProperty(window, 'localStorage', {
-        value: localStorageMock,
-        writable: true
-      });
-
+      // localStorage is already mocked globally in setupTests.ts
       localStorage.setItem('astral-critical-data', JSON.stringify(criticalData));
 
       expect(localStorage.setItem).toHaveBeenCalledWith(
@@ -372,17 +371,8 @@ describe('Offline Functionality', () => {
         ]
       };
 
-      const localStorageMock = {
-        getItem: jest.fn().mockReturnValue(JSON.stringify(cachedData)),
-        setItem: jest.fn(),
-        removeItem: jest.fn(),
-        clear: jest.fn()
-      };
-
-      Object.defineProperty(window, 'localStorage', {
-        value: localStorageMock,
-        writable: true
-      });
+      // localStorage is already mocked globally in setupTests.ts
+      (localStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify(cachedData));
 
       const retrieved = localStorage.getItem('astral-cached-data');
       const data = JSON.parse(retrieved!);

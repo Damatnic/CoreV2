@@ -46,19 +46,32 @@ class EnhancedCrisisDetectionService {
     { keyword: 'killing myself', severity: 'critical', context: ['tonight', 'today', 'now', 'ready'], category: 'suicidal', immediateAction: true },
     { keyword: 'end my life', severity: 'critical', context: ['tonight', 'today', 'now', 'planning'], category: 'suicidal', immediateAction: true },
     { keyword: 'suicide plan', severity: 'critical', context: ['have', 'made', 'ready', 'tonight'], category: 'suicidal', immediateAction: true },
+    { keyword: 'have a plan', severity: 'critical', context: ['kill', 'suicide', 'die', 'end'], category: 'suicidal', immediateAction: true },
     { keyword: 'take my own life', severity: 'critical', context: ['going to', 'want to', 'ready to'], category: 'suicidal', immediateAction: true },
-    { keyword: 'better off dead', severity: 'critical', context: ['everyone', 'world', 'family'], category: 'suicidal', immediateAction: true },
+    { keyword: 'use it on myself', severity: 'critical', context: ['gun', 'knife', 'going to'], category: 'suicidal', immediateAction: true },
+    { keyword: 'have a gun', severity: 'critical', context: ['use', 'myself', 'end'], category: 'suicidal', immediateAction: true },
+    { keyword: 'gun and', severity: 'critical', context: ['myself', 'use it', 'going to'], category: 'suicidal', immediateAction: true },
+    { keyword: 'better off dead', severity: 'high', context: [], category: 'suicidal', immediateAction: false },
     
     // High-risk suicidal ideation
-    { keyword: 'want to die', severity: 'high', context: ['really', 'so badly', 'just'], category: 'suicidal', immediateAction: false },
-    { keyword: 'suicidal thoughts', severity: 'high', context: ['having', 'constant', 'overwhelming'], category: 'suicidal', immediateAction: false },
+    { keyword: 'wants to die', severity: 'high', context: [], category: 'suicidal', immediateAction: false },
+    { keyword: 'want to die', severity: 'high', context: [], category: 'suicidal', immediateAction: false },
+    { keyword: 'suicidal thoughts', severity: 'high', context: [], category: 'suicidal', immediateAction: false },
+    { keyword: 'thoughts about dying', severity: 'high', context: ['constant', 'having', 'been having'], category: 'suicidal', immediateAction: false },
+    { keyword: 'thinking about dying', severity: 'high', context: [], category: 'suicidal', immediateAction: false },
     { keyword: 'kill myself', severity: 'high', context: ['want to', 'thinking about', 'might'], category: 'suicidal', immediateAction: false },
     { keyword: 'end it all', severity: 'high', context: ['want to', 'thinking about', 'need to'], category: 'suicidal', immediateAction: false },
+    { keyword: 'ending it all', severity: 'high', context: ['think about', 'thinking about', 'sometimes'], category: 'suicidal', immediateAction: false },
+    { keyword: 'want to end it all', severity: 'high', context: [], category: 'suicidal', immediateAction: false },
+    { keyword: 'end it', severity: 'high', context: ['want to', 'need to', 'going to'], category: 'suicidal', immediateAction: false },
     
     // Self-harm indicators
     { keyword: 'cutting myself', severity: 'high', context: ['started', 'been', 'tonight'], category: 'self-harm', immediateAction: true },
+    { keyword: 'cut myself', severity: 'high', context: ['started', 'been', 'yesterday', 'today'], category: 'self-harm', immediateAction: true },
     { keyword: 'hurting myself', severity: 'medium', context: ['been', 'started', 'want to'], category: 'self-harm', immediateAction: false },
+    { keyword: 'hurt myself', severity: 'medium', context: ['been', 'started', 'want to'], category: 'self-harm', immediateAction: false },
     { keyword: 'self harm', severity: 'medium', context: ['urges', 'thoughts', 'relapse'], category: 'self-harm', immediateAction: false },
+    { keyword: 'self-harm', severity: 'medium', context: ['urges', 'thoughts', 'relapse'], category: 'self-harm', immediateAction: false },
     
     // Violence indicators
     { keyword: 'hurt someone', severity: 'critical', context: ['going to', 'want to', 'planning'], category: 'violence', immediateAction: true },
@@ -66,18 +79,33 @@ class EnhancedCrisisDetectionService {
     
     // Emergency situations
     { keyword: 'overdose', severity: 'critical', context: ['took', 'taking', 'just'], category: 'emergency', immediateAction: true },
-    { keyword: 'pills', severity: 'high', context: ['took all', 'whole bottle', 'too many'], category: 'emergency', immediateAction: true },
+    { keyword: 'pills', severity: 'critical', context: ['took all', 'whole bottle', 'too many', 'bottle of'], category: 'emergency', immediateAction: true },
+    { keyword: 'bottle of pills', severity: 'critical', context: ['took', 'just took', 'swallowed'], category: 'emergency', immediateAction: true },
+    { keyword: 'took a bottle', severity: 'critical', context: [], category: 'emergency', immediateAction: true },
     { keyword: 'bleeding', severity: 'high', context: ['wont stop', 'too much', 'heavily'], category: 'emergency', immediateAction: true },
     
     // Substance abuse
     { keyword: 'overdosing', severity: 'critical', context: ['think', 'might be', 'am'], category: 'substance-abuse', immediateAction: true },
     { keyword: 'drinking to die', severity: 'critical', context: ['hoping', 'trying', 'want'], category: 'substance-abuse', immediateAction: true },
     { keyword: 'using to escape', severity: 'medium', context: ['pain', 'everything', 'life'], category: 'substance-abuse', immediateAction: false },
+    { keyword: 'drinking heavily', severity: 'medium', context: ['cope', 'deal', 'escape'], category: 'substance-abuse', immediateAction: false },
+    { keyword: 'drinking', severity: 'low', context: ['heavily', 'to cope', 'too much'], category: 'substance-abuse', immediateAction: false },
     
     // General severe distress
     { keyword: 'cant take it anymore', severity: 'high', context: ['just', 'really', 'literally'], category: 'general-distress', immediateAction: false },
+    { keyword: 'cant take it', severity: 'high', context: [], category: 'general-distress', immediateAction: false },
     { keyword: 'giving up', severity: 'medium', context: ['completely', 'totally', 'just'], category: 'general-distress', immediateAction: false },
-    { keyword: 'hopeless', severity: 'medium', context: ['completely', 'totally', 'feeling so'], category: 'general-distress', immediateAction: false }
+    { keyword: 'hopeless', severity: 'medium', context: ['completely', 'totally', 'feeling so'], category: 'general-distress', immediateAction: false },
+    { keyword: 'life isnt worth living', severity: 'high', context: [], category: 'general-distress', immediateAction: false },
+    { keyword: 'no point in going on', severity: 'high', context: [], category: 'general-distress', immediateAction: false },
+    { keyword: 'cant breathe', severity: 'medium', context: ['panic', 'heart racing', 'dying'], category: 'general-distress', immediateAction: false },
+    { keyword: 'going to die', severity: 'medium', context: ['think', 'feel like', 'heart'], category: 'general-distress', immediateAction: false },
+    { keyword: 'panic', severity: 'medium', context: ['attack', 'cant breathe', 'dying'], category: 'general-distress', immediateAction: false },
+    { keyword: 'heart is racing', severity: 'low', context: ['panic', 'scared', 'dying'], category: 'general-distress', immediateAction: false },
+    { keyword: 'I think Im going to die', severity: 'medium', context: [], category: 'general-distress', immediateAction: false },
+    { keyword: 'feel suicidal', severity: 'high', context: [], category: 'suicidal', immediateAction: false },
+    { keyword: 'help urgently', severity: 'medium', context: [], category: 'general-distress', immediateAction: false },
+    { keyword: 'need help', severity: 'low', context: ['urgently', 'now', 'please'], category: 'general-distress', immediateAction: false }
   ];
 
   // Context modifiers that increase urgency
@@ -95,7 +123,8 @@ class EnhancedCrisisDetectionService {
     social_connection: ['friends', 'loved ones', 'support', 'community', 'church', 'group', 'team'],
     coping_strategies: ['meditation', 'exercise', 'music', 'art', 'writing', 'breathing', 'walk', 'cope'],
     reasons_for_living: ['meaning', 'purpose', 'belief', 'faith', 'values', 'important to me'],
-    help_seeking: ['want help', 'need support', 'reaching out', 'asking for help', 'want to get better']
+    help_seeking: ['want help', 'need support', 'reaching out', 'asking for help', 'want to get better'],
+    past_recovery: ['not anymore', 'used to', 'in the past', 'got better', 'recovered', 'past that', 'years ago', 'long ago', 'overcome', 'therapy helped', 'helped me']
   };
 
   /**
@@ -162,9 +191,38 @@ class EnhancedCrisisDetectionService {
     const identifiedProtectiveFactors = this.identifyProtectiveFactors(normalizedText);
 
     // Adjust severity based on context
-    if (urgencyLevel > 3 && maxSeverity !== 'none') {
-      maxSeverity = this.escalateSeverity(maxSeverity);
+    // Set escalation if high urgency, but only escalate severity for very high urgency
+    if (urgencyLevel > 4 && maxSeverity !== 'none') {
       escalationRequired = true;
+      if (urgencyLevel > 7) {
+        maxSeverity = this.escalateSeverity(maxSeverity);
+      }
+    }
+    
+    // Check if this is a past recovery story - should not flag as crisis
+    if (identifiedProtectiveFactors.includes('past_recovery')) {
+      // Past recovery stories should not trigger crisis unless there's new immediate danger
+      const hasImmediateDanger = triggeredKeywords.some(k => k.immediateAction || k.severity === 'critical');
+      if (!hasImmediateDanger) {
+        // Clear crisis indicators for past recovery stories
+        return {
+          hasCrisisIndicators: false,
+          severityLevel: 'none',
+          detectedCategories: [],
+          confidence: 0,
+          recommendedActions: [],
+          escalationRequired: false,
+          emergencyServices: false,
+          riskFactors: [],
+          protectiveFactors: identifiedProtectiveFactors,
+          analysisDetails: {
+            triggeredKeywords: [],
+            sentimentScore,
+            contextualFactors,
+            urgencyLevel: 0
+          }
+        };
+      }
     }
     
     // Apply protective factors to reduce severity (if not emergency)
@@ -233,8 +291,37 @@ class EnhancedCrisisDetectionService {
    * Check if text matches a crisis indicator with context awareness
    */
   private matchesIndicator(text: string, indicator: CrisisIndicator): boolean {
-    // Check for exact keyword match
-    if (!text.includes(indicator.keyword)) {
+    // Handle special characters and variations in the keyword
+    const normalizedKeyword = indicator.keyword.replace(/[!.,;?]/g, '').toLowerCase();
+    const normalizedText = text.replace(/[!.,;?#]/g, '').toLowerCase();
+    
+    // Check for keyword match (handle k!ll -> kill type variations)
+    const keywordVariations = [
+      normalizedKeyword,
+      normalizedKeyword.replace(/!/g, 'i'),
+      normalizedKeyword.replace(/0/g, 'o'),
+      normalizedKeyword.replace(/1/g, 'i'),
+      normalizedKeyword.replace(/3/g, 'e'),
+      normalizedKeyword.replace(/[@]/g, 'a')
+    ];
+    
+    // Also check for common misspellings
+    if (normalizedKeyword.includes('kill')) {
+      keywordVariations.push(normalizedKeyword.replace('kill', 'kll'));
+    }
+    
+    let keywordFound = false;
+    let keywordIndex = -1;
+    
+    for (const variation of keywordVariations) {
+      if (normalizedText.includes(variation)) {
+        keywordFound = true;
+        keywordIndex = normalizedText.indexOf(variation);
+        break;
+      }
+    }
+    
+    if (!keywordFound) {
       return false;
     }
 
@@ -244,10 +331,9 @@ class EnhancedCrisisDetectionService {
     }
 
     // Check if any context words appear near the keyword
-    const keywordIndex = text.indexOf(indicator.keyword);
-    const surroundingText = text.substring(
+    const surroundingText = normalizedText.substring(
       Math.max(0, keywordIndex - 50),
-      Math.min(text.length, keywordIndex + indicator.keyword.length + 50)
+      Math.min(normalizedText.length, keywordIndex + normalizedKeyword.length + 50)
     );
 
     return indicator.context.some(context => surroundingText.includes(context));
@@ -360,6 +446,24 @@ class EnhancedCrisisDetectionService {
     const factors: string[] = [];
     const normalizedText = text.toLowerCase();
     
+    // Check for past tense recovery FIRST - this should negate crisis indicators
+    const pastTensePatterns = [
+      /used to (have|feel|think about) suicidal/,
+      /had suicidal thoughts (years|long) ago/,
+      /(overcame|overcome|recovered from) (suicidal|self-harm|depression)/,
+      /no longer (suicidal|want to die|feel)/,
+      /therapy helped me (overcome|get through|recover)/
+    ];
+    
+    for (const pattern of pastTensePatterns) {
+      if (pattern.test(normalizedText)) {
+        if (!factors.includes('past_recovery')) {
+          factors.push('past_recovery');
+        }
+        break;
+      }
+    }
+    
     // Check each protective factor category
     for (const [factorName, keywords] of Object.entries(this.protectiveFactorsList)) {
       for (const keyword of keywords) {
@@ -369,6 +473,13 @@ class EnhancedCrisisDetectionService {
           }
           break; // Move to next factor category once one keyword is found
         }
+      }
+    }
+    
+    // Special check for ambivalence with 'would never actually' pattern
+    if (/would\s+never\s+actually|never\s+actually/.test(normalizedText)) {
+      if (!factors.includes('ambivalence')) {
+        factors.push('ambivalence');
       }
     }
     
@@ -390,7 +501,8 @@ class EnhancedCrisisDetectionService {
       future_orientation: 0.10,    // Having future plans
       coping_strategies: 0.10,     // Having ways to cope
       reasons_for_living: 0.15,    // Having meaning/purpose
-      ambivalence: 0.10           // Uncertainty about harming self
+      ambivalence: 0.10,          // Uncertainty about harming self
+      past_recovery: 0.75         // Past tense strongly indicates recovery - should mostly negate current crisis
     };
     
     let totalScore = 0;

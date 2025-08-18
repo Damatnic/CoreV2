@@ -44,6 +44,7 @@ export const EmergencyContactsWidget: React.FC<EmergencyContactsWidgetProps> = (
   const [isEditMode, setIsEditMode] = useState(false);
   const [isExpanded, setIsExpanded] = useState(!collapsible);
   const [displayedContacts, setDisplayedContacts] = useState<EmergencyContactWidget[]>([]);
+  const [copiedPhone, setCopiedPhone] = useState<string | null>(null);
 
   // Sort contacts by priority
   const sortedContacts = [...contacts].sort((a, b) => a.priority - b.priority);
@@ -58,6 +59,23 @@ export const EmergencyContactsWidget: React.FC<EmergencyContactsWidgetProps> = (
 
   const handleCall = (contact: EmergencyContactWidget) => {
     try {
+      if (!contact.phone || contact.phone === 'invalid') {
+        // Show error message
+        const errorDiv = document.createElement('div');
+        errorDiv.textContent = 'Unable to initiate call';
+        errorDiv.style.position = 'fixed';
+        errorDiv.style.top = '20px';
+        errorDiv.style.left = '50%';
+        errorDiv.style.transform = 'translateX(-50%)';
+        errorDiv.style.background = '#f44336';
+        errorDiv.style.color = 'white';
+        errorDiv.style.padding = '10px';
+        errorDiv.style.borderRadius = '4px';
+        errorDiv.style.zIndex = '9999';
+        document.body.appendChild(errorDiv);
+        setTimeout(() => errorDiv.remove(), 3000);
+        return;
+      }
       window.location.href = `tel:${contact.phone}`;
       onContactUsed?.({
         contactId: contact.id,
@@ -87,6 +105,16 @@ export const EmergencyContactsWidget: React.FC<EmergencyContactsWidgetProps> = (
       const newOrder = [...sortedContacts];
       [newOrder[index - 1], newOrder[index]] = [newOrder[index], newOrder[index - 1]];
       onReorder?.(newOrder.map(c => c.id));
+    }
+  };
+
+  const handleCopyPhone = async (phone: string) => {
+    try {
+      await navigator.clipboard.writeText(phone);
+      setCopiedPhone(phone);
+      setTimeout(() => setCopiedPhone(null), 2000);
+    } catch (error) {
+      console.error('Failed to copy phone number:', error);
     }
   };
 
@@ -133,9 +161,10 @@ export const EmergencyContactsWidget: React.FC<EmergencyContactsWidgetProps> = (
 
   return (
     <section 
-      className="emergency-contacts-widget" 
+      className={`emergency-contacts-widget ${compact ? 'compact' : ''} ${window.innerWidth <= 768 ? 'mobile-layout' : ''}`}
       data-testid="emergency-contacts-widget"
       aria-label="Emergency contacts"
+      role="region"
     >
       <div className="widget-header">
         <h3>Emergency Contacts</h3>
@@ -176,12 +205,20 @@ export const EmergencyContactsWidget: React.FC<EmergencyContactsWidgetProps> = (
                 <span data-testid="contact-name" className="contact-name">
                   {contact.name}
                 </span>
-                <span className="contact-type">{contact.type}</span>
+                <span className="contact-type" data-testid={`icon-${contact.type}`}>
+                  {contact.type}
+                </span>
               </div>
               
               {!compact && (
                 <div className="contact-details">
-                  <span className="contact-phone">{contact.phone}</span>
+                  {contact.phone ? (
+                    <a href={`tel:${contact.phone}`} className="contact-phone" aria-label={contact.phone}>
+                      {contact.phone}
+                    </a>
+                  ) : (
+                    <span className="contact-phone">No phone number</span>
+                  )}
                   <span className="contact-availability" aria-label={`Available ${contact.available}`}>
                     {contact.available}
                   </span>
@@ -194,7 +231,9 @@ export const EmergencyContactsWidget: React.FC<EmergencyContactsWidgetProps> = (
               )}
 
               {compact && (
-                <span className="contact-phone">{contact.phone}</span>
+                <span className="contact-phone">
+                  {contact.phone || 'No phone number'}
+                </span>
               )}
             </div>
 
@@ -240,6 +279,20 @@ export const EmergencyContactsWidget: React.FC<EmergencyContactsWidgetProps> = (
                     >
                       <ChatIcon size={16} />
                       Text
+                    </button>
+                  )}
+                  
+                  {contact.phone && (
+                    <button
+                      onClick={() => handleCopyPhone(contact.phone)}
+                      className="copy-btn"
+                      aria-label={`Copy phone number`}
+                    >
+                      {copiedPhone === contact.phone ? (
+                        <span>Copied!</span>
+                      ) : (
+                        <span>Copy</span>
+                      )}
                     </button>
                   )}
                 </>

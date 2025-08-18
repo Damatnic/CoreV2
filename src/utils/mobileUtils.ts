@@ -51,13 +51,20 @@ export const enhanceMobileFocus = () => {
   const inputs = document.querySelectorAll('input, textarea');
   
   inputs.forEach(input => {
+    // Type guard to ensure it's an HTML element with addEventListener
+    if (!(input instanceof HTMLElement) || typeof input.addEventListener !== 'function') {
+      return;
+    }
+    
     // Prevent zoom on iOS by ensuring 16px font size
     if (window.navigator.userAgent.includes('iPhone') || window.navigator.userAgent.includes('iPad')) {
       const computedStyle = window.getComputedStyle(input);
-      const fontSize = parseFloat(computedStyle.fontSize);
-      
-      if (fontSize < 16) {
-        (input as HTMLElement).style.fontSize = '16px';
+      if (computedStyle && computedStyle.fontSize) {
+        const fontSize = parseFloat(computedStyle.fontSize);
+        
+        if (fontSize < 16 && input.style) {
+          input.style.fontSize = '16px';
+        }
       }
     }
 
@@ -89,22 +96,34 @@ export const enhanceMobileFocus = () => {
  * Detect mobile device
  */
 export const isMobileDevice = (): boolean => {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-         window.innerWidth <= 768 ||
-         'ontouchstart' in window;
+  const userAgent = window.navigator.userAgent;
+  const hasMobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+  const hasSmallScreen = window.innerWidth <= 768;
+  const hasTouchSupport = 'ontouchstart' in window;
+  
+  // If it's a desktop user agent with large screen, it's not mobile even if touch is supported
+  if (!hasMobileUserAgent && window.innerWidth > 768) {
+    return false;
+  }
+  
+  return hasMobileUserAgent || hasSmallScreen || hasTouchSupport;
 };
 
 /**
  * Detect if virtual keyboard is open
  */
 export const isVirtualKeyboardOpen = (): boolean => {
-  if (window.visualViewport) {
+  if (window.visualViewport && typeof window.visualViewport.height === 'number') {
     return window.visualViewport.height < window.innerHeight * 0.8;
   }
   
   // Fallback detection
-  const heightDifference = window.screen.height - window.innerHeight;
-  return heightDifference > 150;
+  if (window.screen && typeof window.screen.height === 'number') {
+    const heightDifference = window.screen.height - window.innerHeight;
+    return heightDifference > 150;
+  }
+  
+  return false;
 };
 
 /**
@@ -141,7 +160,10 @@ export const addTouchFeedback = (element: HTMLElement) => {
  * Initialize all mobile enhancements
  */
 export const initMobileEnhancements = () => {
-  if (!isMobileDevice()) return;
+  // Always return a cleanup function, even for non-mobile devices
+  if (!isMobileDevice()) {
+    return () => {}; // No-op cleanup function
+  }
 
   // Initialize viewport height handling
   const cleanupViewport = initMobileViewport();

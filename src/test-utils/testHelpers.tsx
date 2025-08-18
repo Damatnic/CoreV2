@@ -67,7 +67,7 @@ export const nextTick = async () => {
  * Helper to simulate user interaction with proper act() wrapping
  */
 export const simulateUserAction = async (
-  element: HTMLElement,
+  _element: HTMLElement,
   action: () => void
 ) => {
   await act(async () => {
@@ -89,7 +89,7 @@ export const waitForComponentReady = async (timeout = 1000) => {
 /**
  * Helper to handle async state updates in hooks
  */
-export const updateHookState = async <T>(
+export const updateHookState = async <T,>(
   hookResult: { current: T },
   updater: (current: T) => void | Promise<void>
 ) => {
@@ -102,7 +102,7 @@ export const updateHookState = async <T>(
 /**
  * Helper to mock and wait for API calls
  */
-export const mockApiCall = async <T>(
+export const mockApiCall = async <T,>(
   mockFn: jest.Mock,
   returnValue: T,
   delay = 0

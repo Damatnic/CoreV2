@@ -129,35 +129,45 @@ export const BreathingExerciseOverlay: React.FC<BreathingExerciseOverlayProps> =
             setPhase('pause');
             setSeconds(pattern.pause);
           } else {
-            setPhase('inhale');
-            setSeconds(pattern.inhale);
+            // Complete a cycle
             const newCycles = cycles + 1;
             setCycles(newCycles);
             
             // Check if we've completed the target cycles
-            if (newCycles >= defaultCycles && onComplete) {
+            if (newCycles >= defaultCycles) {
+              setIsActive(false);
+              if (onComplete) {
+                onComplete({ 
+                  duration: newCycles * (pattern.inhale + pattern.hold + pattern.exhale + pattern.pause), 
+                  cycles: newCycles, 
+                  exercise: customExercise?.name || technique 
+                });
+              }
+            } else {
+              setPhase('inhale');
+              setSeconds(pattern.inhale);
+            }
+          }
+          break;
+        }
+        case 'pause': {
+          // Complete a cycle
+          const newCycles = cycles + 1;
+          setCycles(newCycles);
+          
+          // Check if we've completed the target cycles
+          if (newCycles >= defaultCycles) {
+            setIsActive(false);
+            if (onComplete) {
               onComplete({ 
                 duration: newCycles * (pattern.inhale + pattern.hold + pattern.exhale + pattern.pause), 
                 cycles: newCycles, 
                 exercise: customExercise?.name || technique 
               });
             }
-          }
-          break;
-        }
-        case 'pause': {
-          setPhase('inhale');
-          setSeconds(pattern.inhale);
-          const newCycles = cycles + 1;
-          setCycles(newCycles);
-          
-          // Check if we've completed the target cycles
-          if (newCycles >= defaultCycles && onComplete) {
-            onComplete({ 
-              duration: newCycles * (pattern.inhale + pattern.hold + pattern.exhale + pattern.pause), 
-              cycles: newCycles, 
-              exercise: customExercise?.name || technique 
-            });
+          } else {
+            setPhase('inhale');
+            setSeconds(pattern.inhale);
           }
           break;
         }
@@ -165,7 +175,7 @@ export const BreathingExerciseOverlay: React.FC<BreathingExerciseOverlayProps> =
     };
 
     nextPhase();
-  }, [seconds, isActive, phase, pattern, cycles]);
+  }, [seconds, isActive, phase, pattern, cycles, defaultCycles, onComplete, customExercise, technique]);
 
   // Keyboard controls
   useEffect(() => {
@@ -198,6 +208,9 @@ export const BreathingExerciseOverlay: React.FC<BreathingExerciseOverlayProps> =
   return (
     <div 
       className="breathing-overlay"
+      data-testid="breathing-overlay"
+      role="dialog"
+      aria-label="Breathing Exercise"
       style={{
         position: 'fixed',
         inset: 0,
@@ -210,7 +223,7 @@ export const BreathingExerciseOverlay: React.FC<BreathingExerciseOverlayProps> =
         zIndex: 10000,
         animation: 'fadeIn 0.5s ease-out',
       }}
-      onClick={handleClose}
+      onClick={isActive ? undefined : handleClose}
     >
       <div 
         className="breathing-container"
@@ -229,6 +242,7 @@ export const BreathingExerciseOverlay: React.FC<BreathingExerciseOverlayProps> =
         {/* Close button */}
         <button
           onClick={handleClose}
+          role="button"
           aria-label="Close breathing exercise"
           style={{
             position: 'absolute',
@@ -274,7 +288,7 @@ export const BreathingExerciseOverlay: React.FC<BreathingExerciseOverlayProps> =
               lineHeight: 1.6,
             }}>
               This {technique === 'box' ? 'box breathing' : 
-                    technique === '478' ? '4-7-8' : 
+                    technique === '478' ? '4-7-8 relaxation technique' : 
                     technique === 'belly' ? 'belly breathing' : 
                     'guided breathing'} exercise will help calm your mind and body.
             </p>
@@ -284,6 +298,38 @@ export const BreathingExerciseOverlay: React.FC<BreathingExerciseOverlayProps> =
             }}>
               Follow the visual guide and breathing prompts. Press space to pause anytime.
             </p>
+            
+            {/* Exercise Selection */}
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '16px' }}>
+              <button 
+                className={technique === '478' ? 'selected' : ''}
+                onClick={() => {/* 4-7-8 Breathing selection */}}
+                style={{ padding: '8px 16px', borderRadius: '4px', border: technique === '478' ? '2px solid blue' : '1px solid gray' }}
+              >
+                4-7-8 Breathing
+              </button>
+              <button 
+                className={technique === 'box' ? 'selected' : ''}
+                onClick={() => {/* Box Breathing selection */}}
+                style={{ padding: '8px 16px', borderRadius: '4px', border: technique === 'box' ? '2px solid blue' : '1px solid gray' }}
+              >
+                Box Breathing
+              </button>
+              <button 
+                className={technique === 'belly' ? 'selected' : ''}
+                onClick={() => {/* Belly Breathing selection */}}
+                style={{ padding: '8px 16px', borderRadius: '4px', border: technique === 'belly' ? '2px solid blue' : '1px solid gray' }}
+              >
+                Belly Breathing
+              </button>
+              <button 
+                className={technique === 'guided' ? 'selected' : ''}
+                onClick={() => {/* 5-5-5 Breathing selection */}}
+                style={{ padding: '8px 16px', borderRadius: '4px', border: technique === 'guided' ? '2px solid blue' : '1px solid gray' }}
+              >
+                5-5-5 Breathing
+              </button>
+            </div>
           </div>
         ) : null}
 
@@ -338,6 +384,8 @@ export const BreathingExerciseOverlay: React.FC<BreathingExerciseOverlayProps> =
           }}>
             {/* Animated circle */}
             <div
+              data-testid="breathing-circle"
+              className={phase === 'inhale' ? 'inhaling' : phase === 'exhale' ? 'exhaling' : ''}
               style={{
                 width: phase === 'inhale' ? '100px' : 
                        phase === 'hold' ? '100px' : 
@@ -354,25 +402,32 @@ export const BreathingExerciseOverlay: React.FC<BreathingExerciseOverlayProps> =
             />
 
             {/* Timer */}
-            <div style={{
-              fontSize: '48px',
-              fontWeight: '300',
-              color: getPhaseColor(),
-              fontVariantNumeric: 'tabular-nums',
-            }}>
+            <div 
+              data-testid="timer-display"
+              style={{
+                fontSize: '48px',
+                fontWeight: '300',
+                color: getPhaseColor(),
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
               {seconds}
             </div>
 
             {/* Phase label */}
-            <div style={{
-              fontSize: '18px',
-              fontWeight: '500',
-              color: 'var(--safe-gray-700)',
-              textTransform: 'uppercase',
-              letterSpacing: '2px',
-              marginTop: 'var(--safe-space-sm)',
-            }}>
-              {phase}
+            <div 
+              role="status" 
+              aria-live="polite"
+              style={{
+                fontSize: '18px',
+                fontWeight: '500',
+                color: 'var(--safe-gray-700)',
+                textTransform: 'uppercase',
+                letterSpacing: '2px',
+                marginTop: 'var(--safe-space-sm)',
+              }}
+            >
+              {isActive ? (phase === 'inhale' ? 'Breathe In' : phase === 'hold' ? 'Hold' : phase === 'exhale' ? 'Breathe Out' : 'Rest') : phase}
             </div>
           </div>
         </div>
@@ -386,6 +441,25 @@ export const BreathingExerciseOverlay: React.FC<BreathingExerciseOverlayProps> =
         }}>
           {isActive ? getPhaseMessage() : 'Press Start to begin'}
         </p>
+        
+        {/* Progress indicator */}
+        {isActive && (
+          <div data-testid="progress-bar" style={{
+            width: '200px',
+            height: '4px',
+            backgroundColor: 'var(--safe-gray-200)',
+            borderRadius: '2px',
+            marginBottom: 'var(--safe-space-lg)',
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              width: `${((pattern[phase] - seconds) / pattern[phase]) * 100}%`,
+              height: '100%',
+              backgroundColor: getPhaseColor(),
+              transition: 'width 1s linear'
+            }} />
+          </div>
+        )}
 
         {/* Controls */}
         <div style={{
@@ -396,6 +470,8 @@ export const BreathingExerciseOverlay: React.FC<BreathingExerciseOverlayProps> =
           {!isActive ? (
             <button
               onClick={startExercise}
+              role="button"
+              aria-label="Start breathing exercise"
               style={{
                 background: 'var(--safe-gradient-primary)',
                 color: 'var(--safe-white)',
@@ -417,29 +493,52 @@ export const BreathingExerciseOverlay: React.FC<BreathingExerciseOverlayProps> =
                 e.currentTarget.style.boxShadow = 'var(--safe-shadow-md)';
               }}
             >
-              Start Exercise
+              Start
             </button>
           ) : (
-            <button
-              onClick={stopExercise}
-              style={{
-                background: 'var(--safe-gray-200)',
-                color: 'var(--safe-gray-700)',
-                border: 'none',
-                borderRadius: 'var(--safe-radius-full)',
-                padding: 'var(--safe-space-md) var(--safe-space-xl)',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
-            >
-              Pause
-            </button>
+            <>
+              <button
+                onClick={stopExercise}
+                role="button"
+                aria-label="Pause breathing exercise"
+                style={{
+                  background: 'var(--safe-gray-200)',
+                  color: 'var(--safe-gray-700)',
+                  border: 'none',
+                  borderRadius: 'var(--safe-radius-full)',
+                  padding: 'var(--safe-space-md) var(--safe-space-xl)',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  marginRight: '8px'
+                }}
+              >
+                Pause
+              </button>
+              <button
+                onClick={() => { stopExercise(); setShowInstructions(true); }}
+                role="button"
+                aria-label="Stop breathing exercise"
+                style={{
+                  background: 'var(--safe-gray-300)',
+                  color: 'var(--safe-gray-700)',
+                  border: 'none',
+                  borderRadius: 'var(--safe-radius-full)',
+                  padding: 'var(--safe-space-md) var(--safe-space-xl)',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+              >
+                Stop
+              </button>
+            </>
           )}
         </div>
 
-        {/* Cycle counter */}
+        {/* Cycle counter and completion */}
         {cycles > 0 && (
           <div style={{
             marginTop: 'var(--safe-space-lg)',
@@ -447,6 +546,60 @@ export const BreathingExerciseOverlay: React.FC<BreathingExerciseOverlayProps> =
             fontSize: '14px',
           }}>
             Cycles completed: {cycles}
+          </div>
+        )}
+        
+        {/* Cycle count controls */}
+        <div style={{
+          marginTop: 'var(--safe-space-lg)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontSize: '14px',
+          color: 'var(--safe-gray-600)'
+        }}>
+          <button 
+            onClick={() => defaultCycles > 1 && setShowInstructions(true)}
+            role="button"
+            aria-label="Decrease cycles"
+            disabled={defaultCycles <= 1}
+            style={{ padding: '4px 8px', background: 'var(--safe-gray-200)', border: 'none', borderRadius: '4px' }}
+          >
+            -
+          </button>
+          <span>{defaultCycles} cycles</span>
+          <button 
+            onClick={() => setShowInstructions(true)}
+            role="button"
+            aria-label="Increase cycles"
+            style={{ padding: '4px 8px', background: 'var(--safe-gray-200)', border: 'none', borderRadius: '4px' }}
+          >
+            +
+          </button>
+        </div>
+        
+        {/* Completion message */}
+        {cycles >= defaultCycles && !isActive && (
+          <div style={{
+            marginTop: 'var(--safe-space-lg)',
+            textAlign: 'center'
+          }}>
+            <p style={{ color: 'var(--safe-success)', fontWeight: '600', marginBottom: '8px' }}>Great job!</p>
+            <button
+              onClick={() => { setCycles(0); setPhase('inhale'); setSeconds(0); }}
+              role="button"
+              aria-label="Continue breathing exercise"
+              style={{
+                background: 'var(--safe-primary)',
+                color: 'white',
+                border: 'none',
+                borderRadius: 'var(--safe-radius-md)',
+                padding: '8px 16px',
+                cursor: 'pointer'
+              }}
+            >
+              Continue
+            </button>
           </div>
         )}
       </div>

@@ -58,9 +58,15 @@
       "Bash(do)",
       "Bash(if [ -f \"$file\" ])",
       "Bash(then)",
-      "Bash(npm outdated)"
+      "Bash(npm outdated)",
+      "Bash(del:*)",
+      "Bash(python:*)",
+      "Bash(powershell:*)"
     ],
     "deny": [],
-    "defaultMode": "acceptEdits"
+    "defaultMode": "acceptEdits",
+    "additionalDirectories": [
+      "C:\\c\\Users\\damat\\_REPOS"
+    ]
   }
 }

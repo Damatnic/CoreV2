@@ -107,8 +107,11 @@ export interface AIChatMessage {
 }
 
 export interface AIChatSession {
+    id?: string;
     messages: AIChatMessage[];
     isTyping?: boolean;
+    startedAt?: string;
+    status?: string;
 }
 
 export interface AnalysisResult {
@@ -220,11 +223,14 @@ export interface Block {
 
 export interface ModerationAction {
     id: string;
+    type?: string; // Type of moderation action
+    targetId?: string; // Target of the action
     userId: string; // The user who was moderated
     moderatorId?: string; // The moderator who performed the action
     action: string; // e.g., 'Post Removed', 'Warning Issued'
     reason: string;
     timestamp: string;
+    status?: string; // Status of the action
     relatedContentId?: string | null; // ID of the post/comment
 }
 
@@ -245,6 +251,7 @@ export interface HelpSession {
     startedAt: string;
     endedAt?: string;
     isFavorited: boolean;
+    kudosGiven?: boolean;
     kudosGiven?: boolean;
     summary?: string;
     summaryLoading?: boolean;

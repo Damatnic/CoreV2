@@ -40,7 +40,11 @@ export class VideoThumbnailGenerator {
 
   constructor() {
     this.canvas = document.createElement('canvas');
-    this.ctx = this.canvas.getContext('2d')!;
+    const context = this.canvas.getContext('2d');
+    if (!context) {
+      throw new Error('Failed to create canvas 2D context');
+    }
+    this.ctx = context;
   }
 
   /**

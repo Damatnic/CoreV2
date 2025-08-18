@@ -38,6 +38,7 @@ export const useSwipeGesture = (options: UseSwipeGestureOptions = {}) => {
   const touchStartRef = useRef<TouchPosition | null>(null);
   const touchEndRef = useRef<TouchPosition | null>(null);
   const startTimeRef = useRef<number>(0);
+  const trackingRef = useRef<boolean>(false);
   const [isTracking, setIsTracking] = useState(false);
 
   const handleTouchStart = (e: TouchEvent) => {
@@ -45,12 +46,14 @@ export const useSwipeGesture = (options: UseSwipeGestureOptions = {}) => {
     
     const touch = e.touches[0];
     touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    touchEndRef.current = null; // Reset end position
     startTimeRef.current = Date.now();
+    trackingRef.current = true;
     setIsTracking(true);
   };
 
   const handleTouchMove = (e: TouchEvent) => {
-    if (!isTracking || !touchStartRef.current) return;
+    if (!trackingRef.current || !touchStartRef.current || e.touches.length !== 1) return;
     
     if (preventDefaultTouchMove) {
       e.preventDefault();
@@ -61,18 +64,25 @@ export const useSwipeGesture = (options: UseSwipeGestureOptions = {}) => {
   };
 
   const handleTouchEnd = () => {
-    if (!touchStartRef.current || !touchEndRef.current || !isTracking) {
+    if (!touchStartRef.current || !trackingRef.current) {
+      trackingRef.current = false;
       setIsTracking(false);
+      touchStartRef.current = null;
+      touchEndRef.current = null;
       return;
     }
 
-    const deltaX = touchEndRef.current.x - touchStartRef.current.x;
-    const deltaY = touchEndRef.current.y - touchStartRef.current.y;
+    // Use the last touch position if we have it, otherwise use start position
+    const endPosition = touchEndRef.current || touchStartRef.current;
+
+    const deltaX = endPosition.x - touchStartRef.current.x;
+    const deltaY = endPosition.y - touchStartRef.current.y;
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
     const duration = Date.now() - startTimeRef.current;
-    const velocity = distance / duration;
+    const velocity = duration > 0 ? distance / duration : 0;
 
     // Reset tracking
+    trackingRef.current = false;
     setIsTracking(false);
     touchStartRef.current = null;
     touchEndRef.current = null;
@@ -183,13 +193,15 @@ export const usePullToRefresh = (
   
   const touchStartRef = useRef<{ x: number; y: number; scrollTop: number } | null>(null);
   const touchMoveRef = useRef<{ x: number; y: number } | null>(null);
+  const pullDistanceRef = useRef<number>(0);
+  const isRefreshingRef = useRef<boolean>(false);
 
   useEffect(() => {
     const element = elementRef.current;
     if (!element || !enabled) return;
 
     const handleTouchStart = (e: TouchEvent) => {
-      if (e.touches.length !== 1) return;
+      if (e.touches.length !== 1 || isRefreshingRef.current) return;
       
       const touch = e.touches[0];
       const scrollTop = element.scrollTop || window.scrollY;
@@ -205,7 +217,7 @@ export const usePullToRefresh = (
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (!touchStartRef.current || isRefreshing) return;
+      if (!touchStartRef.current || isRefreshingRef.current || e.touches.length !== 1) return;
       
       const touch = e.touches[0];
       touchMoveRef.current = { x: touch.clientX, y: touch.clientY };
@@ -216,6 +228,7 @@ export const usePullToRefresh = (
       // Only pull-to-refresh when at top and pulling down
       if (scrollTop <= 0 && deltaY > 0) {
         const distance = Math.min(deltaY * resistance, threshold * 1.5);
+        pullDistanceRef.current = distance;
         setPullDistance(distance);
         setIsPulling(distance > 10);
         
@@ -227,16 +240,18 @@ export const usePullToRefresh = (
     };
 
     const handleTouchEnd = async () => {
-      if (!touchStartRef.current || !touchMoveRef.current || isRefreshing) {
+      if (!touchStartRef.current || !touchMoveRef.current || isRefreshingRef.current) {
         resetPull();
         return;
       }
 
-      if (pullDistance >= threshold && !isRefreshing) {
+      if (pullDistanceRef.current >= threshold && !isRefreshingRef.current) {
+        isRefreshingRef.current = true;
         setIsRefreshing(true);
         try {
           await onRefresh();
         } finally {
+          isRefreshingRef.current = false;
           setIsRefreshing(false);
           resetPull();
         }
@@ -246,6 +261,7 @@ export const usePullToRefresh = (
     };
 
     const resetPull = () => {
+      pullDistanceRef.current = 0;
       setPullDistance(0);
       setIsPulling(false);
       touchStartRef.current = null;
@@ -263,7 +279,7 @@ export const usePullToRefresh = (
       element.removeEventListener('touchend', handleTouchEnd);
       element.removeEventListener('touchcancel', resetPull);
     };
-  }, [enabled, threshold, resistance, onRefresh, pullDistance, isRefreshing]);
+  }, [enabled, threshold, resistance, onRefresh]);
 
   return {
     ref: elementRef,

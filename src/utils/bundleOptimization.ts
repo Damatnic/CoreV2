@@ -225,6 +225,20 @@ export class BundleAnalyzer {
   static getMetrics(): BundleMetrics {
     return { ...this.metrics };
   }
+  
+  // Reset metrics (useful for testing)
+  static resetMetrics(): void {
+    this.metrics = {
+      totalSize: 0,
+      loadTime: 0,
+      chunkCount: 0,
+      duplicateModules: [],
+      largestChunks: [],
+      unusedCode: 0,
+      memoryImpact: 0,
+    };
+    this.chunkRegistry.clear();
+  }
 
   // Register chunk loading
   static registerChunkLoad(chunkName: string, startTime: number): void {
@@ -430,8 +444,8 @@ export class MobileMemoryOptimizer {
   }
 
   // Get current memory usage for monitoring
-  private static getCurrentMemoryUsage(): number {
-    if ('memory' in performance) {
+  static getCurrentMemoryUsage(): number {
+    if (typeof performance !== 'undefined' && 'memory' in performance) {
       const performanceWithMemory = performance as Performance & { memory?: { usedJSHeapSize: number } };
       const memory = performanceWithMemory.memory;
       return memory ? memory.usedJSHeapSize / 1024 / 1024 : 0; // Convert to MB
@@ -451,7 +465,7 @@ export class MobileMemoryOptimizer {
     }
     
     // Clear unused image caches
-    this.clearImageCaches();
+    MobileMemoryOptimizer.clearImageCaches();
     
     if (process.env.NODE_ENV === 'development') {
       console.log('🧹 Performed memory cleanup');

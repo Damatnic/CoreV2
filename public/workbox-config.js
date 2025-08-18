@@ -16,6 +16,7 @@ module.exports = defineConfig({
     // Core HTML files
     'index.html',
     'offline.html',
+    'offline-crisis.html',
     
     // Critical static assets
     'assets/index-*.css',

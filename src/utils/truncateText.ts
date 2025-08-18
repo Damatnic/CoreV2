@@ -6,11 +6,19 @@
  * @returns Truncated text with suffix if needed
  */
 export const truncateText = (text: string, maxLength: number, suffix: string = '...'): string => {
-  if (!text || text.length <= maxLength) {
-    return text || '';
+  if (!text) return '';
+  
+  // Handle negative max length
+  if (maxLength <= 0) {
+    return suffix;
   }
   
-  return text.slice(0, maxLength) + suffix;
+  if (text.length <= maxLength) {
+    return text;
+  }
+  
+  // Trim the text before adding suffix to avoid trailing spaces
+  return text.slice(0, maxLength).trimEnd() + suffix;
 };
 
 export default truncateText;

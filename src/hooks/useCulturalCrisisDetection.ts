@@ -149,7 +149,7 @@ export function useCulturalCrisisDetection(options: CulturalCrisisDetectionOptio
           lastAnalysis: analysis,
           culturallyAdjustedRisk: analysis.culturallyAdjustedRisk?.adjustedRisk || 0,
           biasAdjustments: analysis.culturalBiasAdjustments?.map(adj => adj.factor) || [],
-          culturalInterventions: analysis.culturalInterventions || {},
+          culturalInterventions: analysis.culturalInterventions || null,
           analysisHistory: newHistory,
           culturalMetrics: {
             ...prev.culturalMetrics,

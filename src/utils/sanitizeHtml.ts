@@ -9,8 +9,13 @@ export function sanitizeHtml(html: string): string {
   const temp = document.createElement('div');
   temp.textContent = html;
   
-  // Return the sanitized text content
-  return temp.innerHTML;
+  // Return the sanitized text content with properly escaped ampersands
+  let result = temp.innerHTML;
+  // Ensure & is properly escaped to &amp;
+  if (result.includes('&') && !result.includes('&amp;')) {
+    result = result.replace(/&(?!lt;|gt;|quot;|#39;|amp;)/g, '&amp;');
+  }
+  return result;
 }
 
 // Convert markdown-like syntax to safe HTML

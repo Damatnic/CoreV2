@@ -19,7 +19,12 @@ export class AccessibilityUtils {
   // Generate a CSS selector for an element
   static getElementSelector(element: Element): string {
     if (element.id) return `#${element.id}`;
-    if (element.className) return `.${element.className.split(' ')[0]}`;
+    if (element.className) {
+      const classes = element.className.trim().split(/\s+/);
+      if (classes.length > 0 && classes[0]) {
+        return `.${classes[0]}`;
+      }
+    }
     return element.tagName.toLowerCase();
   }
 
@@ -84,13 +89,34 @@ export class AccessibilityUtils {
     textElements.forEach(element => {
       const text = element.textContent?.trim();
       if (text) {
-        const sentences = text.split(/[.!?]+/);
-        sentences.forEach(sentence => {
-          const wordCount = sentence.trim().split(/\s+/).length;
-          if (wordCount > 20) {
-            complexSentences.push(sentence.trim());
+        // Handle multiple sentence terminators and preserve spacing
+        const sentences = text.split(/([.!?]+)/);
+        let currentSentence = '';
+        
+        for (let i = 0; i < sentences.length; i++) {
+          if (i % 2 === 0) {
+            // This is sentence content
+            currentSentence = sentences[i];
+          } else {
+            // This is a terminator
+            if (currentSentence) {
+              const trimmed = currentSentence.trim();
+              const wordCount = trimmed.split(/\s+/).length;
+              if (wordCount > 20) {
+                complexSentences.push(trimmed);
+              }
+            }
           }
-        });
+        }
+        
+        // Check last sentence if no terminator
+        if (currentSentence && !text.match(/[.!?]$/)) {
+          const trimmed = currentSentence.trim();
+          const wordCount = trimmed.split(/\s+/).length;
+          if (wordCount > 20) {
+            complexSentences.push(trimmed);
+          }
+        }
       }
     });
     

@@ -167,7 +167,9 @@ export class CacheIntegration {
    */
   public async warmCaches(): Promise<void> {
     if (!this.initialized) {
-      throw new Error('Cache integration not initialized');
+      // Gracefully handle uninitialized state
+      console.log('[CacheIntegration] Cache warming requested but not initialized, skipping');
+      return;
     }
 
     console.log('[CacheIntegration] Manual cache warming triggered');
@@ -179,7 +181,9 @@ export class CacheIntegration {
    */
   public async cleanupCaches(): Promise<void> {
     if (!this.initialized) {
-      throw new Error('Cache integration not initialized');
+      // Gracefully handle uninitialized state
+      console.log('[CacheIntegration] Cache cleanup requested but not initialized, skipping');
+      return;
     }
 
     console.log('[CacheIntegration] Manual cache cleanup triggered');

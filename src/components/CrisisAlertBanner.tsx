@@ -15,8 +15,14 @@ export const CrisisAlertBanner: React.FC<{
   }, [show]);
   
   const handleClose = () => {
-    setIsVisible(false);
-    onClose?.();
+    try {
+      setIsVisible(false);
+      onClose?.();
+    } catch (error) {
+      console.error('Error closing crisis alert:', error);
+      // Still hide the banner even if callback fails
+      setIsVisible(false);
+    }
   };
   
   if (!isVisible) return null;

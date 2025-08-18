@@ -372,8 +372,9 @@ describe('Card', () => {
     });
 
     it('should handle null or undefined children gracefully', () => {
-      render(<Card>{null}</Card>);
+      const { unmount } = render(<Card>{null}</Card>);
       expect(screen.getByRole('region')).toBeInTheDocument();
+      unmount();
       
       render(<Card>{undefined}</Card>);
       expect(screen.getByRole('region')).toBeInTheDocument();

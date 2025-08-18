@@ -6,16 +6,532 @@
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
 import { TextEncoder, TextDecoder } from 'util';
+import { setupDOM, cleanupDOM } from './test-utils/setupDom';
+import { setupPerformanceMocks, cleanupPerformanceMocks } from './test-utils/performanceMocks';
+// import { cleanupContainers } from './test-utils';
 
 // Setup text encoding/decoding
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder as any;
 
+// Mock TouchEvent for touch gesture tests
+class MockTouchEvent extends Event {
+  touches: Touch[];
+  targetTouches: Touch[];
+  changedTouches: Touch[];
+
+  constructor(type: string, init?: any) {
+    super(type, init);
+    this.touches = init?.touches || [];
+    this.targetTouches = init?.targetTouches || [];
+    this.changedTouches = init?.changedTouches || [];
+  }
+}
+
+// Make TouchEvent available globally
+(global as any).TouchEvent = MockTouchEvent;
+
+// Mock Response and Request for service worker and fetch tests
+class MockResponse {
+  ok: boolean;
+  status: number;
+  statusText: string;
+  headers: Map<string, string>;
+  body: any;
+  
+  constructor(body?: any, init?: ResponseInit) {
+    this.body = body;
+    this.status = init?.status || 200;
+    this.statusText = init?.statusText || 'OK';
+    this.ok = this.status >= 200 && this.status < 300;
+    this.headers = new Map();
+    
+    if (init?.headers) {
+      if (init.headers instanceof Headers) {
+        init.headers.forEach((value, key) => {
+          this.headers.set(key, value);
+        });
+      } else if (Array.isArray(init.headers)) {
+        init.headers.forEach(([key, value]) => {
+          this.headers.set(key, value);
+        });
+      } else {
+        Object.entries(init.headers).forEach(([key, value]) => {
+          this.headers.set(key, value as string);
+        });
+      }
+    }
+  }
+  
+  async json() {
+    return typeof this.body === 'string' ? JSON.parse(this.body) : this.body;
+  }
+  
+  async text() {
+    return typeof this.body === 'string' ? this.body : JSON.stringify(this.body);
+  }
+  
+  clone() {
+    return new MockResponse(this.body, {
+      status: this.status,
+      statusText: this.statusText,
+      headers: Array.from(this.headers.entries())
+    });
+  }
+}
+
+class MockRequest {
+  url: string;
+  method: string;
+  headers: Map<string, string>;
+  body: any;
+  
+  constructor(input: string | Request, init?: RequestInit) {
+    if (typeof input === 'string') {
+      this.url = input;
+    } else {
+      this.url = input.url;
+      this.method = input.method;
+    }
+    
+    this.method = init?.method || 'GET';
+    this.headers = new Map();
+    this.body = init?.body;
+    
+    if (init?.headers) {
+      if (init.headers instanceof Headers) {
+        init.headers.forEach((value, key) => {
+          this.headers.set(key, value);
+        });
+      } else if (Array.isArray(init.headers)) {
+        init.headers.forEach(([key, value]) => {
+          this.headers.set(key, value);
+        });
+      } else {
+        Object.entries(init.headers).forEach(([key, value]) => {
+          this.headers.set(key, value as string);
+        });
+      }
+    }
+  }
+  
+  clone() {
+    return new MockRequest(this.url, {
+      method: this.method,
+      headers: Array.from(this.headers.entries()),
+      body: this.body
+    });
+  }
+}
+
+// Headers mock
+class MockHeaders {
+  private headers: Map<string, string> = new Map();
+  
+  constructor(init?: HeadersInit) {
+    if (init) {
+      if (Array.isArray(init)) {
+        init.forEach(([key, value]) => {
+          this.headers.set(key.toLowerCase(), value);
+        });
+      } else if (init instanceof MockHeaders) {
+        init.forEach((value, key) => {
+          this.headers.set(key.toLowerCase(), value);
+        });
+      } else {
+        Object.entries(init).forEach(([key, value]) => {
+          this.headers.set(key.toLowerCase(), value as string);
+        });
+      }
+    }
+  }
+  
+  append(key: string, value: string) {
+    this.headers.set(key.toLowerCase(), value);
+  }
+  
+  delete(key: string) {
+    this.headers.delete(key.toLowerCase());
+  }
+  
+  get(key: string) {
+    return this.headers.get(key.toLowerCase()) || null;
+  }
+  
+  has(key: string) {
+    return this.headers.has(key.toLowerCase());
+  }
+  
+  set(key: string, value: string) {
+    this.headers.set(key.toLowerCase(), value);
+  }
+  
+  forEach(callback: (value: string, key: string, headers: MockHeaders) => void) {
+    this.headers.forEach((value, key) => {
+      callback(value, key, this);
+    });
+  }
+  
+  entries() {
+    return this.headers.entries();
+  }
+  
+  keys() {
+    return this.headers.keys();
+  }
+  
+  values() {
+    return this.headers.values();
+  }
+}
+
+// Add to global
+(global as any).Response = MockResponse;
+(global as any).Request = MockRequest;
+(global as any).Headers = MockHeaders;
+
 // Import service mocks
 import { setupDefaultMocks } from './__mocks__/services';
 
+// Mock the logger to avoid import.meta issues
+jest.mock('./utils/logger');
+
+// Mock envConfig to avoid import.meta issues
+jest.mock('./utils/envConfig');
+
+// Mock services that use envConfig
+jest.mock('./services/notificationService');
+jest.mock('./services/authService');
+
+// Mock crisis stress testing hook to prevent stress testing during tests
+jest.mock('./hooks/useCrisisStressTesting', () => ({
+  useCrisisStressTesting: jest.fn(() => ({
+    state: {
+      isTestingActive: false,
+      currentTest: null,
+      testResults: [],
+      failoverResults: [],
+      emergencyStatus: { active: false },
+      testConfig: {
+        maxConcurrentUsers: 10,
+        testDuration: 1,
+        rampUpTime: 0,
+        scenarios: [],
+        failureThresholds: {
+          responseTime: 1000,
+          errorRate: 0.01,
+          availability: 0.99
+        },
+        emergencyBreakConditions: []
+      },
+      selectedScenarios: []
+    },
+    actions: {
+      runStressTests: jest.fn(() => Promise.resolve()),
+      runFailoverTests: jest.fn(() => Promise.resolve()),
+      emergencyStop: jest.fn(),
+      clearEmergencyStatus: jest.fn(),
+      updateTestConfig: jest.fn(),
+      toggleScenario: jest.fn(),
+      clearResults: jest.fn(),
+      exportResults: jest.fn(() => '{}')
+    },
+    stats: {
+      total: 0,
+      successful: 0,
+      failed: 0,
+      critical: 0,
+      avgResponseTime: 0,
+      avgAvailability: 1,
+      safetyScore: 100
+    }
+  }))
+}));
+
+// Mock crisis stress testing system to prevent it from running during tests
+jest.mock('./services/crisisStressTestingSystem', () => ({
+  crisisStressTestingSystem: {
+    runCrisisStressTests: jest.fn(() => Promise.resolve([
+      {
+        testId: 'mock-test-1',
+        timestamp: Date.now(),
+        scenario: {
+          id: 'mock-scenario',
+          name: 'Mock Test Scenario',
+          description: 'Mock test scenario for testing',
+          severity: 'low',
+          duration: 100,
+          targetComponents: ['mock-component'],
+          expectedOutcome: 'Mock success',
+          failureConditions: [],
+          recoveryTime: 50
+        },
+        success: true,
+        responseTime: 50,
+        errorRate: 0,
+        availability: 1,
+        failurePoints: [],
+        recoveryTime: 25,
+        impactAssessment: {
+          userImpact: 'none',
+          businessImpact: 'none',
+          safetyImpact: 'none'
+        },
+        recommendations: [],
+        emergencyProcedures: []
+      }
+    ])),
+    runEmergencyFailoverTests: jest.fn(() => Promise.resolve([
+      {
+        id: 'crisis-chat-server-failover',
+        component: 'crisis-chat',
+        failureType: 'server',
+        simulatedFailure: 'Primary chat server becomes unresponsive',
+        expectedFallback: 'Automatic failover to backup chat server',
+        maxFailoverTime: 2000,
+        testResult: {
+          actualFailoverTime: 500,
+          fallbackWorked: true,
+          userExperience: 'Seamless - user unaware of failover',
+          dataIntegrity: true
+        }
+      },
+      {
+        id: 'ai-service-failover',
+        component: 'ai-crisis-detection',
+        failureType: 'service',
+        simulatedFailure: 'AI service API becomes unavailable',
+        expectedFallback: 'Fallback to rule-based detection',
+        maxFailoverTime: 1000,
+        testResult: {
+          actualFailoverTime: 300,
+          fallbackWorked: true,
+          userExperience: 'Minimal disruption',
+          dataIntegrity: true
+        }
+      },
+      {
+        id: 'database-connection-failover',
+        component: 'crisis-resources',
+        failureType: 'database',
+        simulatedFailure: 'Database connection lost',
+        expectedFallback: 'Serve cached crisis resources',
+        maxFailoverTime: 500,
+        testResult: {
+          actualFailoverTime: 200,
+          fallbackWorked: true,
+          userExperience: 'No disruption',
+          dataIntegrity: true
+        }
+      },
+      {
+        id: 'api-rate-limit-failover',
+        component: 'emergency-services',
+        failureType: 'service',
+        simulatedFailure: 'API rate limit exceeded',
+        expectedFallback: 'Queue and retry with backoff',
+        maxFailoverTime: 3000,
+        testResult: {
+          actualFailoverTime: 1500,
+          fallbackWorked: true,
+          userExperience: 'Brief delay but service continues',
+          dataIntegrity: true
+        }
+      },
+      {
+        id: 'network-partition-failover',
+        component: 'emergency-button',
+        failureType: 'network',
+        simulatedFailure: 'Complete network connectivity loss',
+        expectedFallback: 'Local emergency protocol activation',
+        maxFailoverTime: 100,
+        testResult: {
+          actualFailoverTime: 50,
+          fallbackWorked: true,
+          userExperience: 'Seamless - local fallback activated',
+          dataIntegrity: true
+        }
+      }
+    ])),
+  },
+  CrisisStressTestingSystem: jest.fn().mockImplementation(() => ({
+    runCrisisStressTests: jest.fn(() => Promise.resolve([])),
+    runEmergencyFailoverTests: jest.fn(() => Promise.resolve([]))
+  })),
+  CRISIS_COMPONENTS: {
+    EMERGENCY_BUTTON: 'emergency-button',
+    CRISIS_CHAT: 'crisis-chat',
+    HOTLINE_INTEGRATION: 'hotline-integration',
+    EMERGENCY_CONTACTS: 'emergency-contacts',
+    CRISIS_RESOURCES: 'crisis-resources',
+    AI_CRISIS_DETECTION: 'ai-crisis-detection',
+    CRISIS_ALERTS: 'crisis-alerts',
+    EMERGENCY_SERVICES: 'emergency-services',
+    SAFETY_PLAN: 'safety-plan',
+    CRISIS_INTERVENTION: 'crisis-intervention'
+  },
+  CRISIS_TEST_SCENARIOS: [],
+  EMERGENCY_FAILOVER_TESTS: []
+}));
+
+// Automatically mock commonly used services
+jest.mock('./services/crisisDetectionService', () => {
+  const mockAnalyzeCrisisContent = jest.fn(() => ({
+    hasCrisisIndicators: false,
+    severityLevel: 'none',
+    detectedCategories: [],
+    confidence: 0.1,
+    recommendedActions: [],
+    escalationRequired: false,
+    emergencyServices: false,
+    riskFactors: [],
+    protectiveFactors: [],
+    analysisDetails: {
+      triggeredKeywords: [],
+      sentimentScore: 0,
+      contextualFactors: [],
+      urgencyLevel: 0
+    }
+  }));
+  
+  const mockService = {
+    analyzeCrisisContent: mockAnalyzeCrisisContent,
+    analyzeMessageRisk: jest.fn(() => ({
+      riskLevel: 'low',
+      indicators: [],
+      confidence: 0.1
+    })),
+    detectCrisis: jest.fn(() => ({
+      isInCrisis: false,
+      severity: 'none',
+      confidence: 0,
+      keywords: []
+    })),
+    getEscalationActions: jest.fn(() => ({
+      type: 'support',
+      description: 'Monitor and provide support',
+      contacts: [],
+      resources: [],
+      timeline: 'Ongoing'
+    })),
+    generateCrisisResponse: jest.fn(() => ({
+      message: 'Support message',
+      actions: [],
+      resources: [],
+      followUp: []
+    })),
+    reset: jest.fn()
+  };
+  
+  return {
+    enhancedCrisisDetectionService: mockService,
+    crisisDetectionService: mockService,
+    astralCoreCrisisDetection: mockService,
+    default: mockService
+  };
+});
+
+jest.mock('./services/aiModerationService', () => ({
+  aiModerationService: {
+    moderateMessage: jest.fn(() => ({
+      safe: true,
+      category: null,
+      escalate: false
+    })),
+    generateSafeResponse: jest.fn(() => 'Content has been moderated for safety.'),
+    sanitizeForDisplay: jest.fn((text) => text),
+    needsHumanIntervention: jest.fn(() => false)
+  }
+}));
+
+jest.mock('./services/coreWebVitalsService', () => ({
+  coreWebVitalsService: {
+    initialize: jest.fn(() => Promise.resolve()),
+    generateReport: jest.fn(() => Promise.resolve({
+      timestamp: Date.now(),
+      url: 'http://localhost',
+      metrics: { lcp: 1200, fid: 80, cls: 0.05 },
+      grade: 'A'
+    })),
+    getPerformanceSummary: jest.fn(() => ({
+      overall: 'good',
+      metrics: {},
+      recommendations: []
+    }))
+  }
+}));
+
+jest.mock('./services/privacyPreservingAnalyticsService', () => ({
+  privacyPreservingAnalyticsService: {
+    initialize: jest.fn(() => Promise.resolve()),
+    trackEvent: jest.fn(() => Promise.resolve()),
+    trackPageView: jest.fn(() => Promise.resolve()),
+    flush: jest.fn(() => Promise.resolve()),
+    trackMoodEntry: jest.fn(() => Promise.resolve()),
+    trackCrisisInteraction: jest.fn(() => Promise.resolve()),
+    trackFeatureUsage: jest.fn(() => Promise.resolve()),
+    trackSafetyPlanUsage: jest.fn(() => Promise.resolve()),
+    trackResourceAccess: jest.fn(() => Promise.resolve()),
+    trackUserEngagement: jest.fn(() => Promise.resolve()),
+    recordInterventionOutcome: jest.fn(() => Promise.resolve()),
+    getAnonymizedInsights: jest.fn(() => Promise.resolve({
+      totalEvents: 0,
+      eventTypes: {},
+      timeDistribution: {},
+      userSegments: {}
+    })),
+    getUserAnalytics: jest.fn(() => Promise.resolve({
+      userId: 'anonymous',
+      events: [],
+      insights: {}
+    })),
+    clearAnalytics: jest.fn(() => Promise.resolve()),
+    exportAnalytics: jest.fn(() => Promise.resolve({})),
+    setUserConsent: jest.fn(() => Promise.resolve()),
+    getUserConsent: jest.fn(() => Promise.resolve(true))
+  }
+}));
+
+jest.mock('./services/enhancedOfflineService', () => ({
+  enhancedOfflineService: {
+    initialize: jest.fn(() => Promise.resolve()),
+    isOnline: jest.fn(() => true),
+    getOfflineCapabilities: jest.fn(() => ({
+      canCache: true,
+      canSync: true
+    })),
+    addToSyncQueue: jest.fn(),
+    processSyncQueue: jest.fn(() => Promise.resolve()),
+    onStatusChange: jest.fn(),
+    getCrisisResources: jest.fn(() => Promise.resolve([])),
+    getAvailableContent: jest.fn(() => Promise.resolve([])),
+    syncCrisisData: jest.fn(() => Promise.resolve()),
+    clearOfflineData: jest.fn(() => Promise.resolve())
+  }
+}));
+
+jest.mock('./services/peerSupportNetworkService', () => ({
+  peerSupportNetworkService: {
+    initialize: jest.fn(() => Promise.resolve()),
+    connect: jest.fn(() => Promise.resolve()),
+    disconnect: jest.fn(),
+    sendMessage: jest.fn(),
+    getActiveConnections: jest.fn(() => [])
+  }
+}));
+
 // Fix for React 18 act() warnings
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
+
+// Ensure document.body exists for React 18 createRoot
+if (typeof document !== 'undefined') {
+  if (!document.body) {
+    const body = document.createElement('body');
+    if (document.documentElement) {
+      document.documentElement.appendChild(body);
+    }
+  }
+}
 
 // Mock Canvas API
 HTMLCanvasElement.prototype.getContext = jest.fn((contextType) => {
@@ -95,6 +611,94 @@ HTMLCanvasElement.prototype.toBlob = jest.fn((callback) => {
     callback(new Blob(['mock'], { type: 'image/png' }));
   }
 }) as any;
+
+// Mock Blob with text() method
+const OriginalBlob = global.Blob;
+global.Blob = class MockBlob extends OriginalBlob {
+  constructor(parts?: BlobPart[], options?: BlobPropertyBag) {
+    super(parts, options);
+  }
+  
+  text(): Promise<string> {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.readAsText(this);
+    });
+  }
+  
+  arrayBuffer(): Promise<ArrayBuffer> {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as ArrayBuffer);
+      reader.readAsArrayBuffer(this);
+    });
+  }
+} as any;
+
+// Mock FileReader
+(global as any).FileReader = class MockFileReader {
+  result: string | ArrayBuffer | null = null;
+  onload: (() => void) | null = null;
+  onerror: (() => void) | null = null;
+  
+  readAsText(blob: Blob): void {
+    // Handle Blob created by the actual implementation
+    if (blob instanceof Blob) {
+      // Use the Blob constructor's internal structure to get the content
+      const blobParts = (blob as any)[Symbol.for('nodejs.util.inspect.custom')] ? 
+        [(blob as any).toString()] : 
+        (blob as any)._parts || (blob as any).parts || [blob];
+      
+      // Try to extract the text content from the blob
+      Promise.resolve().then(() => {
+        try {
+          // If it's an actual Blob with arrayBuffer method
+          if (typeof blob.arrayBuffer === 'function') {
+            blob.arrayBuffer().then(buffer => {
+              this.result = new TextDecoder().decode(buffer);
+              if (this.onload) this.onload();
+            });
+          } else {
+            // Fallback for mock blobs
+            const text = blobParts.map((part: any) => {
+              if (typeof part === 'string') return part;
+              if (part instanceof ArrayBuffer) return new TextDecoder().decode(part);
+              return String(part);
+            }).join('');
+            this.result = text;
+            if (this.onload) this.onload();
+          }
+        } catch (e) {
+          // Fallback to mock data
+          this.result = 'mock file content';
+          if (this.onload) this.onload();
+        }
+      });
+    } else {
+      this.result = 'mock file content';
+      setTimeout(() => {
+        if (this.onload) this.onload();
+      }, 0);
+    }
+  }
+  
+  readAsArrayBuffer(blob: Blob): void {
+    const parts = (blob as any)._parts || [(blob as any).parts] || [new ArrayBuffer(0)];
+    const buffer = parts[0] instanceof ArrayBuffer ? parts[0] : new TextEncoder().encode(String(parts[0])).buffer;
+    this.result = buffer;
+    setTimeout(() => {
+      if (this.onload) this.onload();
+    }, 0);
+  }
+  
+  readAsDataURL(blob: Blob): void {
+    this.result = 'data:application/octet-stream;base64,mock';
+    setTimeout(() => {
+      if (this.onload) this.onload();
+    }, 0);
+  }
+};
 
 // Mock Image
 (global as any).Image = class MockImage {
@@ -251,17 +855,24 @@ window.requestAnimationFrame = jest.fn(cb => {
 window.cancelAnimationFrame = jest.fn();
 
 // Ensure timer functions are available in the global scope
-if (typeof global.setInterval === 'undefined') {
-  global.setInterval = setInterval;
-}
-if (typeof global.clearInterval === 'undefined') {
-  global.clearInterval = clearInterval;
-}
-if (typeof global.setTimeout === 'undefined') {
-  global.setTimeout = setTimeout;
-}
-if (typeof global.clearTimeout === 'undefined') {
-  global.clearTimeout = clearTimeout;
+// Store original functions before any mocking
+const originalSetInterval = setInterval;
+const originalClearInterval = clearInterval;
+const originalSetTimeout = setTimeout;
+const originalClearTimeout = clearTimeout;
+
+// Always ensure these are available globally
+global.setInterval = global.setInterval || originalSetInterval;
+global.clearInterval = global.clearInterval || originalClearInterval;
+global.setTimeout = global.setTimeout || originalSetTimeout;
+global.clearTimeout = global.clearTimeout || originalClearTimeout;
+
+// Also ensure they're on window
+if (typeof window !== 'undefined') {
+  window.setInterval = window.setInterval || originalSetInterval;
+  window.clearInterval = window.clearInterval || originalClearInterval;
+  window.setTimeout = window.setTimeout || originalSetTimeout;
+  window.clearTimeout = window.clearTimeout || originalClearTimeout;
 }
 
 // Mock performance API
@@ -369,7 +980,9 @@ Object.defineProperty(navigator, 'serviceWorker', {
   writable: true
 });
 
-// Mock fetch
+// Headers class is already defined above, just reassign it
+(global as any).Headers = MockHeaders;
+
 global.fetch = jest.fn(() =>
   Promise.resolve({
     ok: true,
@@ -377,11 +990,12 @@ global.fetch = jest.fn(() =>
     json: async () => ({}),
     text: async () => '',
     blob: async () => new Blob(),
-    headers: new Headers(),
+    headers: new MockHeaders(),
     clone: () => ({
       ok: true,
       status: 200,
-      json: async () => ({})
+      json: async () => ({}),
+      headers: new MockHeaders()
     })
   } as Response)
 );
@@ -402,68 +1016,30 @@ global.crypto.randomUUID = () => {
 // Mock scrollIntoView
 Element.prototype.scrollIntoView = jest.fn();
 
-// Mock comprehensive DOM element methods
-HTMLElement.prototype.setAttribute = jest.fn();
-HTMLElement.prototype.getAttribute = jest.fn((attr: string) => {
-  // Return some default values for commonly used attributes
-  switch (attr) {
-    case 'class':
-    case 'className':
-      return '';
-    case 'id':
-      return '';
-    case 'role':
-      return '';
-    case 'tabindex':
-      return '0';
-    case 'aria-label':
-      return '';
-    case 'aria-hidden':
-      return 'false';
-    case 'data-testid':
-      return '';
-    default:
-      return null;
-  }
-});
-HTMLElement.prototype.removeAttribute = jest.fn();
-HTMLElement.prototype.hasAttribute = jest.fn(() => false);
-HTMLElement.prototype.getAttributeNames = jest.fn(() => []);
+// Mock DOM methods that tests commonly use
+if (!Element.prototype.getBoundingClientRect || Element.prototype.getBoundingClientRect.toString().includes('[native code]')) {
+  Element.prototype.getBoundingClientRect = jest.fn(() => ({
+    bottom: 0,
+    height: 0,
+    left: 0,
+    right: 0,
+    top: 0,
+    width: 0,
+    x: 0,
+    y: 0
+  } as DOMRect));
+}
 
-// Mock Element methods
-Element.prototype.setAttribute = jest.fn();
-Element.prototype.getAttribute = jest.fn((attr: string) => {
-  switch (attr) {
-    case 'class':
-    case 'className':
-      return '';
-    case 'id':
-      return '';
-    case 'role':
-      return '';
-    case 'tabindex':
-      return '0';
-    default:
-      return null;
-  }
-});
-Element.prototype.removeAttribute = jest.fn();
-Element.prototype.hasAttribute = jest.fn(() => false);
-Element.prototype.getAttributeNames = jest.fn(() => []);
-Element.prototype.getBoundingClientRect = jest.fn(() => ({
-  bottom: 0,
-  height: 0,
-  left: 0,
-  right: 0,
-  top: 0,
-  width: 0,
-  x: 0,
-  y: 0
-} as DOMRect));
-Element.prototype.closest = jest.fn(() => null);
-Element.prototype.matches = jest.fn(() => false);
-Element.prototype.querySelector = jest.fn(() => null);
-Element.prototype.querySelectorAll = jest.fn(() => [] as any);
+// Don't override these critical DOM methods as they break createElement
+// Element.prototype.closest = jest.fn(() => null);
+// Element.prototype.matches = jest.fn(() => false);
+// Element.prototype.querySelector = jest.fn(() => null);
+// Element.prototype.querySelectorAll = jest.fn(() => [] as any);
+
+// Ensure document is available globally
+if (typeof global.document === 'undefined' && typeof document !== 'undefined') {
+  global.document = document;
+}
 
 // Mock comprehensive window.getComputedStyle with getPropertyValue
 const createMockComputedStyle = () => {
@@ -591,14 +1167,16 @@ Object.defineProperty(window, 'getComputedStyle', {
 });
 
 // Mock additional Element/Node methods that might be accessed
+// BUT DO NOT MOCK appendChild, removeChild etc - these break React rendering!
 Element.prototype.insertAdjacentElement = jest.fn();
 Element.prototype.insertAdjacentHTML = jest.fn();
 Element.prototype.insertAdjacentText = jest.fn();
-Node.prototype.appendChild = jest.fn();
-Node.prototype.removeChild = jest.fn();
-Node.prototype.insertBefore = jest.fn();
-Node.prototype.replaceChild = jest.fn();
-Node.prototype.cloneNode = jest.fn(() => ({} as Node));
+// DO NOT MOCK THESE - they break React 18 rendering:
+// Node.prototype.appendChild = jest.fn();
+// Node.prototype.removeChild = jest.fn();
+// Node.prototype.insertBefore = jest.fn();
+// Node.prototype.replaceChild = jest.fn();
+// Node.prototype.cloneNode = jest.fn(() => ({} as Node));
 
 // Mock focus/blur methods
 HTMLElement.prototype.focus = jest.fn();
@@ -616,6 +1194,9 @@ const originalError = console.error;
 const originalWarn = console.warn;
 
 beforeAll(() => {
+  // Setup performance mocks
+  setupPerformanceMocks();
+  
   console.error = jest.fn((message, ...args) => {
     // Filter out known React warnings
     if (
@@ -645,36 +1226,57 @@ beforeAll(() => {
 afterAll(() => {
   console.error = originalError;
   console.warn = originalWarn;
+  cleanupPerformanceMocks();
 });
 
-// Ensure DOM root element exists immediately
-if (!document.getElementById('root')) {
-  const root = document.createElement('div');
-  root.id = 'root';
-  document.body.appendChild(root);
+// Ensure DOM root element exists initially for React 18
+if (typeof document !== 'undefined') {
+  // Always ensure body exists first
+  if (!document.body) {
+    const body = document.createElement('body');
+    document.documentElement.appendChild(body);
+  }
+  
+  // Don't add a root element here - let tests create their own containers
+  // This prevents conflicts with React Testing Library
 }
 
 // Setup before each test
 beforeEach(() => {
-  // Clear DOM but preserve root
-  const root = document.getElementById('root');
-  if (root) {
-    root.innerHTML = '';
-  } else {
-    // Create root element if it doesn't exist
-    const newRoot = document.createElement('div');
-    newRoot.id = 'root';
-    document.body.appendChild(newRoot);
-  }
+  // Use our centralized DOM setup
+  setupDOM();
   
   // Setup default mocks
   setupDefaultMocks();
+  
+  // Reset all localStorage mocks - check if they are jest mocks first
+  if (typeof localStorage.getItem === 'function' && 'mockClear' in localStorage.getItem) {
+    (localStorage.getItem as jest.Mock).mockClear();
+  }
+  if (typeof localStorage.setItem === 'function' && 'mockClear' in localStorage.setItem) {
+    (localStorage.setItem as jest.Mock).mockClear();
+  }
+  if (typeof localStorage.removeItem === 'function' && 'mockClear' in localStorage.removeItem) {
+    (localStorage.removeItem as jest.Mock).mockClear();
+  }
+  if (typeof localStorage.clear === 'function' && 'mockClear' in localStorage.clear) {
+    (localStorage.clear as jest.Mock).mockClear();
+  }
+  if (typeof localStorage.key === 'function' && 'mockClear' in localStorage.key) {
+    (localStorage.key as jest.Mock).mockClear();
+  }
+  
+  // Reset timer mocks
+  jest.clearAllTimers();
 });
 
 // Cleanup after each test
-afterEach(() => {
-  // Cleanup React components
-  cleanup();
+afterEach(async () => {
+  // Cleanup React components first (wait for async cleanup)
+  await cleanup();
+  
+  // Clean up custom containers
+  // cleanupContainers();
   
   // Clear all mocks
   jest.clearAllMocks();
@@ -683,12 +1285,43 @@ afterEach(() => {
   localStorage.clear();
   sessionStorage.clear();
   
+  // Run pending timers before clearing them
+  if (typeof setTimeout !== 'undefined' && jest.isMockFunction(setTimeout)) {
+    jest.runOnlyPendingTimers();
+  }
+  
   // Clear timers
   jest.clearAllTimers();
   
-  // Clear DOM
-  document.body.innerHTML = '';
+  // If using fake timers, ensure they're reset
+  if (typeof setTimeout !== 'undefined' && jest.isMockFunction(setTimeout)) {
+    jest.useRealTimers();
+  }
+  
+  // Clean up DOM for next test using our utility
+  cleanupDOM();
 });
+
+// Mock Cache API
+const mockCache = {
+  match: jest.fn(() => Promise.resolve(undefined)),
+  matchAll: jest.fn(() => Promise.resolve([])),
+  add: jest.fn(() => Promise.resolve()),
+  addAll: jest.fn(() => Promise.resolve()),
+  put: jest.fn(() => Promise.resolve()),
+  delete: jest.fn(() => Promise.resolve(true)),
+  keys: jest.fn(() => Promise.resolve([]))
+};
+
+const mockCaches = {
+  open: jest.fn(() => Promise.resolve(mockCache)),
+  has: jest.fn(() => Promise.resolve(false)),
+  delete: jest.fn(() => Promise.resolve(true)),
+  keys: jest.fn(() => Promise.resolve([])),
+  match: jest.fn(() => Promise.resolve(undefined))
+};
+
+(global as any).caches = mockCaches;
 
 // Increase default timeout for async tests
 jest.setTimeout(10000);

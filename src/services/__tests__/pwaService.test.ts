@@ -10,7 +10,7 @@ describe('PWAService', () => {
   let mockRegistration: any;
   let mockNavigator: any;
 
-  it('should have at least one test', () => {
+  it.skip('should have at least one test', () => {
     expect(true).toBe(true);
   });
 

@@ -1,0 +1,720 @@
+
+> astral-core-react@1.0.0 test
+> jest src/hooks/useIntelligentCaching.test.tsx --no-coverage
+
+  console.error
+    Warning: An update to TestComponent inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+        at TestComponent (C:\Users\damat\_REPOS\CoreV2\node_modules\@testing-library\react\dist\pure.js:329:5)
+        at div
+        at Wrapper (C:\Users\damat\_REPOS\CoreV2\src\hooks\useIntelligentCaching.test.tsx:52:61)
+
+    [0m [90m 77 |[39m           [90m// Check if any service worker is registered first[39m
+     [90m 78 |[39m           [36mconst[39m registration [33m=[39m [36mawait[39m navigator[33m.[39mserviceWorker[33m.[39mgetRegistration()[33m;[39m
+    [31m[1m>[22m[39m[90m 79 |[39m           setIsServiceWorkerReady([33m![39m[33m![39mregistration[33m?[39m[33m.[39mactive)[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 80 |[39m           
+     [90m 81 |[39m           [90m// Setup message listener[39m
+     [90m 82 |[39m           navigator[33m.[39mserviceWorker[33m.[39maddEventListener([32m'message'[39m[33m,[39m (event) [33m=>[39m {[0m
+
+      at printWarning (node_modules/react-dom/cjs/react-dom.development.js:86:30)
+      at error (node_modules/react-dom/cjs/react-dom.development.js:60:7)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom.development.js:27628:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom.development.js:25547:5)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom.development.js:16708:7)
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:79:11)
+
+  console.log
+    [Intelligent Cache] Service worker integration ready
+
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:88:19)
+
+  console.warn
+    A function to advance timers was called but the timers APIs are not replaced with fake timers. Call `jest.useFakeTimers()` in this test file or enable fake timers for all tests by setting 'fakeTimers': {'enableGlobally': true} in Jest configuration file.
+    Stack Trace:
+    
+        [0m [90m 88 |[39m     [36mconst[39m { result } [33m=[39m renderHook(() [33m=>[39m useIntelligentCaching()[33m,[39m { wrapper[33m:[39m [33mWrapper[39m })[33m;[39m
+         [90m 89 |[39m
+        [31m[1m>[22m[39m[90m 90 |[39m     [36mawait[39m waitFor(() [33m=>[39m {
+         [90m    |[39m                  [31m[1m^[22m[39m
+         [90m 91 |[39m       expect(result[33m.[39mcurrent[33m.[39misServiceWorkerReady)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+         [90m 92 |[39m     })[33m;[39m
+         [90m 93 |[39m[0m
+    
+          Error: 
+          at FakeTimers._checkFakeTimers (node_modules/@jest/fake-timers/build/modernFakeTimers.js:158:13)
+          at FakeTimers.advanceTimersByTime (node_modules/@jest/fake-timers/build/modernFakeTimers.js:93:14)
+          at node_modules/@testing-library/dom/dist/wait-for.js:71:16
+          at node_modules/@testing-library/react/dist/act-compat.js:48:24
+          at act (node_modules/react/cjs/react.development.js:2512:16)
+          at node_modules/@testing-library/react/dist/act-compat.js:47:25
+          at unstable_advanceTimersWrapper (node_modules/@testing-library/react/dist/pure.js:79:35)
+          at node_modules/@testing-library/dom/dist/wait-for.js:65:15
+          at waitFor (node_modules/@testing-library/dom/dist/wait-for.js:36:10)
+          at node_modules/@testing-library/dom/dist/wait-for.js:164:54
+          at Object.asyncWrapper (node_modules/@testing-library/react/dist/pure.js:88:28)
+          at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:164:35)
+          at Object.<anonymous> (src/hooks/useIntelligentCaching.test.tsx:90:18)
+
+    [0m [90m 88 |[39m     [36mconst[39m { result } [33m=[39m renderHook(() [33m=>[39m useIntelligentCaching()[33m,[39m { wrapper[33m:[39m [33mWrapper[39m })[33m;[39m
+     [90m 89 |[39m
+    [31m[1m>[22m[39m[90m 90 |[39m     [36mawait[39m waitFor(() [33m=>[39m {
+     [90m    |[39m                  [31m[1m^[22m[39m
+     [90m 91 |[39m       expect(result[33m.[39mcurrent[33m.[39misServiceWorkerReady)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 92 |[39m     })[33m;[39m
+     [90m 93 |[39m[0m
+
+      at FakeTimers._checkFakeTimers (node_modules/@jest/fake-timers/build/modernFakeTimers.js:152:28)
+      at FakeTimers.advanceTimersByTime (node_modules/@jest/fake-timers/build/modernFakeTimers.js:93:14)
+      at node_modules/@testing-library/dom/dist/wait-for.js:71:16
+      at node_modules/@testing-library/react/dist/act-compat.js:48:24
+      at act (node_modules/react/cjs/react.development.js:2512:16)
+      at node_modules/@testing-library/react/dist/act-compat.js:47:25
+      at unstable_advanceTimersWrapper (node_modules/@testing-library/react/dist/pure.js:79:35)
+      at node_modules/@testing-library/dom/dist/wait-for.js:65:15
+      at waitFor (node_modules/@testing-library/dom/dist/wait-for.js:36:10)
+      at node_modules/@testing-library/dom/dist/wait-for.js:164:54
+      at Object.asyncWrapper (node_modules/@testing-library/react/dist/pure.js:88:28)
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:164:35)
+      at Object.<anonymous> (src/hooks/useIntelligentCaching.test.tsx:90:18)
+
+  console.log
+    [Intelligent Cache] Service worker integration ready
+
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:88:19)
+
+  console.warn
+    A function to advance timers was called but the timers APIs are not replaced with fake timers. Call `jest.useFakeTimers()` in this test file or enable fake timers for all tests by setting 'fakeTimers': {'enableGlobally': true} in Jest configuration file.
+    Stack Trace:
+    
+        [0m [90m 88 |[39m     [36mconst[39m { result } [33m=[39m renderHook(() [33m=>[39m useIntelligentCaching()[33m,[39m { wrapper[33m:[39m [33mWrapper[39m })[33m;[39m
+         [90m 89 |[39m
+        [31m[1m>[22m[39m[90m 90 |[39m     [36mawait[39m waitFor(() [33m=>[39m {
+         [90m    |[39m     [31m[1m^[22m[39m
+         [90m 91 |[39m       expect(result[33m.[39mcurrent[33m.[39misServiceWorkerReady)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+         [90m 92 |[39m     })[33m;[39m
+         [90m 93 |[39m[0m
+    
+          Error: 
+          at FakeTimers._checkFakeTimers (node_modules/@jest/fake-timers/build/modernFakeTimers.js:158:13)
+          at FakeTimers.advanceTimersByTime (node_modules/@jest/fake-timers/build/modernFakeTimers.js:93:14)
+          at node_modules/@testing-library/react/dist/pure.js:97:16
+          at Object.asyncWrapper (node_modules/@testing-library/react/dist/pure.js:92:13)
+          at Object.<anonymous> (src/hooks/useIntelligentCaching.test.tsx:90:5)
+
+    [0m [90m 88 |[39m     [36mconst[39m { result } [33m=[39m renderHook(() [33m=>[39m useIntelligentCaching()[33m,[39m { wrapper[33m:[39m [33mWrapper[39m })[33m;[39m
+     [90m 89 |[39m
+    [31m[1m>[22m[39m[90m 90 |[39m     [36mawait[39m waitFor(() [33m=>[39m {
+     [90m    |[39m     [31m[1m^[22m[39m
+     [90m 91 |[39m       expect(result[33m.[39mcurrent[33m.[39misServiceWorkerReady)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 92 |[39m     })[33m;[39m
+     [90m 93 |[39m[0m
+
+      at FakeTimers._checkFakeTimers (node_modules/@jest/fake-timers/build/modernFakeTimers.js:152:28)
+      at FakeTimers.advanceTimersByTime (node_modules/@jest/fake-timers/build/modernFakeTimers.js:93:14)
+      at node_modules/@testing-library/react/dist/pure.js:97:16
+      at Object.asyncWrapper (node_modules/@testing-library/react/dist/pure.js:92:13)
+      at Object.<anonymous> (src/hooks/useIntelligentCaching.test.tsx:90:5)
+
+  console.warn
+    A function to advance timers was called but the timers APIs are not replaced with fake timers. Call `jest.useFakeTimers()` in this test file or enable fake timers for all tests by setting 'fakeTimers': {'enableGlobally': true} in Jest configuration file.
+    Stack Trace:
+    
+        [0m [90m 105 |[39m     [36mconst[39m { result } [33m=[39m renderHook(() [33m=>[39m useIntelligentCaching()[33m,[39m { wrapper[33m:[39m [33mWrapper[39m })[33m;[39m
+         [90m 106 |[39m
+        [31m[1m>[22m[39m[90m 107 |[39m     [36mawait[39m waitFor(() [33m=>[39m {
+         [90m     |[39m     [31m[1m^[22m[39m
+         [90m 108 |[39m       expect(result[33m.[39mcurrent[33m.[39misServiceWorkerReady)[33m.[39mtoBe([36mfalse[39m)[33m;[39m
+         [90m 109 |[39m     })[33m;[39m
+         [90m 110 |[39m[0m
+    
+          Error: 
+          at FakeTimers._checkFakeTimers (node_modules/@jest/fake-timers/build/modernFakeTimers.js:158:13)
+          at FakeTimers.advanceTimersByTime (node_modules/@jest/fake-timers/build/modernFakeTimers.js:93:14)
+          at node_modules/@testing-library/react/dist/pure.js:97:16
+          at Object.asyncWrapper (node_modules/@testing-library/react/dist/pure.js:92:13)
+          at Object.<anonymous> (src/hooks/useIntelligentCaching.test.tsx:107:5)
+
+    [0m [90m 105 |[39m     [36mconst[39m { result } [33m=[39m renderHook(() [33m=>[39m useIntelligentCaching()[33m,[39m { wrapper[33m:[39m [33mWrapper[39m })[33m;[39m
+     [90m 106 |[39m
+    [31m[1m>[22m[39m[90m 107 |[39m     [36mawait[39m waitFor(() [33m=>[39m {
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 108 |[39m       expect(result[33m.[39mcurrent[33m.[39misServiceWorkerReady)[33m.[39mtoBe([36mfalse[39m)[33m;[39m
+     [90m 109 |[39m     })[33m;[39m
+     [90m 110 |[39m[0m
+
+      at FakeTimers._checkFakeTimers (node_modules/@jest/fake-timers/build/modernFakeTimers.js:152:28)
+      at FakeTimers.advanceTimersByTime (node_modules/@jest/fake-timers/build/modernFakeTimers.js:93:14)
+      at node_modules/@testing-library/react/dist/pure.js:97:16
+      at Object.asyncWrapper (node_modules/@testing-library/react/dist/pure.js:92:13)
+      at Object.<anonymous> (src/hooks/useIntelligentCaching.test.tsx:107:5)
+
+  console.warn
+    A function to advance timers was called but the timers APIs are not replaced with fake timers. Call `jest.useFakeTimers()` in this test file or enable fake timers for all tests by setting 'fakeTimers': {'enableGlobally': true} in Jest configuration file.
+    Stack Trace:
+    
+        [0m [90m 127 |[39m     [36mconst[39m { result } [33m=[39m renderHook(() [33m=>[39m useIntelligentCaching()[33m,[39m { wrapper[33m:[39m [33mWrapper[39m })[33m;[39m
+         [90m 128 |[39m
+        [31m[1m>[22m[39m[90m 129 |[39m     [36mawait[39m waitFor(() [33m=>[39m {
+         [90m     |[39m                  [31m[1m^[22m[39m
+         [90m 130 |[39m       expect(result[33m.[39mcurrent[33m.[39misServiceWorkerReady)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+         [90m 131 |[39m     })[33m;[39m
+         [90m 132 |[39m[0m
+    
+          Error: 
+          at FakeTimers._checkFakeTimers (node_modules/@jest/fake-timers/build/modernFakeTimers.js:158:13)
+          at FakeTimers.advanceTimersByTime (node_modules/@jest/fake-timers/build/modernFakeTimers.js:93:14)
+          at node_modules/@testing-library/dom/dist/wait-for.js:71:16
+          at node_modules/@testing-library/react/dist/act-compat.js:48:24
+          at act (node_modules/react/cjs/react.development.js:2512:16)
+          at node_modules/@testing-library/react/dist/act-compat.js:47:25
+          at unstable_advanceTimersWrapper (node_modules/@testing-library/react/dist/pure.js:79:35)
+          at node_modules/@testing-library/dom/dist/wait-for.js:65:15
+          at waitFor (node_modules/@testing-library/dom/dist/wait-for.js:36:10)
+          at node_modules/@testing-library/dom/dist/wait-for.js:164:54
+          at Object.asyncWrapper (node_modules/@testing-library/react/dist/pure.js:88:28)
+          at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:164:35)
+          at Object.<anonymous> (src/hooks/useIntelligentCaching.test.tsx:129:18)
+
+    [0m [90m 127 |[39m     [36mconst[39m { result } [33m=[39m renderHook(() [33m=>[39m useIntelligentCaching()[33m,[39m { wrapper[33m:[39m [33mWrapper[39m })[33m;[39m
+     [90m 128 |[39m
+    [31m[1m>[22m[39m[90m 129 |[39m     [36mawait[39m waitFor(() [33m=>[39m {
+     [90m     |[39m                  [31m[1m^[22m[39m
+     [90m 130 |[39m       expect(result[33m.[39mcurrent[33m.[39misServiceWorkerReady)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 131 |[39m     })[33m;[39m
+     [90m 132 |[39m[0m
+
+      at FakeTimers._checkFakeTimers (node_modules/@jest/fake-timers/build/modernFakeTimers.js:152:28)
+      at FakeTimers.advanceTimersByTime (node_modules/@jest/fake-timers/build/modernFakeTimers.js:93:14)
+      at node_modules/@testing-library/dom/dist/wait-for.js:71:16
+      at node_modules/@testing-library/react/dist/act-compat.js:48:24
+      at act (node_modules/react/cjs/react.development.js:2512:16)
+      at node_modules/@testing-library/react/dist/act-compat.js:47:25
+      at unstable_advanceTimersWrapper (node_modules/@testing-library/react/dist/pure.js:79:35)
+      at node_modules/@testing-library/dom/dist/wait-for.js:65:15
+      at waitFor (node_modules/@testing-library/dom/dist/wait-for.js:36:10)
+      at node_modules/@testing-library/dom/dist/wait-for.js:164:54
+      at Object.asyncWrapper (node_modules/@testing-library/react/dist/pure.js:88:28)
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:164:35)
+      at Object.<anonymous> (src/hooks/useIntelligentCaching.test.tsx:129:18)
+
+  console.log
+    [Intelligent Cache] Service worker integration ready
+
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:88:19)
+
+  console.warn
+    A function to advance timers was called but the timers APIs are not replaced with fake timers. Call `jest.useFakeTimers()` in this test file or enable fake timers for all tests by setting 'fakeTimers': {'enableGlobally': true} in Jest configuration file.
+    Stack Trace:
+    
+        [0m [90m 127 |[39m     [36mconst[39m { result } [33m=[39m renderHook(() [33m=>[39m useIntelligentCaching()[33m,[39m { wrapper[33m:[39m [33mWrapper[39m })[33m;[39m
+         [90m 128 |[39m
+        [31m[1m>[22m[39m[90m 129 |[39m     [36mawait[39m waitFor(() [33m=>[39m {
+         [90m     |[39m     [31m[1m^[22m[39m
+         [90m 130 |[39m       expect(result[33m.[39mcurrent[33m.[39misServiceWorkerReady)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+         [90m 131 |[39m     })[33m;[39m
+         [90m 132 |[39m[0m
+    
+          Error: 
+          at FakeTimers._checkFakeTimers (node_modules/@jest/fake-timers/build/modernFakeTimers.js:158:13)
+          at FakeTimers.advanceTimersByTime (node_modules/@jest/fake-timers/build/modernFakeTimers.js:93:14)
+          at node_modules/@testing-library/react/dist/pure.js:97:16
+          at Object.asyncWrapper (node_modules/@testing-library/react/dist/pure.js:92:13)
+          at Object.<anonymous> (src/hooks/useIntelligentCaching.test.tsx:129:5)
+
+    [0m [90m 127 |[39m     [36mconst[39m { result } [33m=[39m renderHook(() [33m=>[39m useIntelligentCaching()[33m,[39m { wrapper[33m:[39m [33mWrapper[39m })[33m;[39m
+     [90m 128 |[39m
+    [31m[1m>[22m[39m[90m 129 |[39m     [36mawait[39m waitFor(() [33m=>[39m {
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 130 |[39m       expect(result[33m.[39mcurrent[33m.[39misServiceWorkerReady)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 131 |[39m     })[33m;[39m
+     [90m 132 |[39m[0m
+
+      at FakeTimers._checkFakeTimers (node_modules/@jest/fake-timers/build/modernFakeTimers.js:152:28)
+      at FakeTimers.advanceTimersByTime (node_modules/@jest/fake-timers/build/modernFakeTimers.js:93:14)
+      at node_modules/@testing-library/react/dist/pure.js:97:16
+      at Object.asyncWrapper (node_modules/@testing-library/react/dist/pure.js:92:13)
+      at Object.<anonymous> (src/hooks/useIntelligentCaching.test.tsx:129:5)
+
+  console.warn
+    A function to advance timers was called but the timers APIs are not replaced with fake timers. Call `jest.useFakeTimers()` in this test file or enable fake timers for all tests by setting 'fakeTimers': {'enableGlobally': true} in Jest configuration file.
+    Stack Trace:
+    
+        [0m [90m 147 |[39m     [36mconst[39m { result } [33m=[39m renderHook(() [33m=>[39m useIntelligentCaching()[33m,[39m { wrapper[33m:[39m [33mWrapper[39m })[33m;[39m
+         [90m 148 |[39m
+        [31m[1m>[22m[39m[90m 149 |[39m     [36mawait[39m waitFor(() [33m=>[39m {
+         [90m     |[39m                  [31m[1m^[22m[39m
+         [90m 150 |[39m       expect(result[33m.[39mcurrent[33m.[39misServiceWorkerReady)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+         [90m 151 |[39m     })[33m;[39m
+         [90m 152 |[39m[0m
+    
+          Error: 
+          at FakeTimers._checkFakeTimers (node_modules/@jest/fake-timers/build/modernFakeTimers.js:158:13)
+          at FakeTimers.advanceTimersByTime (node_modules/@jest/fake-timers/build/modernFakeTimers.js:93:14)
+          at node_modules/@testing-library/dom/dist/wait-for.js:71:16
+          at node_modules/@testing-library/react/dist/act-compat.js:48:24
+          at act (node_modules/react/cjs/react.development.js:2512:16)
+          at node_modules/@testing-library/react/dist/act-compat.js:47:25
+          at unstable_advanceTimersWrapper (node_modules/@testing-library/react/dist/pure.js:79:35)
+          at node_modules/@testing-library/dom/dist/wait-for.js:65:15
+          at waitFor (node_modules/@testing-library/dom/dist/wait-for.js:36:10)
+          at node_modules/@testing-library/dom/dist/wait-for.js:164:54
+          at Object.asyncWrapper (node_modules/@testing-library/react/dist/pure.js:88:28)
+          at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:164:35)
+          at Object.<anonymous> (src/hooks/useIntelligentCaching.test.tsx:149:18)
+
+    [0m [90m 147 |[39m     [36mconst[39m { result } [33m=[39m renderHook(() [33m=>[39m useIntelligentCaching()[33m,[39m { wrapper[33m:[39m [33mWrapper[39m })[33m;[39m
+     [90m 148 |[39m
+    [31m[1m>[22m[39m[90m 149 |[39m     [36mawait[39m waitFor(() [33m=>[39m {
+     [90m     |[39m                  [31m[1m^[22m[39m
+     [90m 150 |[39m       expect(result[33m.[39mcurrent[33m.[39misServiceWorkerReady)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 151 |[39m     })[33m;[39m
+     [90m 152 |[39m[0m
+
+      at FakeTimers._checkFakeTimers (node_modules/@jest/fake-timers/build/modernFakeTimers.js:152:28)
+      at FakeTimers.advanceTimersByTime (node_modules/@jest/fake-timers/build/modernFakeTimers.js:93:14)
+      at node_modules/@testing-library/dom/dist/wait-for.js:71:16
+      at node_modules/@testing-library/react/dist/act-compat.js:48:24
+      at act (node_modules/react/cjs/react.development.js:2512:16)
+      at node_modules/@testing-library/react/dist/act-compat.js:47:25
+      at unstable_advanceTimersWrapper (node_modules/@testing-library/react/dist/pure.js:79:35)
+      at node_modules/@testing-library/dom/dist/wait-for.js:65:15
+      at waitFor (node_modules/@testing-library/dom/dist/wait-for.js:36:10)
+      at node_modules/@testing-library/dom/dist/wait-for.js:164:54
+      at Object.asyncWrapper (node_modules/@testing-library/react/dist/pure.js:88:28)
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:164:35)
+      at Object.<anonymous> (src/hooks/useIntelligentCaching.test.tsx:149:18)
+
+  console.log
+    [Intelligent Cache] Service worker integration ready
+
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:88:19)
+
+  console.warn
+    A function to advance timers was called but the timers APIs are not replaced with fake timers. Call `jest.useFakeTimers()` in this test file or enable fake timers for all tests by setting 'fakeTimers': {'enableGlobally': true} in Jest configuration file.
+    Stack Trace:
+    
+        [0m [90m 147 |[39m     [36mconst[39m { result } [33m=[39m renderHook(() [33m=>[39m useIntelligentCaching()[33m,[39m { wrapper[33m:[39m [33mWrapper[39m })[33m;[39m
+         [90m 148 |[39m
+        [31m[1m>[22m[39m[90m 149 |[39m     [36mawait[39m waitFor(() [33m=>[39m {
+         [90m     |[39m     [31m[1m^[22m[39m
+         [90m 150 |[39m       expect(result[33m.[39mcurrent[33m.[39misServiceWorkerReady)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+         [90m 151 |[39m     })[33m;[39m
+         [90m 152 |[39m[0m
+    
+          Error: 
+          at FakeTimers._checkFakeTimers (node_modules/@jest/fake-timers/build/modernFakeTimers.js:158:13)
+          at FakeTimers.advanceTimersByTime (node_modules/@jest/fake-timers/build/modernFakeTimers.js:93:14)
+          at node_modules/@testing-library/react/dist/pure.js:97:16
+          at Object.asyncWrapper (node_modules/@testing-library/react/dist/pure.js:92:13)
+          at Object.<anonymous> (src/hooks/useIntelligentCaching.test.tsx:149:5)
+
+    [0m [90m 147 |[39m     [36mconst[39m { result } [33m=[39m renderHook(() [33m=>[39m useIntelligentCaching()[33m,[39m { wrapper[33m:[39m [33mWrapper[39m })[33m;[39m
+     [90m 148 |[39m
+    [31m[1m>[22m[39m[90m 149 |[39m     [36mawait[39m waitFor(() [33m=>[39m {
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 150 |[39m       expect(result[33m.[39mcurrent[33m.[39misServiceWorkerReady)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 151 |[39m     })[33m;[39m
+     [90m 152 |[39m[0m
+
+      at FakeTimers._checkFakeTimers (node_modules/@jest/fake-timers/build/modernFakeTimers.js:152:28)
+      at FakeTimers.advanceTimersByTime (node_modules/@jest/fake-timers/build/modernFakeTimers.js:93:14)
+      at node_modules/@testing-library/react/dist/pure.js:97:16
+      at Object.asyncWrapper (node_modules/@testing-library/react/dist/pure.js:92:13)
+      at Object.<anonymous> (src/hooks/useIntelligentCaching.test.tsx:149:5)
+
+  console.error
+    Warning: An update to TestComponent inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+        at TestComponent (C:\Users\damat\_REPOS\CoreV2\node_modules\@testing-library\react\dist\pure.js:329:5)
+        at div
+        at Wrapper (C:\Users\damat\_REPOS\CoreV2\src\hooks\useIntelligentCaching.test.tsx:52:61)
+
+    [0m [90m 77 |[39m           [90m// Check if any service worker is registered first[39m
+     [90m 78 |[39m           [36mconst[39m registration [33m=[39m [36mawait[39m navigator[33m.[39mserviceWorker[33m.[39mgetRegistration()[33m;[39m
+    [31m[1m>[22m[39m[90m 79 |[39m           setIsServiceWorkerReady([33m![39m[33m![39mregistration[33m?[39m[33m.[39mactive)[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 80 |[39m           
+     [90m 81 |[39m           [90m// Setup message listener[39m
+     [90m 82 |[39m           navigator[33m.[39mserviceWorker[33m.[39maddEventListener([32m'message'[39m[33m,[39m (event) [33m=>[39m {[0m
+
+      at printWarning (node_modules/react-dom/cjs/react-dom.development.js:86:30)
+      at error (node_modules/react-dom/cjs/react-dom.development.js:60:7)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom.development.js:27628:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom.development.js:25547:5)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom.development.js:16708:7)
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:79:11)
+
+  console.log
+    [Intelligent Cache] Service worker integration ready
+
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:88:19)
+
+  console.warn
+    A function to advance timers was called but the timers APIs are not replaced with fake timers. Call `jest.useFakeTimers()` in this test file or enable fake timers for all tests by setting 'fakeTimers': {'enableGlobally': true} in Jest configuration file.
+    Stack Trace:
+    
+        [0m [90m 184 |[39m     [36mconst[39m { result } [33m=[39m renderHook(() [33m=>[39m useIntelligentCaching()[33m,[39m { wrapper[33m:[39m [33mWrapper[39m })[33m;[39m
+         [90m 185 |[39m
+        [31m[1m>[22m[39m[90m 186 |[39m     [36mawait[39m waitFor(() [33m=>[39m {
+         [90m     |[39m                  [31m[1m^[22m[39m
+         [90m 187 |[39m       expect(result[33m.[39mcurrent[33m.[39misServiceWorkerReady)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+         [90m 188 |[39m     })[33m;[39m
+         [90m 189 |[39m[0m
+    
+          Error: 
+          at FakeTimers._checkFakeTimers (node_modules/@jest/fake-timers/build/modernFakeTimers.js:158:13)
+          at FakeTimers.advanceTimersByTime (node_modules/@jest/fake-timers/build/modernFakeTimers.js:93:14)
+          at node_modules/@testing-library/dom/dist/wait-for.js:71:16
+          at node_modules/@testing-library/react/dist/act-compat.js:48:24
+          at act (node_modules/react/cjs/react.development.js:2512:16)
+          at node_modules/@testing-library/react/dist/act-compat.js:47:25
+          at unstable_advanceTimersWrapper (node_modules/@testing-library/react/dist/pure.js:79:35)
+          at node_modules/@testing-library/dom/dist/wait-for.js:65:15
+          at waitFor (node_modules/@testing-library/dom/dist/wait-for.js:36:10)
+          at node_modules/@testing-library/dom/dist/wait-for.js:164:54
+          at Object.asyncWrapper (node_modules/@testing-library/react/dist/pure.js:88:28)
+          at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:164:35)
+          at Object.<anonymous> (src/hooks/useIntelligentCaching.test.tsx:186:18)
+
+    [0m [90m 184 |[39m     [36mconst[39m { result } [33m=[39m renderHook(() [33m=>[39m useIntelligentCaching()[33m,[39m { wrapper[33m:[39m [33mWrapper[39m })[33m;[39m
+     [90m 185 |[39m
+    [31m[1m>[22m[39m[90m 186 |[39m     [36mawait[39m waitFor(() [33m=>[39m {
+     [90m     |[39m                  [31m[1m^[22m[39m
+     [90m 187 |[39m       expect(result[33m.[39mcurrent[33m.[39misServiceWorkerReady)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 188 |[39m     })[33m;[39m
+     [90m 189 |[39m[0m
+
+      at FakeTimers._checkFakeTimers (node_modules/@jest/fake-timers/build/modernFakeTimers.js:152:28)
+      at FakeTimers.advanceTimersByTime (node_modules/@jest/fake-timers/build/modernFakeTimers.js:93:14)
+      at node_modules/@testing-library/dom/dist/wait-for.js:71:16
+      at node_modules/@testing-library/react/dist/act-compat.js:48:24
+      at act (node_modules/react/cjs/react.development.js:2512:16)
+      at node_modules/@testing-library/react/dist/act-compat.js:47:25
+      at unstable_advanceTimersWrapper (node_modules/@testing-library/react/dist/pure.js:79:35)
+      at node_modules/@testing-library/dom/dist/wait-for.js:65:15
+      at waitFor (node_modules/@testing-library/dom/dist/wait-for.js:36:10)
+      at node_modules/@testing-library/dom/dist/wait-for.js:164:54
+      at Object.asyncWrapper (node_modules/@testing-library/react/dist/pure.js:88:28)
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:164:35)
+      at Object.<anonymous> (src/hooks/useIntelligentCaching.test.tsx:186:18)
+
+  console.log
+    [Intelligent Cache] Service worker integration ready
+
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:88:19)
+
+  console.warn
+    A function to advance timers was called but the timers APIs are not replaced with fake timers. Call `jest.useFakeTimers()` in this test file or enable fake timers for all tests by setting 'fakeTimers': {'enableGlobally': true} in Jest configuration file.
+    Stack Trace:
+    
+        [0m [90m 184 |[39m     [36mconst[39m { result } [33m=[39m renderHook(() [33m=>[39m useIntelligentCaching()[33m,[39m { wrapper[33m:[39m [33mWrapper[39m })[33m;[39m
+         [90m 185 |[39m
+        [31m[1m>[22m[39m[90m 186 |[39m     [36mawait[39m waitFor(() [33m=>[39m {
+         [90m     |[39m     [31m[1m^[22m[39m
+         [90m 187 |[39m       expect(result[33m.[39mcurrent[33m.[39misServiceWorkerReady)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+         [90m 188 |[39m     })[33m;[39m
+         [90m 189 |[39m[0m
+    
+          Error: 
+          at FakeTimers._checkFakeTimers (node_modules/@jest/fake-timers/build/modernFakeTimers.js:158:13)
+          at FakeTimers.advanceTimersByTime (node_modules/@jest/fake-timers/build/modernFakeTimers.js:93:14)
+          at node_modules/@testing-library/react/dist/pure.js:97:16
+          at Object.asyncWrapper (node_modules/@testing-library/react/dist/pure.js:92:13)
+          at Object.<anonymous> (src/hooks/useIntelligentCaching.test.tsx:186:5)
+
+    [0m [90m 184 |[39m     [36mconst[39m { result } [33m=[39m renderHook(() [33m=>[39m useIntelligentCaching()[33m,[39m { wrapper[33m:[39m [33mWrapper[39m })[33m;[39m
+     [90m 185 |[39m
+    [31m[1m>[22m[39m[90m 186 |[39m     [36mawait[39m waitFor(() [33m=>[39m {
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 187 |[39m       expect(result[33m.[39mcurrent[33m.[39misServiceWorkerReady)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 188 |[39m     })[33m;[39m
+     [90m 189 |[39m[0m
+
+      at FakeTimers._checkFakeTimers (node_modules/@jest/fake-timers/build/modernFakeTimers.js:152:28)
+      at FakeTimers.advanceTimersByTime (node_modules/@jest/fake-timers/build/modernFakeTimers.js:93:14)
+      at node_modules/@testing-library/react/dist/pure.js:97:16
+      at Object.asyncWrapper (node_modules/@testing-library/react/dist/pure.js:92:13)
+      at Object.<anonymous> (src/hooks/useIntelligentCaching.test.tsx:186:5)
+
+  console.error
+    Warning: An update to TestComponent inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+        at TestComponent (C:\Users\damat\_REPOS\CoreV2\node_modules\@testing-library\react\dist\pure.js:329:5)
+        at div
+        at Wrapper (C:\Users\damat\_REPOS\CoreV2\src\hooks\useIntelligentCaching.test.tsx:52:61)
+
+    [0m [90m 77 |[39m           [90m// Check if any service worker is registered first[39m
+     [90m 78 |[39m           [36mconst[39m registration [33m=[39m [36mawait[39m navigator[33m.[39mserviceWorker[33m.[39mgetRegistration()[33m;[39m
+    [31m[1m>[22m[39m[90m 79 |[39m           setIsServiceWorkerReady([33m![39m[33m![39mregistration[33m?[39m[33m.[39mactive)[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 80 |[39m           
+     [90m 81 |[39m           [90m// Setup message listener[39m
+     [90m 82 |[39m           navigator[33m.[39mserviceWorker[33m.[39maddEventListener([32m'message'[39m[33m,[39m (event) [33m=>[39m {[0m
+
+      at printWarning (node_modules/react-dom/cjs/react-dom.development.js:86:30)
+      at error (node_modules/react-dom/cjs/react-dom.development.js:60:7)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom.development.js:27628:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom.development.js:25547:5)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom.development.js:16708:7)
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:79:11)
+
+  console.log
+    [Intelligent Cache] Service worker integration ready
+
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:88:19)
+
+  console.error
+    Warning: An update to TestComponent inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+        at TestComponent (C:\Users\damat\_REPOS\CoreV2\node_modules\@testing-library\react\dist\pure.js:329:5)
+        at div
+        at Wrapper (C:\Users\damat\_REPOS\CoreV2\src\hooks\useIntelligentCaching.test.tsx:52:61)
+
+    [0m [90m 77 |[39m           [90m// Check if any service worker is registered first[39m
+     [90m 78 |[39m           [36mconst[39m registration [33m=[39m [36mawait[39m navigator[33m.[39mserviceWorker[33m.[39mgetRegistration()[33m;[39m
+    [31m[1m>[22m[39m[90m 79 |[39m           setIsServiceWorkerReady([33m![39m[33m![39mregistration[33m?[39m[33m.[39mactive)[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 80 |[39m           
+     [90m 81 |[39m           [90m// Setup message listener[39m
+     [90m 82 |[39m           navigator[33m.[39mserviceWorker[33m.[39maddEventListener([32m'message'[39m[33m,[39m (event) [33m=>[39m {[0m
+
+      at printWarning (node_modules/react-dom/cjs/react-dom.development.js:86:30)
+      at error (node_modules/react-dom/cjs/react-dom.development.js:60:7)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom.development.js:27628:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom.development.js:25547:5)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom.development.js:16708:7)
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:79:11)
+
+  console.log
+    [Intelligent Cache] Service worker integration ready
+
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:88:19)
+
+  console.error
+    Warning: An update to TestComponent inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+        at TestComponent (C:\Users\damat\_REPOS\CoreV2\node_modules\@testing-library\react\dist\pure.js:329:5)
+        at div
+        at Wrapper (C:\Users\damat\_REPOS\CoreV2\src\hooks\useIntelligentCaching.test.tsx:52:61)
+
+    [0m [90m 77 |[39m           [90m// Check if any service worker is registered first[39m
+     [90m 78 |[39m           [36mconst[39m registration [33m=[39m [36mawait[39m navigator[33m.[39mserviceWorker[33m.[39mgetRegistration()[33m;[39m
+    [31m[1m>[22m[39m[90m 79 |[39m           setIsServiceWorkerReady([33m![39m[33m![39mregistration[33m?[39m[33m.[39mactive)[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 80 |[39m           
+     [90m 81 |[39m           [90m// Setup message listener[39m
+     [90m 82 |[39m           navigator[33m.[39mserviceWorker[33m.[39maddEventListener([32m'message'[39m[33m,[39m (event) [33m=>[39m {[0m
+
+      at printWarning (node_modules/react-dom/cjs/react-dom.development.js:86:30)
+      at error (node_modules/react-dom/cjs/react-dom.development.js:60:7)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom.development.js:27628:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom.development.js:25547:5)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom.development.js:16708:7)
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:79:11)
+
+  console.log
+    [Intelligent Cache] Service worker integration ready
+
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:88:19)
+
+  console.log
+    [Prefetch] Skipping due to slow network: /api/test
+
+      at Object.prefetchResource (src/hooks/useIntelligentCaching.tsx:128:19)
+
+  console.log
+    [Intelligent Cache] Service worker integration ready
+
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:88:19)
+
+  console.log
+    [Intelligent Cache] Service worker integration ready
+
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:88:19)
+
+  console.log
+    [Prefetch] Successfully prefetched: /api/crisis
+
+      at Object.prefetchResource (src/hooks/useIntelligentCaching.tsx:152:15)
+
+  console.log
+    [Intelligent Cache] Service worker integration ready
+
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:88:19)
+
+  console.log
+    [Prefetch] Successfully prefetched: /api/crisis
+
+      at Object.prefetchResource (src/hooks/useIntelligentCaching.tsx:152:15)
+
+  console.log
+    [Prefetch] Skipping due to slow network: /api/failing
+
+      at Object.prefetchResource (src/hooks/useIntelligentCaching.tsx:128:19)
+
+  console.log
+    [Intelligent Cache] Service worker integration ready
+
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:88:19)
+
+  console.log
+    [Prefetch] Skipping due to slow network: /api/slow
+
+      at Object.prefetchResource (src/hooks/useIntelligentCaching.tsx:128:19)
+
+  console.log
+    [Intelligent Cache] Service worker integration ready
+
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:88:19)
+
+  console.log
+    [Prefetch] Skipping due to slow network: /api/notfound
+
+      at Object.prefetchResource (src/hooks/useIntelligentCaching.tsx:128:19)
+
+  console.log
+    [Intelligent Cache] Service worker integration ready
+
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:88:19)
+
+  console.log
+    [Intelligent Cache] Service worker integration ready
+
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:88:19)
+
+  console.log
+    [Intelligent Cache] Service worker integration ready
+
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:88:19)
+
+  console.log
+    [Intelligent Cache] Service worker integration ready
+
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:88:19)
+
+  console.error
+    Warning: An update to TestComponent inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+        at TestComponent (C:\Users\damat\_REPOS\CoreV2\node_modules\@testing-library\react\dist\pure.js:329:5)
+        at div
+        at Wrapper (C:\Users\damat\_REPOS\CoreV2\src\hooks\useIntelligentCaching.test.tsx:52:61)
+
+    [0m [90m 77 |[39m           [90m// Check if any service worker is registered first[39m
+     [90m 78 |[39m           [36mconst[39m registration [33m=[39m [36mawait[39m navigator[33m.[39mserviceWorker[33m.[39mgetRegistration()[33m;[39m
+    [31m[1m>[22m[39m[90m 79 |[39m           setIsServiceWorkerReady([33m![39m[33m![39mregistration[33m?[39m[33m.[39mactive)[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 80 |[39m           
+     [90m 81 |[39m           [90m// Setup message listener[39m
+     [90m 82 |[39m           navigator[33m.[39mserviceWorker[33m.[39maddEventListener([32m'message'[39m[33m,[39m (event) [33m=>[39m {[0m
+
+      at printWarning (node_modules/react-dom/cjs/react-dom.development.js:86:30)
+      at error (node_modules/react-dom/cjs/react-dom.development.js:60:7)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom.development.js:27628:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom.development.js:25547:5)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom.development.js:16708:7)
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:79:11)
+
+  console.log
+    [Intelligent Cache] Service worker integration ready
+
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:88:19)
+
+  console.log
+    [Intelligent Cache] Service worker integration ready
+
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:88:19)
+
+  console.error
+    Warning: An update to TestComponent inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+        at TestComponent (C:\Users\damat\_REPOS\CoreV2\node_modules\@testing-library\react\dist\pure.js:329:5)
+        at div
+        at Wrapper (C:\Users\damat\_REPOS\CoreV2\src\hooks\useIntelligentCaching.test.tsx:52:61)
+
+    [0m [90m 77 |[39m           [90m// Check if any service worker is registered first[39m
+     [90m 78 |[39m           [36mconst[39m registration [33m=[39m [36mawait[39m navigator[33m.[39mserviceWorker[33m.[39mgetRegistration()[33m;[39m
+    [31m[1m>[22m[39m[90m 79 |[39m           setIsServiceWorkerReady([33m![39m[33m![39mregistration[33m?[39m[33m.[39mactive)[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 80 |[39m           
+     [90m 81 |[39m           [90m// Setup message listener[39m
+     [90m 82 |[39m           navigator[33m.[39mserviceWorker[33m.[39maddEventListener([32m'message'[39m[33m,[39m (event) [33m=>[39m {[0m
+
+      at printWarning (node_modules/react-dom/cjs/react-dom.development.js:86:30)
+      at error (node_modules/react-dom/cjs/react-dom.development.js:60:7)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom.development.js:27628:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom.development.js:25547:5)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom.development.js:16708:7)
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:79:11)
+
+  console.log
+    [Intelligent Cache] Service worker integration ready
+
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:88:19)
+
+  console.log
+    [Intelligent Cache] Service worker integration ready
+
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:88:19)
+
+  console.log
+    [Intelligent Cache] Service worker integration ready
+
+      at initializeServiceWorker (src/hooks/useIntelligentCaching.tsx:88:19)
+

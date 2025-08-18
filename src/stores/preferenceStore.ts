@@ -11,7 +11,8 @@ export const usePreferenceStore = create<PreferenceState>((set) => ({
   loadFilters: () => {
     try {
         const savedFilters = localStorage.getItem('contentFilters');
-        if (savedFilters) {
+        // Check for null, undefined, or empty string
+        if (savedFilters && savedFilters.trim() !== '') {
           set({ contentFilters: JSON.parse(savedFilters) });
         }
     } catch (e) {

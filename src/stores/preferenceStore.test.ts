@@ -160,8 +160,9 @@ describe('preferenceStore', () => {
 
       const state = usePreferenceStore.getState();
       expect(state.contentFilters).toEqual([]);
-      expect(console.error).toHaveBeenCalled();
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('contentFilters');
+      // Empty string should be handled gracefully without error
+      expect(console.error).not.toHaveBeenCalled();
+      expect(localStorageMock.removeItem).not.toHaveBeenCalled();
     });
 
     test('should preserve existing filters when localStorage throws error', () => {

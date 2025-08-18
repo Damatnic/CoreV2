@@ -176,7 +176,7 @@ export function useEnhancedCrisisDetection(options: EnhancedCrisisDetectionOptio
         lastRiskLevelRef.current = currentRisk;
 
         // Handle intervention recommendations
-        if (result.realTimeRisk.recommendedInterventions.length > 0 && onInterventionRecommended) {
+        if (result.realTimeRisk.recommendedInterventions && result.realTimeRisk.recommendedInterventions.length > 0 && onInterventionRecommended) {
           onInterventionRecommended(result.realTimeRisk.recommendedInterventions.map(i => i.description));
         }
       }
@@ -315,12 +315,12 @@ export function useEnhancedCrisisDetection(options: EnhancedCrisisDetectionOptio
    */
   const getRiskPrediction = useCallback(() => {
     if (state.riskTrend.length < 3) {
-      return { predictedRisk: 0, confidence: 0, trend: 'unknown' };
+      return { predictedRisk: 0, confidence: 0, trend: 'unknown' as const, currentRisk: 0, riskChange: 0 };
     }
 
     const recentRisks = state.riskTrend.slice(-5);
     const currentRisk = recentRisks[recentRisks.length - 1];
-    const previousRisk = recentRisks[recentRisks.length - 2];
+    const previousRisk = recentRisks.length > 1 ? recentRisks[recentRisks.length - 2] : currentRisk;
     
     // Simple linear prediction
     const riskSlope = (currentRisk - recentRisks[0]) / recentRisks.length;
@@ -354,21 +354,26 @@ export function useEnhancedCrisisDetection(options: EnhancedCrisisDetectionOptio
 
     const { realTimeRisk, culturalContext } = state.lastAnalysis;
     
+    // Handle case where recommendedInterventions might not exist
+    if (!realTimeRisk.recommendedInterventions || realTimeRisk.recommendedInterventions.length === 0) {
+      return [];
+    }
+    
     return realTimeRisk.recommendedInterventions
       .map((intervention): InterventionRecommendation => {
         const getInterventionType = (priority: number): 'immediate' | 'urgent' | 'supportive' | 'monitoring' | 'resources' => {
-          if (priority > 8) return 'immediate';
-          if (priority > 6) return 'urgent';
-          if (priority > 4) return 'supportive';
-          if (priority > 2) return 'monitoring';
+          if (priority >= 8) return 'immediate';
+          if (priority >= 6) return 'urgent';
+          if (priority >= 4) return 'supportive';
+          if (priority >= 2) return 'monitoring';
           return 'resources';
         };
 
         const getTimeframe = (priority: number): string => {
-          if (priority > 8) return 'immediate';
-          if (priority > 6) return 'within 2 hours';
-          if (priority > 4) return 'within 24 hours';
-          return 'within week';
+          if (priority >= 8) return 'Immediate';
+          if (priority >= 6) return 'Within 2 hours';
+          if (priority >= 4) return 'Within 24 hours';
+          return 'Within week';
         };
 
         return {

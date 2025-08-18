@@ -36,6 +36,11 @@ export interface CulturalAssessmentResult extends AssessmentResult {
     resources: string[];
     familyGuidance?: string;
   };
+  privacyMetadata?: {
+    culturallyAdjusted: boolean;
+    culturalConfidenceScore: number;
+    biasReductionApplied: boolean;
+  };
 }
 
 /**
@@ -55,7 +60,9 @@ export async function getCulturalPhq9Questions(
     // Convert cultural questions to standard format for existing components
     return culturalQuestions.map(q => ({
       id: q.id,
-      text: q.culturalAdaptations[culturalContext || 'Western']?.text || q.text,
+      text: q.culturalAdaptations[culturalContext]?.text || 
+            q.culturalAdaptations['Western']?.text || 
+            q.text,
       options: q.options
     }));
   } catch (error) {
@@ -82,7 +89,9 @@ export async function getCulturalGad7Questions(
     // Convert cultural questions to standard format for existing components
     return culturalQuestions.map(q => ({
       id: q.id,
-      text: q.culturalAdaptations[culturalContext || 'Western']?.text || q.text,
+      text: q.culturalAdaptations[culturalContext]?.text || 
+            q.culturalAdaptations['Western']?.text || 
+            q.text,
       options: q.options
     }));
   } catch (error) {
@@ -117,7 +126,8 @@ export async function getCulturalPhq9Result(
       color: getSeverityColor(result.severity),
       culturalContext: result.culturalContext,
       culturalFactors: result.culturalFactors,
-      recommendations: result.recommendations
+      recommendations: result.recommendations,
+      privacyMetadata: result.privacyMetadata
     };
   } catch (error) {
     console.error('[Assessment Utils] Failed to get cultural PHQ-9 result:', error);
@@ -165,7 +175,8 @@ export async function getCulturalGad7Result(
       color: getSeverityColor(result.severity),
       culturalContext: result.culturalContext,
       culturalFactors: result.culturalFactors,
-      recommendations: result.recommendations
+      recommendations: result.recommendations,
+      privacyMetadata: result.privacyMetadata
     };
   } catch (error) {
     console.error('[Assessment Utils] Failed to get cultural GAD-7 result:', error);
@@ -477,7 +488,24 @@ function getSeverityColor(severity: string): string {
  * Format assessment date for display
  */
 export function formatAssessmentDate(date: string | Date): string {
-  const assessmentDate = typeof date === 'string' ? new Date(date) : date;
+  let assessmentDate: Date;
+  
+  if (typeof date === 'string') {
+    // Handle date-only strings (YYYY-MM-DD) by treating them as local dates
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      const [year, month, day] = date.split('-').map(Number);
+      assessmentDate = new Date(year, month - 1, day);
+    } else {
+      assessmentDate = new Date(date);
+    }
+  } else {
+    assessmentDate = date;
+  }
+  
+  if (isNaN(assessmentDate.getTime())) {
+    return 'Invalid Date';
+  }
+  
   return assessmentDate.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',

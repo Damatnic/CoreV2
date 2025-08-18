@@ -144,13 +144,13 @@ export const useIntelligentCaching = () => {
 
       clearTimeout(timeoutId);
 
-      if (response.ok) {
-        console.log('[Prefetch] Successfully prefetched:', url);
-        return true;
-      } else {
+      if (!response.ok) {
         console.warn('[Prefetch] Failed with status:', response.status, url);
         return false;
       }
+      
+      console.log('[Prefetch] Successfully prefetched:', url);
+      return true;
     } catch (error) {
       console.warn('[Prefetch] Error:', error, url);
       return false;
@@ -209,8 +209,8 @@ export const useIntelligentCaching = () => {
     options: PrefetchOptions = {}
   ) => {
     const prefetchPromises = urls.map(url => prefetchResource(url, options));
-    const results = await Promise.allSettled(prefetchPromises);
-    return results.filter(r => r.status === 'fulfilled' && r.value).length;
+    const results = await Promise.all(prefetchPromises);
+    return results.filter(success => success).length;
   }, [prefetchResource]);
 
   // Preload critical resources for current user
@@ -330,8 +330,8 @@ const prefetchResourceList = async (
   priority?: CachePriority
 ) => {
   const prefetchPromises = resources.map(url => prefetchFn(url, { priority }));
-  const results = await Promise.allSettled(prefetchPromises);
-  return results.filter(r => r.status === 'fulfilled' && r.value).length;
+  const results = await Promise.all(prefetchPromises);
+  return results.filter(success => success).length;
 };
 
 /**

@@ -1,0 +1,76 @@
+
+> astral-core-react@1.0.0 test
+> jest --testPathPattern=AppButton
+
+PASS src/components/__tests__/AppButton.test.tsx
+  AppButton
+    Rendering
+      √ should render button with children (37 ms)
+      √ should render button with correct type attribute (15 ms)
+      √ should render with icon when provided (3 ms)
+      √ should render icon-only button correctly (4 ms)
+      √ should not render children text in icon-only mode (2 ms)
+    Button Variants
+      √ should apply correct classes for primary variant when enhanced (3 ms)
+      √ should apply correct classes for primary variant when not enhanced (3 ms)
+      √ should apply correct classes for secondary variant when enhanced (5 ms)
+      √ should apply correct classes for secondary variant when not enhanced (3 ms)
+      √ should apply correct classes for danger variant when enhanced (3 ms)
+      √ should apply correct classes for danger variant when not enhanced (2 ms)
+      √ should apply correct classes for success variant when enhanced (3 ms)
+      √ should apply correct classes for success variant when not enhanced (3 ms)
+      √ should apply correct classes for ghost variant when enhanced (3 ms)
+      √ should apply correct classes for ghost variant when not enhanced (2 ms)
+    Button Sizes
+      √ should apply correct size class for xs when enhanced (3 ms)
+      √ should apply correct size class for xs when not enhanced (2 ms)
+      √ should apply correct size class for sm when enhanced (3 ms)
+      √ should apply correct size class for sm when not enhanced (2 ms)
+      √ should apply correct size class for md when enhanced (3 ms)
+      √ should apply correct size class for md when not enhanced (2 ms)
+      √ should apply correct size class for lg when enhanced (4 ms)
+      √ should apply correct size class for lg when not enhanced (2 ms)
+      √ should apply correct size class for xl when enhanced (3 ms)
+      √ should apply correct size class for xl when not enhanced (3 ms)
+    Loading State
+      √ should show loading spinner when isLoading is true (4 ms)
+      √ should not show children when loading (1 ms)
+      √ should show loading dots when loading (1 ms)
+      √ should show loading dots for default size (1 ms)
+    Disabled State
+      √ should be disabled when disabled prop is true (3 ms)
+      √ should be disabled when isLoading is true (4 ms)
+      √ should be disabled when both disabled and isLoading are true (3 ms)
+      √ should not call onClick when disabled (5 ms)
+      √ should not call onClick when loading (2 ms)
+    User Interactions
+      √ should call onClick when button is clicked (4 ms)
+      √ should call onClick multiple times when clicked multiple times (4 ms)
+      √ should pass click event to onClick handler (3 ms)
+    Accessibility
+      √ should have proper touch target size (4 ms)
+      √ should have minimum width for icon-only buttons (3 ms)
+      √ should use aria-label for icon-only buttons with string children (3 ms)
+      √ should use provided aria-label over children for icon-only buttons (3 ms)
+      √ should use provided aria-label for regular buttons (3 ms)
+      √ should not have aria-label when not icon-only and no explicit aria-label (3 ms)
+    CSS Classes
+      √ should apply enhanced classes when enhanced is true (3 ms)
+      √ should apply legacy classes when enhanced is false (2 ms)
+      √ should apply custom className (3 ms)
+      √ should combine all appropriate classes (3 ms)
+    Custom Styles
+      √ should apply custom styles (3 ms)
+      √ should merge custom styles with default touch target styles (3 ms)
+    Edge Cases
+      √ should handle undefined children gracefully (4 ms)
+      √ should handle null children gracefully (2 ms)
+      √ should handle complex children content (2 ms)
+      √ should handle icon with complex children in icon-only mode (3 ms)
+      √ should handle rapid state changes (5 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       54 passed, 54 total
+Snapshots:   0 total
+Time:        1.122 s
+Ran all test suites matching /AppButton/i.

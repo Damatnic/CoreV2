@@ -1,6 +1,12 @@
-export const formatTimeAgo = (timestamp: string | Date): string => {
+export const formatTimeAgo = (timestamp: string | Date | null | undefined): string => {
+    if (!timestamp) return 'Unknown';
+    
     const now = new Date();
     const past = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
+    
+    // Handle invalid dates
+    if (isNaN(past.getTime())) return 'Invalid date';
+    
     const seconds = Math.floor((now.getTime() - past.getTime()) / 1000);
 
     if (seconds < 60) return `${Math.floor(seconds)}s ago`;
@@ -18,7 +24,7 @@ export const formatTimeAgo = (timestamp: string | Date): string => {
 
 export const formatChatTimestamp = (timestamp: string): string => {
     const messageDate = new Date(timestamp);
-    const now = new Date();
+    const now = new Date(Date.now()); // Use Date.now() for better testability
     
     const isToday = messageDate.getDate() === now.getDate() &&
                     messageDate.getMonth() === now.getMonth() &&
@@ -29,8 +35,8 @@ export const formatChatTimestamp = (timestamp: string): string => {
     }
     
     // Check for yesterday
-    const yesterday = new Date(now);
-    yesterday.setDate(now.getDate() - 1);
+    const yesterday = new Date(Date.now());
+    yesterday.setDate(yesterday.getDate() - 1);
     const isYesterday = messageDate.getDate() === yesterday.getDate() &&
                         messageDate.getMonth() === yesterday.getMonth() &&
                         messageDate.getFullYear() === yesterday.getFullYear();

@@ -124,14 +124,25 @@ export function useCrisisDetection(options: CrisisDetectionOptions = {}) {
       if (result.hasCrisisIndicators && result.severityLevel !== 'none') {
         const response = crisisDetectionService.generateCrisisResponse(result, userType);
         
-        setCrisisAlert({
-          show: true,
-          severity: result.severityLevel,
-          message: response.message,
-          actions: response.actions,
-          resources: response.resources,
-          emergencyMode: result.emergencyServices
-        });
+        if (response) {
+          setCrisisAlert({
+            show: true,
+            severity: result.severityLevel,
+            message: response.message || 'Crisis detected - please seek help',
+            actions: response.actions || [],
+            resources: response.resources || [],
+            emergencyMode: result.emergencyServices
+          });
+        } else {
+          setCrisisAlert({
+            show: true,
+            severity: result.severityLevel,
+            message: 'Crisis detected - please seek help',
+            actions: [],
+            resources: [],
+            emergencyMode: result.emergencyServices
+          });
+        }
       }
 
       analysisCountRef.current += 1;

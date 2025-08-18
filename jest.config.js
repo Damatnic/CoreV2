@@ -3,7 +3,6 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: [
-    '<rootDir>/jest-setup.ts',
     '<rootDir>/src/setupTests.ts'
   ],
   setupFiles: ['<rootDir>/jest-env-setup.js'],
@@ -15,11 +14,28 @@ module.exports = {
     '\\.css$': 'identity-obj-proxy',
     '\\.module\\.css$': 'identity-obj-proxy',
     '^../contexts/AuthContext$': '<rootDir>/src/contexts/__mocks__/AuthContext.tsx',
-    '^./contexts/AuthContext$': '<rootDir>/src/contexts/__mocks__/AuthContext.tsx'
+    '^./contexts/AuthContext$': '<rootDir>/src/contexts/__mocks__/AuthContext.tsx',
+    '^../contexts/ThemeContext$': '<rootDir>/src/contexts/__mocks__/ThemeContext.tsx',
+    '^./contexts/ThemeContext$': '<rootDir>/src/contexts/__mocks__/ThemeContext.tsx',
+    '^../contexts/NotificationContext$': '<rootDir>/src/contexts/__mocks__/NotificationContext.tsx',
+    '^./contexts/NotificationContext$': '<rootDir>/src/contexts/__mocks__/NotificationContext.tsx'
   },
   testMatch: [
     '<rootDir>/src/**/*.test.{js,jsx,ts,tsx}',
-    '<rootDir>/tests/**/*.test.{js,jsx,ts,tsx}'
+    '<rootDir>/tests/accessibility/**/*.test.{js,jsx,ts,tsx}',
+    '<rootDir>/tests/integration/**/*.test.{js,jsx,ts,tsx}',
+    '<rootDir>/tests/performance/**/*.test.{js,jsx,ts,tsx}',
+    '<rootDir>/tests/service-worker/**/*.test.{js,jsx,ts,tsx}',
+    '<rootDir>/tests/services/**/*.test.{js,jsx,ts,tsx}',
+    '<rootDir>/tests/unit/**/*.test.{js,jsx,ts,tsx}',
+    '<rootDir>/tests/views/**/*.test.{js,jsx,ts,tsx}'
+  ],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/tests/e2e/',
+    '/tests/mobile/',
+    '/tests/pwa/',
+    '\\.spec\\.(ts|tsx|js|jsx)$'
   ],
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',

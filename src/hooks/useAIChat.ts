@@ -58,6 +58,12 @@ export const useAIChat = (options: UseAIChatOptions = {}) => {
     const sendMessage = async (text: string) => {
         if (!text.trim()) return;
         
+        // Check authentication before sending message
+        if (!authState.userToken) {
+            console.warn('User is not authenticated. Cannot send messages.');
+            return;
+        }
+        
         setError(null);
         
         // Content moderation

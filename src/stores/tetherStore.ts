@@ -132,14 +132,18 @@ export const useTetherStore = create<TetherState>((set, get) => ({
         const ws = new WebSocket(`wss://api.astralcore.app/tether/${data.sessionId}`);
         
         ws.onmessage = (event) => {
-          const message = JSON.parse(event.data);
-          if (message.type === 'strength_update') {
-            get().updateConnectionStrength(message.strength);
-          } else if (message.type === 'haptic') {
-            // Trigger haptic feedback
-            if ('vibrate' in navigator && !get().silentMode) {
-              navigator.vibrate(message.pattern);
+          try {
+            const message = JSON.parse(event.data);
+            if (message.type === 'strength_update') {
+              get().updateConnectionStrength(message.strength);
+            } else if (message.type === 'haptic') {
+              // Trigger haptic feedback
+              if ('vibrate' in navigator && !get().silentMode) {
+                navigator.vibrate(message.pattern);
+              }
             }
+          } catch (error) {
+            console.error('Failed to parse WebSocket message:', error);
           }
         };
 
@@ -222,12 +226,13 @@ export const useTetherStore = create<TetherState>((set, get) => ({
         },
         body: JSON.stringify({ requestId })
       });
-
+    } catch (error) {
+      console.error('Failed to decline tether:', error);
+    } finally {
+      // Always remove from pending requests, even on error
       set({
         pendingRequests: get().pendingRequests.filter(r => r.id !== requestId)
       });
-    } catch (error) {
-      console.error('Failed to decline tether:', error);
     }
   },
 

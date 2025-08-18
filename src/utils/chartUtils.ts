@@ -13,8 +13,9 @@ export const groupCheckInsByDay = (checkIns: MoodCheckIn[], days: number): Chart
 
     const relevantCheckIns = checkIns.filter(c => {
         const checkInDate = new Date(c.timestamp);
-        const diffDays = (today.getTime() - checkInDate.getTime()) / (1000 * 3600 * 24);
-        return diffDays < days;
+        checkInDate.setHours(0, 0, 0, 0);
+        const diffDays = Math.floor((today.getTime() - checkInDate.getTime()) / (1000 * 3600 * 24));
+        return diffDays >= 0 && diffDays < days;
     });
 
     for (const checkIn of relevantCheckIns) {

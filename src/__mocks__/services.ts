@@ -96,7 +96,7 @@ export const mockWebSocketService = {
 
 // Cache Service Mock
 export const mockCacheService = {
-  get: jest.fn((key) => Promise.resolve(null)),
+  get: jest.fn((_key) => Promise.resolve(null)),
   set: jest.fn(() => Promise.resolve()),
   delete: jest.fn(() => Promise.resolve()),
   clear: jest.fn(() => Promise.resolve()),
@@ -105,15 +105,131 @@ export const mockCacheService = {
   size: jest.fn(() => Promise.resolve(0))
 };
 
+// Enhanced Crisis Detection Service Mock
+export const mockEnhancedCrisisDetectionService = {
+  analyzeCrisisContent: jest.fn(() => ({
+    hasCrisisIndicators: false,
+    severityLevel: 'low',
+    crisisTypes: [],
+    confidence: 0.1,
+    keywords: [],
+    interventionRecommendations: []
+  })),
+  analyzeMessageRisk: jest.fn(() => ({
+    riskLevel: 'low',
+    indicators: [],
+    confidence: 0.1
+  })),
+  getInterventionRecommendations: jest.fn(() => []),
+  updateThresholds: jest.fn(),
+  reset: jest.fn()
+};
+
+// AI Moderation Service Mock
+export const mockAIModerationService = {
+  moderateMessage: jest.fn(() => ({
+    safe: true,
+    category: null,
+    escalate: false,
+    confidence: 0.9
+  })),
+  generateSafeResponse: jest.fn(() => 'Content has been moderated for safety.'),
+  sanitizeForDisplay: jest.fn((text) => text),
+  needsHumanIntervention: jest.fn(() => false),
+  reportViolation: jest.fn(() => Promise.resolve()),
+  updateRules: jest.fn()
+};
+
+// Error Tracking Service Mock
+export const mockErrorTrackingService = {
+  captureError: jest.fn(),
+  captureException: jest.fn(),
+  captureMessage: jest.fn(),
+  setContext: jest.fn(),
+  setTag: jest.fn(),
+  setUser: jest.fn(),
+  withScope: jest.fn((callback) => callback({})),
+  flush: jest.fn(() => Promise.resolve())
+};
+
+// Core Web Vitals Service Mock
+export const mockCoreWebVitalsService = {
+  initialize: jest.fn(() => Promise.resolve()),
+  generateReport: jest.fn(() => Promise.resolve({
+    timestamp: Date.now(),
+    url: 'http://localhost',
+    metrics: {
+      lcp: 1200,
+      fid: 80,
+      cls: 0.05,
+      fcp: 800,
+      ttfb: 200
+    },
+    grade: 'A'
+  })),
+  getPerformanceSummary: jest.fn(() => ({
+    overall: 'good',
+    metrics: {},
+    recommendations: []
+  })),
+  trackMetric: jest.fn(),
+  reset: jest.fn()
+};
+
+// Privacy Preserving Analytics Service Mock
+export const mockPrivacyPreservingAnalyticsService = {
+  initialize: jest.fn(() => Promise.resolve()),
+  trackEvent: jest.fn(),
+  trackPageView: jest.fn(),
+  setUserProperties: jest.fn(),
+  flush: jest.fn(() => Promise.resolve()),
+  getInsights: jest.fn(() => Promise.resolve({})),
+  reset: jest.fn()
+};
+
+// Enhanced Offline Service Mock
+export const mockEnhancedOfflineService = {
+  initialize: jest.fn(() => Promise.resolve()),
+  isOnline: jest.fn(() => true),
+  getOfflineCapabilities: jest.fn(() => ({
+    canCache: true,
+    canSync: true,
+    hasStorageQuota: true
+  })),
+  addToSyncQueue: jest.fn(),
+  processSyncQueue: jest.fn(() => Promise.resolve()),
+  getQueueStatus: jest.fn(() => ({ pending: 0, failed: 0 })),
+  clearQueue: jest.fn()
+};
+
+// Peer Support Network Service Mock
+export const mockPeerSupportNetworkService = {
+  initialize: jest.fn(() => Promise.resolve()),
+  connect: jest.fn(() => Promise.resolve()),
+  disconnect: jest.fn(),
+  sendMessage: jest.fn(),
+  joinGroup: jest.fn(() => Promise.resolve()),
+  leaveGroup: jest.fn(),
+  getActiveConnections: jest.fn(() => []),
+  reportUser: jest.fn(() => Promise.resolve())
+};
+
 // Export all mocks as a single object for easy importing
 export const serviceMocks = {
   crisisDetection: mockCrisisDetectionService,
+  enhancedCrisisDetection: mockEnhancedCrisisDetectionService,
+  aiModeration: mockAIModerationService,
   performance: mockPerformanceMonitor,
   analytics: mockAnalyticsService,
   auth: mockAuthService,
   notification: mockNotificationService,
   websocket: mockWebSocketService,
-  cache: mockCacheService
+  cache: mockCacheService,
+  errorTracking: mockErrorTrackingService,
+  coreWebVitals: mockCoreWebVitalsService,
+  privacyAnalytics: mockPrivacyPreservingAnalyticsService,
+  enhancedOffline: mockEnhancedOfflineService,
+  peerSupport: mockPeerSupportNetworkService
 };
 
 // Helper function to reset all service mocks
@@ -127,17 +243,20 @@ export const resetAllServiceMocks = () => {
   });
 };
 
-// Helper function to setup default mock implementations
+// Helper function to setup default mock implementations  
 export const setupDefaultMocks = () => {
-  // Setup localStorage with some default values
-  localStorage.setItem('theme', 'light');
-  localStorage.setItem('userPreferences', JSON.stringify({
-    notifications: true,
-    soundEnabled: false
-  }));
+  // Ensure storage mocks are working and populate with default values
+  if (typeof localStorage !== 'undefined' && localStorage.setItem) {
+    localStorage.setItem('theme', 'light');
+    localStorage.setItem('userPreferences', JSON.stringify({
+      notifications: true,
+      soundEnabled: false
+    }));
+  }
   
-  // Setup sessionStorage with default session
-  sessionStorage.setItem('sessionId', 'test-session');
+  if (typeof sessionStorage !== 'undefined' && sessionStorage.setItem) {
+    sessionStorage.setItem('sessionId', 'test-session');
+  }
   
   // Setup fetch to return successful responses by default
   (global.fetch as jest.Mock).mockResolvedValue({
